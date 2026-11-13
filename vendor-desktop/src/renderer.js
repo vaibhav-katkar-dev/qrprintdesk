@@ -350,7 +350,7 @@ function applyConfigUI() {
   document.getElementById('sidebar-shop-name').innerText    = config.shopName || 'QrPrintDesk';
   document.getElementById('sidebar-station-name').innerText = config.shopSlug ? `@${config.shopSlug}` : 'Vendor Station';
   updateModeUI();
-  document.getElementById('settings-server-url').value     = config.serverUrl || 'https://okinsite.com';
+  document.getElementById('settings-server-url').value     = config.serverUrl || 'https://qrprintdesk.in';
   document.getElementById('settings-auto-enhance').checked = config.autoEnhance !== false;
   document.getElementById('settings-sound-alert').checked  = config.soundAlert  !== false;
 }
@@ -1501,7 +1501,7 @@ async function handleRegister() {
   if (!shopName || !ownerEmail || !pin || !stationName) { alert('Please fill all fields.'); return; }
   if (!/^\d{4,8}$/.test(pin)) { alert('PIN must be 48 digits only.'); return; }
 
-  const serverUrl = config.serverUrl || 'https://okinsite.com';
+  const serverUrl = config.serverUrl || 'https://qrprintdesk.in';
   const btn = document.getElementById('submit-register-btn');
   btn.disabled = true; btn.innerText = 'Registering...';
 
@@ -1549,7 +1549,7 @@ async function handleEmailLogin() {
   if (!email || !pin) { alert('Please enter your Registered Email and PIN.'); return; }
   if (!/^\d{4,8}$/.test(pin)) { alert('PIN must be 48 digits.'); return; }
 
-  const serverUrl = config.serverUrl || 'https://okinsite.com';
+  const serverUrl = config.serverUrl || 'https://qrprintdesk.in';
   const btn = document.getElementById('submit-login-btn');
   btn.disabled = true; btn.innerText = 'Signing In...';
 
@@ -1587,7 +1587,7 @@ async function handleEmailLogin() {
 }
 
 async function handleTokenLogin() {
-  const serverUrl  = config.serverUrl || 'https://okinsite.com';
+  const serverUrl  = config.serverUrl || 'https://qrprintdesk.in';
   const agentToken = document.getElementById('login-agent-token').value.trim();
   if (!agentToken) { alert('Please enter Agent Token.'); return; }
 
@@ -1623,7 +1623,7 @@ async function handleLogout() {
   }
   if (dashboardPollTimer) clearInterval(dashboardPollTimer);
   config = {
-    serverUrl: config.serverUrl || 'https://okinsite.com',
+    serverUrl: config.serverUrl || 'https://qrprintdesk.in',
     agentToken: '',
     shopSlug: '',
     shopName: '',

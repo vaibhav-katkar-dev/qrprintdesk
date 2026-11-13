@@ -22,10 +22,10 @@ const PROFILES = {
 };
 
 // Parse command line arguments
-// Example: node scripts/load_simulator.js --mode=avg --target=https://okinsite.com
+// Example: node scripts/load_simulator.js --mode=avg --target=https://qrprintdesk.in
 const args = process.argv.slice(2);
 const modeArg = args.find(a => a.startsWith('--mode='))?.split('=')[1]?.toLowerCase() || 'avg';
-const targetArg = args.find(a => a.startsWith('--target='))?.split('=')[1] || 'https://okinsite.com';
+const targetArg = args.find(a => a.startsWith('--target='))?.split('=')[1] || 'https://qrprintdesk.in';
 const selectedProfile = PROFILES[modeArg] || PROFILES.avg;
 const BASE_URL = targetArg.replace(/\/+$/, '');
 

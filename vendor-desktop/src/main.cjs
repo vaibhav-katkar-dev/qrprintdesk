@@ -112,7 +112,7 @@ function loadConfig() {
 
   // Default fallback for new installation
   return {
-    serverUrl: 'https://okinsite.com',
+    serverUrl: 'https://qrprintdesk.in',
     agentToken: '',
     shopSlug: '',
     shopName: '',

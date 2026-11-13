@@ -9,8 +9,8 @@
     "dev": "node --watch src/server.js",
     "test": "node --test tests/*.test.js",
     "loadtest": "node tests/load_test.js",
-    "simulate:avg": "node scripts/load_simulator.js --mode=avg --target=https://okinsite.com",
-    "simulate:worst": "node scripts/load_simulator.js --mode=worst --target=https://okinsite.com",
+    "simulate:avg": "node scripts/load_simulator.js --mode=avg --target=https://qrprintdesk.in",
+    "simulate:worst": "node scripts/load_simulator.js --mode=worst --target=https://qrprintdesk.in",
     "simulate:local": "node scripts/load_simulator.js --mode=avg --target=http://localhost:3000"
   },
   "dependencies": {

@@ -17,7 +17,7 @@ set TOKEN=eyJhIjoiMTE5MmU4Zjg1ZmQ4N2E3ZDQyZWFkYzM4MGZkMjUwMTUiLCJ0IjoiY2MxNjM1MT
 echo.
 echo  ================================================================
 echo   ShopPrint - Installing Cloudflare Tunnel as Windows Service
-echo   Domain: okinsite.com
+echo   Domain: qrprintdesk.in
 echo  ================================================================
 echo.
 
@@ -53,7 +53,7 @@ echo.
 echo  ================================================================
 echo   SUCCESS! Cloudflare Tunnel is now a permanent Windows Service.
 echo   - Auto-starts on every reboot (no window needed)
-echo   - Domain: okinsite.com is ALWAYS live
+echo   - Domain: qrprintdesk.in is ALWAYS live
 echo   - Service name: cloudflared
 echo  ================================================================
 echo.
