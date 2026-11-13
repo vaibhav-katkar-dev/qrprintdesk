@@ -90,6 +90,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
         pricing: shop.pricing,
         printOptions: shop.printOptions ?? DEFAULT_PRINT_OPTIONS,
         requireCustomerName: shop.requireCustomerName ?? false,
+        payAtCounter: shop.payAtCounter ?? false,
         isActive: shop.isActive
       },
       stats: {
@@ -270,6 +271,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
       colorPerPagePaise?: number;
       duplexDiscountPaise?: number;
       requireCustomerName?: boolean;
+      payAtCounter?: boolean;
       printOptions?: {
         allowColor?: boolean;
         allowBW?: boolean;
@@ -291,7 +293,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
     if (!auth) return;
     const { shopId, shop } = auth;
 
-    const { shopName, shopSlug, bwPerPagePaise, colorPerPagePaise, duplexDiscountPaise, requireCustomerName, printOptions } = request.body || {};
+    const { shopName, shopSlug, bwPerPagePaise, colorPerPagePaise, duplexDiscountPaise, requireCustomerName, payAtCounter, printOptions } = request.body || {};
     const update: any = { updatedAt: new Date() };
 
     if (shopName) update.name = shopName.trim().slice(0, 80);
@@ -311,6 +313,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
     if (typeof colorPerPagePaise === 'number' && colorPerPagePaise >= 0) update['pricing.colorPerPagePaise'] = Math.round(colorPerPagePaise);
     if (typeof duplexDiscountPaise === 'number' && duplexDiscountPaise >= 0) update['pricing.duplexDiscountPaise'] = Math.round(duplexDiscountPaise);
     if (typeof requireCustomerName === 'boolean') update.requireCustomerName = requireCustomerName;
+    if (typeof payAtCounter === 'boolean') update.payAtCounter = payAtCounter;
 
     if (printOptions && typeof printOptions === 'object') {
       const existing = shop.printOptions ?? DEFAULT_PRINT_OPTIONS;
@@ -342,6 +345,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
         pricing: updated!.pricing,
         printOptions: updated!.printOptions ?? DEFAULT_PRINT_OPTIONS,
         requireCustomerName: updated!.requireCustomerName ?? false,
+        payAtCounter: updated!.payAtCounter ?? false,
       }
     });
   });

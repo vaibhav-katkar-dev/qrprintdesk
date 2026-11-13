@@ -103,11 +103,11 @@ export class WebSocketHub {
     return this.getActiveShopIds().length;
   }
 
-  // Send compact hint only: { type: "job", id: jobId }
-  public sendJobHint(shopId: string, jobId: string): boolean {
+  // Send compact hint: { type: "job", id: jobId, payAtCounter?: boolean }
+  public sendJobHint(shopId: string, jobId: string, meta?: { payAtCounter?: boolean }): boolean {
     const socket = this.activeSockets.get(shopId);
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'job', id: jobId }));
+      socket.send(JSON.stringify({ type: 'job', id: jobId, ...(meta || {}) }));
       return true;
     }
     return false;

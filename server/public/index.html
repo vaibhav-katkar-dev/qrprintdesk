@@ -996,9 +996,9 @@
               <div class="total-figure">Rs.<span x-text="totalPriceRupees"></span></div>
               <div class="total-subscript" x-text="`${totalSheets} sheet(s)  ${copies} copy`"></div>
             </div>
-            <button type="button" class="primary-submit-btn" :disabled="loading || anyUploadFailed" @click="startPayAndPrint">
+            <button type="button" class="primary-submit-btn" :disabled="loading || anyUploadFailed" @click="shopInfo.payAtCounter ? startPayAtCounter() : startPayAndPrint()">
               <span class="spinner-ring" x-show="loading"></span>
-              <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading (' + uploadPercent + '%)...' : 'Pay & Print')"></span>
+              <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading (' + uploadPercent + '%)...' : (shopInfo.payAtCounter ? 'Submit & Pay at Counter' : 'Pay & Print'))"></span>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!loading"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
@@ -1028,13 +1028,14 @@
 
           <!-- Stepper Timeline -->
           <div class="flow-stepper">
-            <div class="flow-row completed">
+            <div class="flow-row" :class="isPayAtCounterOrder ? 'active' : 'completed'">
               <div class="flow-circle">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!isPayAtCounterOrder"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style="font-size:11px;font-weight:800;" x-show="isPayAtCounterOrder">Rs</span>
               </div>
               <div class="flow-body">
-                <div class="flow-name">Payment Received</div>
-                <div class="flow-desc" x-text="`Rs.${totalPriceRupees} verified`"></div>
+                <div class="flow-name" x-text="isPayAtCounterOrder ? 'Pay at Counter' : 'Payment Received'"></div>
+                <div class="flow-desc" x-text="isPayAtCounterOrder ? `Pay Rs.${totalPriceRupees} in cash at the counter` : `Rs.${totalPriceRupees} verified`"></div>
               </div>
             </div>
 
@@ -1102,6 +1103,7 @@
         orderId: '',
         orderCode: '#1001',
         orderStatus: 'PAYMENT_PENDING',
+        isPayAtCounterOrder: false,
         jobStatus: 'QUEUED',
         queuePos: 1,
         pollTimer: null,
@@ -1455,6 +1457,75 @@
           });
         },
 
+        async startPayAtCounter() {
+          if (!this.fileList.length) return;
+          this.loading = true;
+          this.loadingText = 'Finishing Upload...';
+          this.errorMessage = '';
+
+          const pending = this.fileList.filter(f => f.status !== 'done');
+          if (pending.length > 0) {
+            pending.forEach(f => { if (f.status === 'pending') this.uploadSingleFile(f.id); });
+            const ok = await this.waitForAllUploads();
+            if (!ok) {
+              this.loading = false;
+              this.errorMessage = 'Upload failed. Tap Retry.';
+              return;
+            }
+          }
+
+          try {
+            this.loadingText = 'Submitting Order...';
+            const uploadedFiles = this.fileList.map(item => ({
+              fileKey: item.uploadedMeta.fileKey,
+              originalFilename: item.uploadedMeta.originalFilename,
+              fileSize: item.uploadedMeta.fileSize,
+              mimeType: item.uploadedMeta.mimeType,
+              pageCount: item.uploadedMeta.pageCount || 1,
+              pageRange: this.showRangeInput ? this.customPageRange : undefined
+            }));
+
+            const orderPayload = {
+              shopSlug: this.shopSlug,
+              customerName: this.customerName ? this.customerName.trim() : undefined,
+              payAtCounter: true,
+              files: uploadedFiles,
+              printOptions: {
+                copies: this.copies,
+                colorMode: this.colorMode,
+                duplexMode: this.duplexMode,
+                paperSize: 'A4',
+                orientation: 'portrait',
+                pagesPerSheet: this.pagesPerSheet || 1,
+                pageRange: this.showRangeInput ? this.customPageRange : undefined
+              }
+            };
+
+            const orderRes = await fetch('/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(orderPayload)
+            });
+
+            if (!orderRes.ok) {
+              const errData = await orderRes.json();
+              throw new Error(errData.error || 'Failed to submit order');
+            }
+
+            const orderData = await orderRes.json();
+            this.orderId = orderData.orderId;
+            this.orderCode = '#' + orderData.orderId.slice(-4).toUpperCase();
+            this.isPayAtCounterOrder = true;
+            this.orderStatus = 'PAY_AT_COUNTER_PENDING';
+            this.view = 'tracking';
+            this.loading = false;
+            this.startPolling();
+          } catch (err) {
+            this.errorMessage = err.message || 'Submission error';
+            this.loading = false;
+          }
+        },
+
         async startPayAndPrint() {
           if (!this.fileList.length) return;
           if (this.shopInfo.requireCustomerName && (!this.customerName || !this.customerName.trim())) {
@@ -1641,6 +1712,7 @@
               if (res.ok) {
                 const data = await res.json();
                 this.orderStatus = data.status;
+                if (data.payAtCounter) this.isPayAtCounterOrder = true;
                 if (data.jobStatus) this.jobStatus = data.jobStatus;
                 if (data.queuePosition) this.queuePos = data.queuePosition;
 

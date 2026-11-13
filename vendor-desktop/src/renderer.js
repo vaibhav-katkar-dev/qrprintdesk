@@ -79,8 +79,9 @@ async function _executePrintJob(jobId) {
 // ── Status badge helper ─────────────────────────────────────────────────────
 // Returns a badge <span> with a colored pulsing dot for every known job state.
 const STATUS_META = {
-  queued:           { dot: '#f59e0b', pulse: true,  label: 'Queued'        },
-  downloading:      { dot: '#8b5cf6', pulse: true,  label: 'Downloading'   },
+  queued:                 { dot: '#f59e0b', pulse: true,  label: 'Queued'        },
+  pay_at_counter_pending: { dot: '#eab308', pulse: true,  label: 'Pay at Counter'},
+  downloading:            { dot: '#8b5cf6', pulse: true,  label: 'Downloading'   },
   print_submitted:  { dot: '#3b82f6', pulse: true,  label: 'Submitted'     },
   printing:         { dot: '#3b82f6', pulse: true,  label: 'Printing'      },
   completed:        { dot: '#16a34a', pulse: false, label: 'Completed'     },
@@ -343,6 +344,15 @@ function setupEventListeners() {
 
   // Reject modal confirm
   document.getElementById('confirm-reject-btn').addEventListener('click', confirmReject);
+
+  // Pay at counter toggle handler
+  const pacToggle = document.getElementById('settings-pay-at-counter');
+  if (pacToggle) {
+    pacToggle.addEventListener('change', (e) => {
+      const row = document.getElementById('pac-autoprint-row');
+      if (row) row.style.display = e.target.checked ? 'flex' : 'none';
+    });
+  }
 }
 
 //  Config UI 
@@ -353,6 +363,17 @@ function applyConfigUI() {
   document.getElementById('settings-server-url').value     = config.serverUrl || 'https://qrprintdesk.in';
   document.getElementById('settings-auto-enhance').checked = config.autoEnhance !== false;
   document.getElementById('settings-sound-alert').checked  = config.soundAlert  !== false;
+
+  const pacInput = document.getElementById('settings-pay-at-counter');
+  const pacAutoPrintInput = document.getElementById('settings-pac-autoprint');
+  const pacRow = document.getElementById('pac-autoprint-row');
+  if (pacInput) {
+    pacInput.checked = config.payAtCounter === true;
+    if (pacRow) pacRow.style.display = config.payAtCounter ? 'flex' : 'none';
+  }
+  if (pacAutoPrintInput) {
+    pacAutoPrintInput.checked = config.pacAutoPrint === true;
+  }
 }
 
 function updateModeUI() {
@@ -397,7 +418,13 @@ function initWebSocket() {
           logPrinterActivity(`Incoming job #${shortId} received`, 'blue');
           if (config.soundAlert) playChime();
           showProminentJobNotifier(msg.id);
-          if (config.autoPrint) handleAutoPrint(msg.id); // non-blocking: queued in FIFO
+          const isPayAtCounterJob = msg.payAtCounter === true;
+          const shouldAutoPrint = config.autoPrint && (!isPayAtCounterJob || config.pacAutoPrint === true);
+          if (shouldAutoPrint) {
+            handleAutoPrint(msg.id); // non-blocking: queued in FIFO
+          } else if (isPayAtCounterJob && !config.pacAutoPrint) {
+            logPrinterActivity(`Pay-at-counter order #${shortId} held for manual print (cash verification)`, 'orange');
+          }
           invalidateCache('jobs', 'dashboard');
           refreshDashboard(true);
           const jobPage = document.getElementById('page-jobs');
@@ -1347,6 +1374,11 @@ async function saveSettings() {
   config.autoEnhance = document.getElementById('settings-auto-enhance').checked;
   config.soundAlert  = document.getElementById('settings-sound-alert').checked;
 
+  const pacModeEl = document.getElementById('settings-pay-at-counter');
+  const pacAutoEl = document.getElementById('settings-pac-autoprint');
+  if (pacModeEl) config.payAtCounter = pacModeEl.checked;
+  if (pacAutoEl) config.pacAutoPrint = pacAutoEl.checked;
+
   const bwPrice       = parseFloat(document.getElementById('settings-bw-price').value)       || 1.5;
   const colorPrice    = parseFloat(document.getElementById('settings-color-price').value)     || 5.0;
   const duplexDisc    = parseFloat(document.getElementById('settings-duplex-discount').value) || 0;
@@ -1394,6 +1426,7 @@ async function saveSettings() {
         colorPerPagePaise:   Math.round(colorPrice * 100),
         duplexDiscountPaise: Math.round(duplexDisc * 100),
         requireCustomerName: requireName,
+        payAtCounter:        config.payAtCounter === true,
         printOptions
       })
     });

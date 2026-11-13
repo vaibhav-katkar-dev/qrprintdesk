@@ -7,7 +7,8 @@ import { calculateOrderPrice } from '../services/pricing.js';
 import { createCashfreeOrderSession, fetchCashfreeOrderStatus } from '../services/cashfree.js';
 import { fulfillPaidOrder } from '../services/paymentFulfillment.js';
 import { WebSocketHub } from '../services/wsHub.js';
-import { OrderDocument, ShopDocument, IdempotencyKeyDocument, JobDocument } from '../types.js';
+import { OrderDocument, ShopDocument, IdempotencyKeyDocument, JobDocument, OutboxDocument } from '../types.js';
+import { outboxBus } from '../services/outboxWorker.js';
 
 export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> = async (fastify, opts) => {
   const db = opts.db;
@@ -50,6 +51,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         maxCopies: 10
       },
       requireCustomerName: shop.requireCustomerName ?? false,
+      payAtCounter: shop.payAtCounter ?? false,
       agentOnline: isConnected,
       sandbox: process.env.CASHFREE_ENV === 'SANDBOX'
     });
@@ -97,6 +99,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       customerName?: string;
       customerPhone?: string;
       customerNote?: string;
+      payAtCounter?: boolean;
       files: Array<{
         fileKey: string;
         originalFilename: string;
@@ -117,7 +120,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       };
     };
   }>('/orders', async (request, reply) => {
-    const { idempotencyKey, shopSlug, customerName, customerPhone, customerNote, files, printOptions } = request.body || {};
+    const { idempotencyKey, shopSlug, customerName, customerPhone, customerNote, payAtCounter, files, printOptions } = request.body || {};
 
     if (!shopSlug || !files || !Array.isArray(files) || files.length === 0 || !printOptions) {
       return reply.code(400).send({ error: 'Missing required order parameters' });
@@ -181,26 +184,30 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       });
     }
 
-    // 5. Create Cashfree payment session
+    const isPayAtCounter = (shop.payAtCounter === true) || (payAtCounter === true);
+
+    // 5. Payment Session or Pay at Counter
     let paymentSessionId: string | undefined;
     let providerOrderId: string | undefined;
 
-    try {
-      const sessionResult = await createCashfreeOrderSession({
-        orderId,
-        amountPaise: pricing.amountPaise,
-        customerName,
-        customerPhone,
-        orderSplits: orderSplitsInput.length > 0 ? orderSplitsInput : undefined
-      });
-      paymentSessionId = sessionResult.paymentSessionId;
-      providerOrderId = sessionResult.providerOrderId;
-    } catch (err: any) {
-      request.log.error({ err }, 'Failed to create Cashfree session — returning 503');
-      return reply.code(503).send({
-        error: 'Payment gateway temporarily unavailable. Please try again in a moment.',
-        retryable: true
-      });
+    if (!isPayAtCounter) {
+      try {
+        const sessionResult = await createCashfreeOrderSession({
+          orderId,
+          amountPaise: pricing.amountPaise,
+          customerName,
+          customerPhone,
+          orderSplits: orderSplitsInput.length > 0 ? orderSplitsInput : undefined
+        });
+        paymentSessionId = sessionResult.paymentSessionId;
+        providerOrderId = sessionResult.providerOrderId;
+      } catch (err: any) {
+        request.log.error({ err }, 'Failed to create Cashfree session — returning 503');
+        return reply.code(503).send({
+          error: 'Payment gateway temporarily unavailable. Please try again in a moment.',
+          retryable: true
+        });
+      }
     }
 
     // 6. Save order document in MongoDB
@@ -227,7 +234,8 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         percentage: s.percentage,
         status: 'CREATED'
       })),
-      status: 'PAYMENT_PENDING',
+      status: isPayAtCounter ? 'PAY_AT_COUNTER_PENDING' : 'PAYMENT_PENDING',
+      payAtCounter: isPayAtCounter,
       paymentSessionId,
       providerOrderId,
       retentionUntil,
@@ -235,9 +243,9 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         {
           actor: 'customer',
           from: 'UPLOADED',
-          to: 'PAYMENT_PENDING',
+          to: isPayAtCounter ? 'PAY_AT_COUNTER_PENDING' : 'PAYMENT_PENDING',
           time: now,
-          reason: 'Order created, awaiting payment'
+          reason: isPayAtCounter ? 'Order created under Pay at Counter mode' : 'Order created, awaiting payment'
         }
       ],
       createdAt: now,
@@ -246,10 +254,61 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
 
     await db.collection<OrderDocument>('orders').insertOne(orderDoc);
 
+    let jobId: string | undefined;
+
+    if (isPayAtCounter) {
+      jobId = `job_${orderDoc.orderId}`;
+      const jobDoc: JobDocument = {
+        _id: new ObjectId(),
+        jobId,
+        orderId: orderDoc.orderId,
+        shopId: orderDoc.shopId,
+        status: 'QUEUED',
+        retryCount: 0,
+        auditTrail: [
+          {
+            actor: 'system',
+            from: 'PAY_AT_COUNTER_PENDING',
+            to: 'QUEUED',
+            time: now,
+            reason: 'Pay at counter order created, queued for print confirmation'
+          }
+        ],
+        createdAt: now,
+        updatedAt: now
+      };
+      await db.collection<JobDocument>('jobs').insertOne(jobDoc);
+
+      await db.collection<OutboxDocument>('outbox').insertOne({
+        _id: new ObjectId(),
+        jobId,
+        shopId: orderDoc.shopId,
+        payload: {
+          type: 'job',
+          id: jobId,
+          op: 'PRINT_JOB',
+          payAtCounter: true
+        },
+        status: 'PENDING',
+        attempts: 0,
+        nextAttemptAt: now,
+        createdAt: now,
+        updatedAt: now
+      });
+
+      outboxBus.emit('outbox:new');
+
+      if (wsHub) {
+        wsHub.sendJobHint(orderDoc.shopId.toString(), jobId, { payAtCounter: true });
+      }
+    }
+
     // 7. Client-safe response
     const clientSafeResponse = {
       orderId: orderDoc.orderId,
       status: orderDoc.status,
+      jobId,
+      payAtCounter: isPayAtCounter,
       paymentSessionId: orderDoc.paymentSessionId,
       amountPaise: pricing.amountPaise,
       amountRupees: (pricing.amountPaise / 100).toFixed(2),
@@ -392,6 +451,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       status: order.status,
       jobStatus: job?.status,
       jobId: job?.jobId,
+      payAtCounter: (order as any).payAtCounter ?? false,
       queuePosition: queuePosition > 0 ? queuePosition : undefined,
       failureReason: job?.failureReason,
       amountPaise: order.pricing.amountPaise,

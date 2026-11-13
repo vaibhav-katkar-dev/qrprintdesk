@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 export type JobState =
   | 'UPLOADED'
   | 'PAYMENT_PENDING'
+  | 'PAY_AT_COUNTER_PENDING'
   | 'PAID'
   | 'QUEUED'
   | 'DOWNLOADING'
@@ -90,6 +91,7 @@ export interface ShopDocument {
     maxCopies: number;
   };
   requireCustomerName?: boolean;
+  payAtCounter?: boolean;
 }
 
 export interface AgentDocument {
@@ -145,6 +147,7 @@ export interface OrderDocument {
   status: JobState;
   paymentSessionId?: string;
   providerOrderId?: string; // Cashfree order ID
+  payAtCounter?: boolean;
   retentionUntil: Date;
   auditTrail: AuditEntry[];
   createdAt: Date;
@@ -201,6 +204,7 @@ export interface OutboxDocument {
     type: 'job';
     id: string;
     op: string;
+    payAtCounter?: boolean;
   };
   status: 'PENDING' | 'PROCESSING' | 'DELIVERED' | 'FAILED';
   attempts: number;

@@ -88,8 +88,8 @@ export const agentRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       return reply.code(404).send({ error: 'Associated order not found' });
     }
 
-    // PAYMENT GATE: Document is locked until payment is confirmed
-    const accessibleStates = ['PAID', 'QUEUED', 'DOWNLOADING', 'PRINT_SUBMITTED', 'COMPLETED'];
+    // PAYMENT GATE: Document is locked until payment is confirmed or Pay at Counter
+    const accessibleStates = ['PAID', 'QUEUED', 'DOWNLOADING', 'PRINT_SUBMITTED', 'COMPLETED', 'PAY_AT_COUNTER_PENDING'];
     if (!accessibleStates.includes(order.status as string)) {
       return reply.code(403).send({
         error: 'Payment not confirmed. Document is locked until payment is received.',
