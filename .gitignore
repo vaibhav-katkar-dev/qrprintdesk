@@ -1,0 +1,58 @@
+# ── Security & Environment Variables ─────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.pfx
+tunnel_token.txt
+*token*.txt
+server/config/
+
+# ── Dependencies ──────────────────────────────────────────────────
+node_modules/
+package-lock.json.backup
+
+# ── Large Binaries & Build Output (> 100MB blocked by GitHub) ─────
+*.zip
+*.tar.gz
+*.7z
+*.rar
+*.exe
+*.dll
+*.pak
+*.bin
+*.dat
+*.iso
+*.msi
+
+# Unpacked Electron application & build directories
+vendor-app/
+windows-software/dist/
+windows-software/bin/
+windows-software/data/tmp/
+vendor-desktop/dist/
+
+# ── Runtime Data, Caches & Temporary Storage ──────────────────────
+data/
+tmp/
+temp/
+doc-cache/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+temp_screen.png
+*.swp
+*.swo
+
+# ── OS & IDE Metadata ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace

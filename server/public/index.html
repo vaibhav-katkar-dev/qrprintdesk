@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>QrPrintDesk  Instant Counter Print</title>
+  <!-- Cashfree JS SDK v3 -->
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <!-- Alpine.js -->
+  <script defer src="/public/vendor/alpine.min.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #f8fafc;
+      --surface-card: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --surface-hover: #e2e8f0;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --brand-blue: #2563eb;
+      --brand-blue-hover: #1d4ed8;
+      --brand-blue-soft: #eff6ff;
+      --brand-blue-border: #bfdbfe;
+      --success-green: #059669;
+      --success-green-soft: #ecfdf5;
+      --success-green-border: #a7f3d0;
+      --danger-red: #e11d48;
+      --danger-red-soft: #fff1f2;
+      --danger-red-border: #fecdd3;
+      --radius-xl: 18px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+      --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.02);
+      --shadow-elevation: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px 14px 108px;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.011em;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /*  Header  */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 2px;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #0f172a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+    }
+
+    .shop-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shop-title {
+      font-size: 16.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    .station-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--success-green);
+      letter-spacing: -0.01em;
+    }
+
+    .station-status.offline {
+      color: var(--text-tertiary);
+    }
+
+    .dot-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success-green);
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+    }
+
+    .station-status.offline .dot-indicator {
+      background: var(--text-tertiary);
+      box-shadow: none;
+    }
+
+    /*  Structured Block Cards  */
+    .block-card {
+      background: var(--surface-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .block-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .block-counter {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--brand-blue);
+      background: var(--brand-blue-soft);
+      padding: 2px 7px;
+      border-radius: 12px;
+    }
+
+    /*  Document Selector Grid  */
+    .upload-action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .upload-tile {
+      position: relative;
+      background: #ffffff;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .upload-tile:active {
+      transform: scale(0.98);
+      background: var(--surface-subtle);
+    }
+
+    .upload-tile.tile-camera {
+      border-color: #cbd5e1;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .upload-tile.tile-pdf {
+      border-color: #cbd5e1;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .tile-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tile-camera .tile-icon-box {
+      background: var(--brand-blue-soft);
+      color: var(--brand-blue);
+    }
+
+    .tile-pdf .tile-icon-box {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .tile-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .tile-sub {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      line-height: 1.25;
+    }
+
+    .input-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    /*  Selected Documents List  */
+    .document-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .document-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      gap: 10px;
+    }
+
+    .document-info-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .doc-type-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+    }
+
+    .doc-text-wrap {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .doc-filename {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .doc-meta {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 1px;
+    }
+
+    .doc-remove-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: none;
+      background: #ffffff;
+      color: var(--danger-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+      transition: all 0.1s;
+    }
+
+    .doc-remove-btn:active {
+      background: var(--danger-red-soft);
+    }
+
+    /*  Segmented Controls  */
+    .field-row {
+      margin-bottom: 14px;
+    }
+
+    .field-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .segmented-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--surface-subtle);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      gap: 3px;
+    }
+
+    .segmented-tab {
+      border: none;
+      background: transparent;
+      padding: 9px 8px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .segmented-tab.active {
+      background: #ffffff;
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    .rate-pill {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .segmented-tab.active .rate-pill {
+      color: var(--brand-blue);
+    }
+
+    /*  Copies Stepper  */
+    .stepper-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 6px 8px;
+    }
+
+    .stepper-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding-left: 6px;
+    }
+
+    .stepper-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stepper-action {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .stepper-action:active {
+      background: var(--surface-hover);
+    }
+
+    .stepper-number {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /*  Form Inputs  */
+    .modern-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .modern-input:focus {
+      border-color: var(--brand-blue);
+    }
+
+    .modern-input::placeholder {
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    /*  Sticky Checkout Footer  */
+    .checkout-footer-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      z-index: 100;
+      box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    .footer-content-wrap {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .total-price-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .total-figure {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .total-subscript {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .primary-submit-btn {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 13px 20px;
+      font-size: 14.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .primary-submit-btn:active:not(:disabled) {
+      transform: scale(0.98);
+      background: #1e293b;
+    }
+
+    .primary-submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Upload Progress & Badges */
+    .doc-status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .doc-status-badge.done {
+      background: var(--success-green-soft);
+      color: var(--success-green);
+      border-color: var(--success-green-border);
+    }
+    .doc-status-badge.uploading {
+      background: var(--brand-blue-soft);
+      color: var(--brand-blue);
+      border-color: var(--brand-blue-border);
+    }
+    .doc-status-badge.error {
+      background: var(--danger-red-soft);
+      color: var(--danger-red);
+      border-color: var(--danger-red-border);
+      cursor: pointer;
+    }
+    .doc-upload-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: var(--surface-hover);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .doc-upload-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #3b82f6);
+      transition: width 0.2s ease;
+    }
+    .dock-upload-banner {
+      background: #eff6ff;
+      border-top: 1px solid #bfdbfe;
+      padding: 9px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .dock-upload-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e40af;
+    }
+    .dock-progress-track {
+      width: 100%;
+      height: 6px;
+      background: #dbeafe;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .dock-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+      border-radius: 3px;
+      transition: width 0.15s ease-out;
+    }
+
+    /* Sandbox Button */
+    .sandbox-trigger-btn {
+      width: 100%;
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px dashed #f59e0b;
+      border-radius: var(--radius-md);
+      padding: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /*  Order Tracking Pass / Ticket  */
+    .pickup-pass {
+      background: #ffffff;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 24px 18px;
+      text-align: center;
+      box-shadow: var(--shadow-elevation);
+      position: relative;
+    }
+
+    .pass-header-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+    }
+
+    .pass-token {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+      margin: 8px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-capsule {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-capsule.queued { background: var(--surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+    .status-capsule.printing { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .status-capsule.ready { background: var(--success-green-soft); color: var(--success-green); border: 1px solid var(--success-green-border); }
+
+    /* Flow Stepper */
+    .flow-stepper {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flow-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .flow-row.completed .flow-circle {
+      background: var(--success-green);
+      border-color: var(--success-green);
+      color: #ffffff;
+    }
+
+    .flow-row.active .flow-circle {
+      background: var(--brand-blue);
+      border-color: var(--brand-blue);
+      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .flow-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flow-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .flow-desc {
+      font-size: 11.5px;
+      color: var(--text-tertiary);
+    }
+
+    /* Error Message Box */
+    .error-box {
+      background: var(--danger-red-soft);
+      border: 1px solid var(--danger-red-border);
+      color: var(--danger-red);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spinner-ring {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body x-data="customerApp()" x-init="init()">
+  <div class="container">
+
+    <!--  Top Brand Header  -->
+    <header class="app-header">
+      <div class="brand-cluster">
+        <div class="brand-mark" style="background:transparent;box-shadow:none;padding:0;">
+          <img src="/assets/icon.png" alt="QrPrintDesk" style="width:34px;height:34px;border-radius:8px;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+        </div>
+        <div class="shop-meta">
+          <h1 class="shop-title" x-text="shopInfo.name || 'Print Station'"></h1>
+          <div class="station-status" :class="{ 'offline': !shopInfo.agentOnline }">
+            <span class="dot-indicator"></span>
+            <span x-text="shopInfo.agentOnline ? 'Printer Ready' : 'Connecting to station...'"></span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Error Banner -->
+    <div class="error-box" x-show="errorMessage">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span x-text="errorMessage"></span>
+    </div>
+
+    <!-- 
+         VIEW 1: SELECT DOCUMENTS & PREFERENCES
+          -->
+    <template x-if="view === 'upload'">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- STEP 1: Select Documents -->
+        <section class="block-card">
+          <div class="block-header">
+            <span class="block-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Choose Files to Print
+            </span>
+            <span class="block-counter" x-show="fileList.length > 0" x-text="`${fileList.length} file(s) added`"></span>
+          </div>
+
+          <!-- Dual Upload Targets -->
+          <div class="upload-action-row">
+            <!-- Photos & ID Cards -->
+            <label class="upload-tile tile-camera">
+              <input type="file" multiple accept="image/*" class="input-overlay" @change="onFilesSelected">
+              <div class="tile-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+              <div>
+                <div class="tile-title">Photos &amp; ID Card</div>
+                <div class="tile-sub">Aadhaar, PAN, Camera</div>
+              </div>
+            </label>
+
+            <!-- PDF Documents -->
+            <label class="upload-tile tile-pdf">
+              <input type="file" multiple accept="application/pdf,.pdf" class="input-overlay" @change="onFilesSelected">
+              <div class="tile-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div>
+                <div class="tile-title">PDF &amp; Documents</div>
+                <div class="tile-sub">PDF, Notes, Resumes</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Selected Files Rows with Live Upload Tracking -->
+          <div class="document-list" x-show="fileList.length > 0">
+            <template x-for="(f, idx) in fileList" :key="f.id || idx">
+              <div class="document-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;">
+                  <div class="document-info-cell">
+                    <div class="doc-type-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="f.name.toLowerCase().endsWith('.pdf')"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="!f.name.toLowerCase().endsWith('.pdf')"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <div class="doc-text-wrap">
+                      <div class="doc-filename" x-text="f.name"></div>
+                      <div class="doc-meta" x-text="`${formatBytes(f.size)}  ${f.pageCount} page(s)`"></div>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <!-- Uploading status -->
+                    <template x-if="f.status === 'uploading'">
+                      <span class="doc-status-badge uploading">
+                        <span class="spinner-ring" style="width:10px;height:10px;border-width:1.5px;border-top-color:#2563eb;"></span>
+                        <span x-text="f.progress + '%'"></span>
+                      </span>
+                    </template>
+                    <!-- Done status -->
+                    <template x-if="f.status === 'done'">
+                      <span class="doc-status-badge done">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Ready</span>
+                      </span>
+                    </template>
+                    <!-- Error status -->
+                    <template x-if="f.status === 'error'">
+                      <button type="button" class="doc-status-badge error" @click="retryUpload(f.id)" title="Click to retry upload">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        <span>Retry</span>
+                      </button>
+                    </template>
+
+                    <button type="button" class="doc-remove-btn" @click="removeFile(idx)" title="Remove file">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Per-file progress bar during upload -->
+                <div class="doc-upload-progress-wrap" x-show="f.status === 'uploading'">
+                  <div class="doc-upload-progress-bar" :style="'width: ' + f.progress + '%'"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <!-- STEP 2: Preferences (Appears once files are selected) -->
+        <section class="block-card" x-show="fileList.length > 0">
+          <div class="block-header">
+            <span class="block-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Print Settings
+            </span>
+          </div>
+
+          <!-- Color Mode -->
+          <div class="field-row" x-show="shopInfo.printOptions?.allowBW || shopInfo.printOptions?.allowColor">
+            <div class="field-label">Color or Black &amp; White</div>
+            <div class="segmented-tabs">
+              <button type="button" class="segmented-tab" :class="{ 'active': colorMode === 'monochrome' }" @click="colorMode = 'monochrome'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/></svg>
+                <span>Black &amp; White</span>
+                <span class="rate-pill" x-text="`Rs.${shopInfo.pricing?.bwRate || 2}`"></span>
+              </button>
+              <button type="button" class="segmented-tab" :class="{ 'active': colorMode === 'color' }" @click="colorMode = 'color'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20v-20z"/></svg>
+                <span>Full Color</span>
+                <span class="rate-pill" x-text="`Rs.${shopInfo.pricing?.colorRate || 10}`"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Duplex -->
+          <div class="field-row" x-show="shopInfo.printOptions?.allowSimplex !== false || shopInfo.printOptions?.allowDuplexLong">
+            <div class="field-label">Print on Both Sides?</div>
+            <div class="segmented-tabs">
+              <button type="button" class="segmented-tab" :class="{ 'active': duplexMode === 'simplex' }" @click="duplexMode = 'simplex'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="16" rx="2"/></svg>
+                <span>Single Side</span>
+              </button>
+              <button type="button" class="segmented-tab" :class="{ 'active': duplexMode === 'duplexlong' }" @click="duplexMode = 'duplexlong'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="12" height="16" rx="1.5"/><path d="M8 8h4M8 12h4"/><rect x="8" y="4" width="12" height="16" rx="1.5" stroke-dasharray="2 2"/></svg>
+                <span>Both Sides</span>
+                <span class="rate-pill" x-text="`-Rs.${shopInfo.pricing?.duplexDiscount || 0.50}`"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Page Layout: 1 per sheet vs 2 on 1 -->
+          <div class="field-row" x-show="shopInfo.printOptions?.allow2on1 !== false">
+            <div class="field-label">Page Layout (Paper Saver)</div>
+            <div class="segmented-tabs">
+              <button type="button" class="segmented-tab" :class="{ 'active': pagesPerSheet === 1 }" @click="pagesPerSheet = 1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="16" rx="2"/></svg>
+                <span>1 Per Sheet</span>
+              </button>
+              <button type="button" class="segmented-tab" :class="{ 'active': pagesPerSheet === 2 }" @click="pagesPerSheet = 2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="16" rx="1"/><rect x="13" y="4" width="7" height="16" rx="1"/></svg>
+                <span>2 on 1 (Eco)</span>
+                <span class="rate-pill">Save Paper</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Copies Stepper -->
+          <div class="field-row">
+            <div class="stepper-bar">
+              <span class="stepper-label">How Many Copies?</span>
+              <div class="stepper-controls">
+                <button type="button" class="stepper-action" @click="copies = Math.max(1, copies - 1)" title="Decrease">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <span class="stepper-number" x-text="copies"></span>
+                <button type="button" class="stepper-action" @click="copies = Math.min(shopInfo.printOptions?.maxCopies || 50, copies + 1)" title="Increase">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Name Input -->
+          <div class="field-row">
+            <div class="field-label">
+              <span>Your Name (for pickup)</span>
+              <span x-show="shopInfo.requireCustomerName" style="color:var(--danger-red);">*</span>
+            </div>
+            <input type="text" x-model="customerName" placeholder="Enter your name" class="modern-input" />
+          </div>
+
+          <!-- Custom Page Range (Optional) -->
+          <div class="field-row" style="margin-top:6px;" x-show="totalRawPages > 1">
+            <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" @click="showRangeInput = !showRangeInput">
+              <span style="font-size:12px;font-weight:700;color:var(--brand-blue);display:flex;align-items:center;gap:4px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                <span x-text="showRangeInput ? 'Print All Pages' : 'Need Specific Pages? (e.g. 1-3)'"></span>
+              </span>
+            </div>
+            <div x-show="showRangeInput" style="margin-top:8px;">
+              <input type="text" x-model="customPageRange" @input="recalculateCustomPages" placeholder="e.g. 1-3, 5" class="modern-input" style="font-size:12.5px;" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Sandbox Quick Test Button -->
+        <div x-show="shopInfo.sandbox && fileList.length > 0" style="padding:0 2px;">
+          <button type="button" class="sandbox-trigger-btn" :disabled="loading" @click="startSandboxOneClickPrint">
+            <span class="spinner-ring" x-show="loading" style="border-top-color:#b45309;"></span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="!loading"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>1-Click Test Print (Instant)</span>
+          </button>
+        </div>
+
+        <!-- Sticky Floating Bottom Bar -->
+        <div class="checkout-footer-dock" x-show="fileList.length > 0">
+          <!-- Real-time Multi-file Upload Progress Bar -->
+          <div class="dock-upload-banner" x-show="isUploadingFiles">
+            <div class="dock-upload-row">
+              <span style="display:flex;align-items:center;gap:6px;">
+                <span class="spinner-ring" style="width:11px;height:11px;border-width:1.5px;border-top-color:#1e40af;"></span>
+                <span x-text="uploadProgressLabel"></span>
+              </span>
+              <span x-text="uploadPercent + '%'"></span>
+            </div>
+            <div class="dock-progress-track">
+              <div class="dock-progress-fill" :style="'width: ' + uploadPercent + '%'"></div>
+            </div>
+          </div>
+
+          <div class="footer-content-wrap">
+            <div class="total-price-block">
+              <div class="total-figure">Rs.<span x-text="totalPriceRupees"></span></div>
+              <div class="total-subscript" x-text="`${totalSheets} sheet(s)  ${copies} copy`"></div>
+            </div>
+            <button type="button" class="primary-submit-btn" :disabled="loading || anyUploadFailed" @click="startPayAndPrint">
+              <span class="spinner-ring" x-show="loading"></span>
+              <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading (' + uploadPercent + '%)...' : 'Pay & Print')"></span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!loading"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </template>
+
+    <!-- 
+         VIEW 2: COUNTER PICKUP TRACKING
+          -->
+    <template x-if="view === 'tracking'">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Pickup Pass / Token Card -->
+        <div class="pickup-pass">
+          <div class="pass-header-label">Your Pickup Code</div>
+          <div class="pass-token" x-text="orderCode"></div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px;">Show this code at the counter to collect your prints</div>
+          <div>
+            <span class="status-capsule" :class="isCompleted ? 'ready' : (isPrintingOrDone ? 'printing' : 'queued')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="isCompleted"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="!isCompleted && isPrintingOrDone"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span x-text="isCompleted ? 'Print Ready! Pick up at counter' : (isPrintingOrDone ? 'Printing at counter...' : 'In queue...')"></span>
+            </span>
+          </div>
+
+          <!-- Stepper Timeline -->
+          <div class="flow-stepper">
+            <div class="flow-row completed">
+              <div class="flow-circle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="flow-body">
+                <div class="flow-name">Payment Received</div>
+                <div class="flow-desc" x-text="`Rs.${totalPriceRupees} verified`"></div>
+              </div>
+            </div>
+
+            <div class="flow-row" :class="isPrintingOrDone ? 'completed' : 'active'">
+              <div class="flow-circle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="isPrintingOrDone"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="spinner-ring" style="width:10px;height:10px;border-top-color:#ffffff;" x-show="!isPrintingOrDone"></span>
+              </div>
+              <div class="flow-body">
+                <div class="flow-name">Sent to Printer</div>
+                <div class="flow-desc" x-text="isPrintingOrDone ? 'Printing your pages right now' : 'Connecting to printer...'"></div>
+              </div>
+            </div>
+
+            <div class="flow-row" :class="{ 'completed': isCompleted, 'active': isPrintingOrDone && !isCompleted }">
+              <div class="flow-circle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="isCompleted"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style="font-size:11px;font-weight:800;" x-show="!isCompleted">3</span>
+              </div>
+              <div class="flow-body">
+                <div class="flow-name" x-text="isCompleted ? 'Print Complete' : 'Printer Running'"></div>
+                <div class="flow-desc" x-text="isCompleted ? 'Pick up your printout from the counter' : 'Machine is printing...'"></div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="primary-submit-btn" style="width:100%;justify-content:center;margin-top:20px;" @click="resetToUpload">
+            <span>Print More Documents</span>
+          </button>
+        </div>
+
+      </div>
+    </template>
+
+  </div>
+
+  <script>
+    function customerApp() {
+      return {
+        view: 'upload',
+        shopSlug: (window.location.pathname.split('/shop/')[1] || 'default').replace(/^\/+|\/+$/g, '').split('?')[0].trim().toLowerCase() || 'default',
+        shopInfo: {
+          name: 'QrPrintDesk Station',
+          pricing: { bwRate: 2, colorRate: 10, duplexDiscount: 0.5 },
+          agentOnline: true,
+          sandbox: true
+        },
+        fileList: [],
+        uploadPercent: 0,
+        isUploadingFiles: false,
+        uploadProgressLabel: 'Uploading documents...',
+        totalRawPages: 1,
+        activePrintPages: 1,
+        pageSelectionMode: 'all',
+        customPageRange: '',
+        showRangeInput: false,
+        customerName: '',
+        colorMode: 'monochrome',
+        duplexMode: 'simplex',
+        pagesPerSheet: 1,
+        copies: 1,
+        loading: false,
+        loadingText: '',
+        errorMessage: '',
+        orderId: '',
+        orderCode: '#1001',
+        orderStatus: 'PAYMENT_PENDING',
+        jobStatus: 'QUEUED',
+        queuePos: 1,
+        pollTimer: null,
+        cashfreeInstance: null,
+
+        async init() {
+          try {
+            const res = await fetch(`/api/shops/${this.shopSlug}/info`);
+            if (res.ok) {
+              this.shopInfo = await res.json();
+              if (this.shopInfo.printOptions) {
+                const po = this.shopInfo.printOptions;
+                if (po.defaultColorMode) this.colorMode = po.defaultColorMode;
+                if (po.defaultDuplex) this.duplexMode = po.defaultDuplex;
+                if (po.defaultPagesPerSheet) this.pagesPerSheet = po.defaultPagesPerSheet;
+              }
+            }
+          } catch (_) {}
+
+          try {
+            const mode = this.shopInfo.sandbox ? 'sandbox' : 'production';
+            if (window.Cashfree) {
+              this.cashfreeInstance = window.Cashfree({ mode });
+            }
+          } catch (e) {
+            console.warn('Cashfree SDK init error:', e);
+          }
+        },
+
+        get totalSheets() {
+          const effectivePages = this.pagesPerSheet === 2 ? Math.max(1, Math.ceil(this.activePrintPages / 2)) : this.activePrintPages;
+          const raw = effectivePages * this.copies;
+          return this.duplexMode === 'duplexlong' ? Math.ceil(raw / 2) : raw;
+        },
+
+        get totalPriceRupees() {
+          const rate = this.colorMode === 'color' ? (this.shopInfo.pricing?.colorRate || 10) : (this.shopInfo.pricing?.bwRate || 2);
+          const rawPages = this.pagesPerSheet === 2 ? Math.max(1, Math.ceil(this.activePrintPages / 2)) : this.activePrintPages;
+          let discount = 0;
+          if (this.duplexMode === 'duplexlong') {
+            const discPages = Math.floor(rawPages / 2);
+            discount = discPages * (this.shopInfo.pricing?.duplexDiscount || 0.5);
+          }
+          const perCopy = Math.max(0, (rawPages * rate) - discount);
+          return (perCopy * this.copies).toFixed(2);
+        },
+
+        get isPrintingOrDone() {
+          return ['DOWNLOADING', 'PRINT_SUBMITTED', 'COMPLETED'].includes(this.jobStatus);
+        },
+
+        get isCompleted() {
+          return this.jobStatus === 'COMPLETED' || this.orderStatus === 'COMPLETED';
+        },
+
+        get anyUploadFailed() {
+          return this.fileList.some(f => f.status === 'error');
+        },
+
+        getFileItem(id) {
+          return this.fileList.find(f => f.id === id);
+        },
+
+        recomputeOverallProgress() {
+          if (!this.fileList.length) {
+            this.uploadPercent = 100;
+            this.isUploadingFiles = false;
+            return;
+          }
+          let totalBytes = 0;
+          let loadedBytes = 0;
+          let hasUploading = false;
+          let uploadingCount = 0;
+          let doneCount = 0;
+
+          for (const f of this.fileList) {
+            const sz = f.size || 1024;
+            totalBytes += sz;
+            if (f.status === 'done') {
+              doneCount++;
+              loadedBytes += sz;
+            } else if (f.status === 'uploading') {
+              hasUploading = true;
+              uploadingCount++;
+              loadedBytes += Math.round(((f.progress || 0) / 100) * sz);
+            } else if (f.status === 'pending') {
+              hasUploading = true;
+            }
+          }
+
+          this.isUploadingFiles = hasUploading;
+          if (totalBytes === 0) {
+            this.uploadPercent = 100;
+          } else {
+            this.uploadPercent = Math.min(100, Math.round((loadedBytes / totalBytes) * 100));
+          }
+
+          if (uploadingCount > 0) {
+            this.uploadProgressLabel = `Uploading ${doneCount + 1} of ${this.fileList.length} documents...`;
+          } else {
+            this.uploadProgressLabel = 'Preparing documents...';
+          }
+        },
+
+        formatBytes(bytes) {
+          if (!bytes) return '0 B';
+          const k = 1024;
+          const sizes = ['B', 'KB', 'MB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        },
+
+        async onFilesSelected(e) {
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+          this.errorMessage = '';
+
+          for (const file of files) {
+            const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            this.fileList.push({
+              id,
+              file,
+              name: file.name,
+              size: file.size,
+              pageCount: 1,
+              status: 'pending',
+              progress: 0,
+              loadedBytes: 0,
+              uploadedMeta: null,
+              errorMessage: '',
+              xhr: null
+            });
+            // Launch background upload
+            setTimeout(() => this.uploadSingleFile(id), 10);
+          }
+          this.recomputeOverallProgress();
+          this.updatePageCounts();
+          try { e.target.value = ''; } catch (_) {}
+        },
+
+        uploadSingleFile(id) {
+          const item = this.getFileItem(id);
+          if (!item || item.status === 'done') return;
+          item.status = 'uploading';
+          item.progress = 0;
+          item.errorMessage = '';
+          this.recomputeOverallProgress();
+
+          // ── Step 1: Client-side image compression ───────────────────────────
+          // Camera photos from phones can be 8–15 MB. We resize to max 1600px
+          // and compress to JPEG ~75% quality BEFORE sending — in ~100ms on the
+          // customer's device. Result: 8 MB → ~400 KB. 20x faster upload.
+          const isImage = item.file.type.startsWith('image/');
+          const compress = (file) => new Promise((resolve) => {
+            if (!isImage || file.size < 300_000) { resolve(file); return; } // skip small/non-images
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+              URL.revokeObjectURL(url);
+              const MAX = 1600;
+              let { width: w, height: h } = img;
+              if (w > MAX || h > MAX) {
+                const ratio = Math.min(MAX / w, MAX / h);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              canvas.toBlob(
+                (blob) => resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file),
+                'image/jpeg', 0.78
+              );
+            };
+            img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+            img.src = url;
+          });
+
+          // ── Step 3: Presigned direct-to-cloud upload ────────────────────────
+          // Asks server for a one-time upload URL, then sends the file straight
+          // to Backblaze B2. Server bandwidth used: 0 bytes. Any file size works.
+          const doPresignedUpload = async (file) => {
+            // 3a. Get presigned URL + metadata from our server (tiny JSON call)
+            const metaRes = await fetch('/api/uploads/presigned-url', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                shopSlug: this.shopSlug,
+                filename: file.name,
+                mimeType: file.type || 'application/octet-stream',
+                fileSize: file.size
+              })
+            });
+            if (!metaRes.ok) {
+              const e = await metaRes.json().catch(() => ({}));
+              throw new Error(e.error || 'Could not get upload URL');
+            }
+            const { uploadUrl, fileKey, pageCount } = await metaRes.json();
+
+            // 3b. PUT file directly to cloud (server never touches the bytes)
+            await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              const live = this.getFileItem(id);
+              xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable && live) {
+                  live.loadedBytes = e.loaded;
+                  live.progress = Math.min(97, Math.round((e.loaded / e.total) * 100));
+                  this.recomputeOverallProgress();
+                }
+              };
+              xhr.onload  = () => xhr.status >= 200 && xhr.status < 400 ? resolve() : reject(new Error(`Cloud upload HTTP ${xhr.status}`));
+              xhr.onerror = () => reject(new Error('Cloud upload network error'));
+              xhr.ontimeout = () => reject(new Error('Cloud upload timed out'));
+              xhr.open('PUT', uploadUrl);
+              xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+              xhr.timeout = 300_000;
+              xhr.send(file);
+            });
+
+            return { fileKey, pageCount: pageCount || 1 };
+          };
+
+          // ── Fallback: direct POST to server (if presigned URL not available) ─
+          const doDirectUpload = (file) => new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('shopSlug', this.shopSlug);
+            const xhr = new XMLHttpRequest();
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const live = this.getFileItem(id);
+                if (live) {
+                  live.loadedBytes = e.loaded;
+                  live.progress = Math.min(97, Math.round((e.loaded / e.total) * 100));
+                  this.recomputeOverallProgress();
+                }
+              }
+            };
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try { resolve(JSON.parse(xhr.responseText)); }
+                catch { reject(new Error('Upload parse error')); }
+              } else {
+                let msg = 'Upload failed';
+                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (_) {}
+                reject(new Error(msg));
+              }
+            };
+            xhr.onerror   = () => reject(new Error('Network connection failed'));
+            xhr.ontimeout = () => reject(new Error('Upload timed out'));
+            xhr.open('POST', `/api/uploads/direct?shopSlug=${encodeURIComponent(this.shopSlug)}`);
+            xhr.timeout = 180_000;
+            xhr.send(formData);
+          });
+
+          // ── Orchestrate: compress → presigned upload → fallback ─────────────
+          (async () => {
+            const live = this.getFileItem(id);
+            if (!live) return;
+            try {
+              const compressed = await compress(item.file);
+
+              let fileKey, pageCount;
+              try {
+                // Try fast presigned path first
+                ({ fileKey, pageCount } = await doPresignedUpload(compressed));
+              } catch (presignErr) {
+                // Fallback to direct server upload if presigned fails
+                console.warn('[upload] presigned failed, falling back:', presignErr.message);
+                const res = await doDirectUpload(compressed);
+                fileKey    = res.fileKey;
+                pageCount  = res.pageCount || 1;
+              }
+
+              const l2 = this.getFileItem(id);
+              if (!l2) return;
+              l2.status   = 'done';
+              l2.progress = 100;
+              l2.uploadedMeta = {
+                fileKey,
+                originalFilename: item.file.name,
+                fileSize: compressed.size,
+                mimeType: compressed.type || item.file.type,
+                pageCount
+              };
+              l2.pageCount = pageCount;
+              this.updatePageCounts();
+            } catch (err) {
+              const l2 = this.getFileItem(id);
+              if (l2) { l2.status = 'error'; l2.errorMessage = err.message || 'Upload failed'; }
+            }
+            this.recomputeOverallProgress();
+          })();
+        },
+
+        retryUpload(id) {
+          this.errorMessage = '';
+          this.uploadSingleFile(id);
+        },
+
+        removeFile(index) {
+          const item = this.fileList[index];
+          if (item && item.xhr && item.status === 'uploading') {
+            try { item.xhr.abort(); } catch (_) {}
+          }
+          this.fileList.splice(index, 1);
+          this.recomputeOverallProgress();
+          this.updatePageCounts();
+        },
+
+        updatePageCounts() {
+          let sum = 0;
+          this.fileList.forEach(f => sum += f.pageCount);
+          this.totalRawPages = Math.max(1, sum);
+          this.recalculateCustomPages();
+        },
+
+        recalculateCustomPages() {
+          if (!this.showRangeInput || !this.customPageRange.trim()) {
+            this.activePrintPages = this.totalRawPages;
+            return;
+          }
+          let count = 0;
+          const parts = this.customPageRange.split(',');
+          for (const p of parts) {
+            const trimmed = p.trim();
+            if (trimmed.includes('-')) {
+              const [start, end] = trimmed.split('-').map(Number);
+              if (!isNaN(start) && !isNaN(end) && end >= start) count += (end - start + 1);
+            } else if (!isNaN(Number(trimmed)) && Number(trimmed) > 0) {
+              count += 1;
+            }
+          }
+          this.activePrintPages = Math.max(1, count || this.totalRawPages);
+        },
+
+        async waitForAllUploads() {
+          return new Promise((resolve) => {
+            const interval = setInterval(() => {
+              const anyError = this.fileList.some(f => f.status === 'error');
+              if (anyError) {
+                clearInterval(interval);
+                return resolve(false);
+              }
+              const allDone = this.fileList.every(f => f.status === 'done');
+              if (allDone) {
+                clearInterval(interval);
+                return resolve(true);
+              }
+            }, 100);
+          });
+        },
+
+        async startPayAndPrint() {
+          if (!this.fileList.length) return;
+          if (this.shopInfo.requireCustomerName && (!this.customerName || !this.customerName.trim())) {
+            this.errorMessage = 'Please enter your name for pickup identification.';
+            return;
+          }
+
+          // Check for failed uploads
+          const failed = this.fileList.filter(f => f.status === 'error');
+          if (failed.length > 0) {
+            this.errorMessage = 'One or more documents failed to upload. Please tap "Retry" on the failed item.';
+            return;
+          }
+
+          this.loading = true;
+          this.errorMessage = '';
+
+          // Wait for any in-flight uploads to complete
+          const pending = this.fileList.filter(f => f.status !== 'done');
+          if (pending.length > 0) {
+            this.loadingText = 'Finishing Upload...';
+            pending.forEach(f => { if (f.status === 'pending') this.uploadSingleFile(f.id); });
+
+            const ok = await this.waitForAllUploads();
+            if (!ok) {
+              this.loading = false;
+              this.errorMessage = 'Document upload encountered an error. Please retry.';
+              return;
+            }
+          }
+
+          try {
+            this.loadingText = 'Opening Payment...';
+            const uploadedFiles = this.fileList.map(item => ({
+              fileKey: item.uploadedMeta.fileKey,
+              originalFilename: item.uploadedMeta.originalFilename,
+              fileSize: item.uploadedMeta.fileSize,
+              mimeType: item.uploadedMeta.mimeType,
+              pageCount: item.uploadedMeta.pageCount || 1,
+              pageRange: this.showRangeInput ? this.customPageRange : undefined
+            }));
+
+            const orderPayload = {
+              shopSlug: this.shopSlug,
+              customerName: this.customerName ? this.customerName.trim() : undefined,
+              files: uploadedFiles,
+              printOptions: {
+                copies: this.copies,
+                colorMode: this.colorMode,
+                duplexMode: this.duplexMode,
+                paperSize: 'A4',
+                orientation: 'portrait',
+                pagesPerSheet: this.pagesPerSheet || 1,
+                pageRange: this.showRangeInput ? this.customPageRange : undefined
+              }
+            };
+
+            const orderRes = await fetch('/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(orderPayload)
+            });
+
+            if (!orderRes.ok) {
+              const errData = await orderRes.json();
+              throw new Error(errData.error || 'Failed to create order');
+            }
+
+            const orderData = await orderRes.json();
+            this.orderId = orderData.orderId;
+            this.orderCode = '#' + orderData.orderId.slice(-4).toUpperCase();
+
+            if (!this.cashfreeInstance && window.Cashfree) {
+              this.cashfreeInstance = window.Cashfree({ mode: this.shopInfo.sandbox ? 'sandbox' : 'production' });
+            }
+
+            if (this.cashfreeInstance && orderData.paymentSessionId) {
+              this.cashfreeInstance.checkout({
+                paymentSessionId: orderData.paymentSessionId,
+                redirectTarget: '_modal'
+              }).then(async (result) => {
+                if (result.error) {
+                  this.errorMessage = result.error.message || 'Payment was cancelled. You can retry anytime.';
+                  this.loading = false;
+                  return;
+                }
+                // Payment completed! Verify and trigger print immediately
+                await this.verifyAndTrackOrder();
+              });
+            } else {
+              await this.verifyAndTrackOrder();
+            }
+
+          } catch (err) {
+            this.errorMessage = err.message || 'Payment error';
+            this.loading = false;
+          }
+        },
+
+        async startSandboxOneClickPrint() {
+          if (!this.fileList.length) return;
+          this.loading = true;
+          this.loadingText = 'Finishing Upload...';
+          this.errorMessage = '';
+
+          const pending = this.fileList.filter(f => f.status !== 'done');
+          if (pending.length > 0) {
+            pending.forEach(f => { if (f.status === 'pending') this.uploadSingleFile(f.id); });
+            const ok = await this.waitForAllUploads();
+            if (!ok) {
+              this.loading = false;
+              this.errorMessage = 'Upload failed. Tap Retry.';
+              return;
+            }
+          }
+
+          try {
+            this.loadingText = 'Simulating Print...';
+            const uploadedFiles = this.fileList.map(item => ({
+              fileKey: item.uploadedMeta.fileKey,
+              originalFilename: item.uploadedMeta.originalFilename,
+              fileSize: item.uploadedMeta.fileSize,
+              mimeType: item.uploadedMeta.mimeType,
+              pageCount: item.uploadedMeta.pageCount || 1,
+              pageRange: this.showRangeInput ? this.customPageRange : undefined
+            }));
+
+            const orderRes = await fetch('/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                shopSlug: this.shopSlug,
+                customerName: this.customerName ? this.customerName.trim() : undefined,
+                files: uploadedFiles,
+                printOptions: {
+                  copies: this.copies,
+                  colorMode: this.colorMode,
+                  duplexMode: this.duplexMode,
+                  paperSize: 'A4',
+                  orientation: 'portrait',
+                  pagesPerSheet: this.pagesPerSheet || 1,
+                  pageRange: this.showRangeInput ? this.customPageRange : undefined
+                }
+              })
+            });
+
+            const orderData = await orderRes.json();
+            this.orderId = orderData.orderId;
+            this.orderCode = '#' + orderData.orderId.slice(-4).toUpperCase();
+
+            const simRes = await fetch(`/api/orders/${this.orderId}/simulate-sandbox-payment`, { method: 'POST' });
+            const simData = await simRes.json();
+            if (simData.isPaid) {
+              this.view = 'tracking';
+              this.loading = false;
+              this.startPolling();
+            }
+          } catch (err) {
+            this.errorMessage = err.message;
+            this.loading = false;
+          }
+        },
+
+        async verifyAndTrackOrder() {
+          try {
+            this.loadingText = 'Confirming Payment & Sending to Printer...';
+            await fetch(`/api/orders/${this.orderId}/verify-payment`, { method: 'POST' });
+            this.view = 'tracking';
+            this.loading = false;
+            this.startPolling();
+          } catch (e) {
+            this.view = 'tracking';
+            this.loading = false;
+            this.startPolling();
+          }
+        },
+
+        startPolling() {
+          if (this.pollTimer) clearInterval(this.pollTimer);
+          this.pollTimer = setInterval(async () => {
+            if (!this.orderId) return;
+            try {
+              const res = await fetch(`/api/orders/${this.orderId}`);
+              if (res.ok) {
+                const data = await res.json();
+                this.orderStatus = data.status;
+                if (data.jobStatus) this.jobStatus = data.jobStatus;
+                if (data.queuePosition) this.queuePos = data.queuePosition;
+
+                if (data.jobStatus === 'COMPLETED') {
+                  clearInterval(this.pollTimer);
+                }
+              }
+            } catch (_) {}
+          }, 1500);
+        },
+
+        resetToUpload() {
+          if (this.pollTimer) clearInterval(this.pollTimer);
+          this.view = 'upload';
+          this.fileList.forEach(f => {
+            if (f.xhr && f.status === 'uploading') try { f.xhr.abort(); } catch (_) {}
+          });
+          this.fileList = [];
+          this.totalRawPages = 1;
+          this.activePrintPages = 1;
+          this.customPageRange = '';
+          this.showRangeInput = false;
+          this.orderId = '';
+          this.errorMessage = '';
+        }
+      };
+    }
+  </script>
+</body>
+</html>

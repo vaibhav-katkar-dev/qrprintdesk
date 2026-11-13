@@ -1,0 +1,19 @@
+{
+  "name": "qrprintdesk-vendor-desktop",
+  "version": "2.0.0",
+  "description": "QrPrintDesk Professional Vendor Station - Commercial Electron Desktop App",
+  "main": "src/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "QrPrintDesk Team",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.2.1"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
+}

@@ -1,0 +1,7 @@
+﻿# SumatraPDF Settings for QrPrintDesk Vendor Station
+CheckForUpdates = false
+MainWindowBackground = #ffffff
+PrinterDefaults [
+	PrintScale = fit
+	PrintAsImage = true
+]

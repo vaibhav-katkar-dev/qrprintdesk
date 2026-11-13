@@ -1,0 +1,1121 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QrPrintDesk Vendor Station</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app-container">
+
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SIDEBAR
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <aside id="sidebar">
+    <div>
+      <div class="brand-section">
+        <img src="assets/logo.png" alt="QrPrintDesk" class="brand-logo-img" />
+        <div class="brand-text">
+          <h1 id="sidebar-shop-name">QrPrintDesk</h1>
+          <p id="sidebar-station-name">Vendor Station</p>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="nav-item active" data-page="dashboard">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" data-page="jobs">
+          <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Jobs
+        </div>
+        <div class="nav-item" data-page="finances">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Finances & Payouts
+        </div>
+        <div class="nav-item" data-page="qr">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Customer QR
+        </div>
+        <div class="nav-item" data-page="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </div>
+        <div class="nav-item" data-page="subscription">
+          <svg viewBox="0 0 24 24"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/></svg>
+          Subscription
+        </div>
+        <div class="nav-item" data-page="support">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Support
+        </div>
+        <div class="nav-item logout" id="nav-logout-btn">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </div>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div id="sidebar-connection-pill" class="connection-pill">
+        <div id="status-dot" class="status-dot online"></div>
+        <span id="status-text">Connected</span>
+      </div>
+      <span class="version-text">v2.0.0</span>
+    </div>
+  </aside>
+
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       MAIN CONTENT
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <main id="main-content">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-title">
+        <h2 id="page-title">Dashboard</h2>
+        <p id="page-sub">Live shop overview and incoming cloud print jobs</p>
+      </div>
+      <div class="top-bar-actions">
+        <button id="toggle-mode-btn" class="btn btn-secondary btn-sm" title="Toggle Auto-Print / Semi-Auto">
+          <span id="mode-badge" class="badge" style="background:#dcfce7;color:#15803d;padding:2px 6px;">AUTO</span>
+          <span id="mode-btn-text">Auto-Print</span>
+        </button>
+        <button id="flush-spooler-btn" class="btn btn-danger btn-sm" title="Clear Windows print queue">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.37"/></svg>
+          Flush Spooler
+        </button>
+        <button id="refresh-btn" class="btn btn-secondary btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
+          Refresh
+        </button>
+        <button id="open-shop-btn" class="btn btn-secondary btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open Store
+        </button>
+      </div>
+    </header>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: DASHBOARD
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-dashboard" class="page active">
+
+      <!-- 4 Stat Cards Row -->
+      <div class="stats-grid">
+        <!-- Today Orders (Blue) -->
+        <div class="stat-card blue">
+          <div class="stat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-3 8h6v2H10v-2zm0 4h6v2H10v-2z"/></svg>
+          </div>
+          <div id="stat-today-orders" class="stat-value">0</div>
+          <div class="stat-label">Today Orders</div>
+          <svg class="stat-wave" viewBox="0 0 140 60" preserveAspectRatio="none">
+            <path d="M0,60 C40,40 80,55 140,20 L140,60 Z" fill="#eff6ff" opacity="0.8"/>
+            <path d="M0,60 C30,30 90,45 140,10 L140,60 Z" fill="#dbeafe" opacity="0.6"/>
+          </svg>
+        </div>
+
+        <!-- Completed (Green) -->
+        <div class="stat-card green">
+          <div class="stat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          </div>
+          <div id="stat-completed-jobs" class="stat-value">0</div>
+          <div class="stat-label">Completed</div>
+          <svg class="stat-wave" viewBox="0 0 140 60" preserveAspectRatio="none">
+            <path d="M0,60 C40,40 80,55 140,20 L140,60 Z" fill="#ecfdf5" opacity="0.8"/>
+            <path d="M0,60 C30,30 90,45 140,10 L140,60 Z" fill="#d1fae5" opacity="0.6"/>
+          </svg>
+        </div>
+
+        <!-- In Queue (Amber) -->
+        <div class="stat-card amber">
+          <div class="stat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          </div>
+          <div id="stat-pending-jobs" class="stat-value">0</div>
+          <div class="stat-label">In Queue</div>
+          <svg class="stat-wave" viewBox="0 0 140 60" preserveAspectRatio="none">
+            <path d="M0,60 C40,40 80,55 140,20 L140,60 Z" fill="#fffbeb" opacity="0.8"/>
+            <path d="M0,60 C30,30 90,45 140,10 L140,60 Z" fill="#fef3c7" opacity="0.6"/>
+          </svg>
+        </div>
+
+        <!-- Revenue Today (Purple) -->
+        <div class="stat-card purple">
+          <div class="stat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 3h12M6 8h12M6 13l7.5 8M6 13h4.5a4.5 4.5 0 0 0 0-9H6v9z"/></svg>
+          </div>
+          <div id="stat-today-revenue" class="stat-value">â‚¹0.00</div>
+          <div class="stat-label">Revenue Today</div>
+          <svg class="stat-wave" viewBox="0 0 140 60" preserveAspectRatio="none">
+            <path d="M0,60 C40,40 80,55 140,20 L140,60 Z" fill="#f5f3ff" opacity="0.8"/>
+            <path d="M0,60 C30,30 90,45 140,10 L140,60 Z" fill="#ede9fe" opacity="0.6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Hardware / Printer Control Strip (Sleek Horizontal Bar) -->
+      <div class="printer-strip-card">
+        <div class="printer-strip-left">
+          <div class="printer-icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </div>
+          <div class="printer-select-wrap">
+            <span class="printer-strip-label">Printer:</span>
+            <select id="right-panel-printer-select" class="printer-strip-select">
+              <option value="">(Windows Default)</option>
+            </select>
+          </div>
+          <div id="right-printer-banner" class="ready-pill-banner compact">
+            <div id="right-printer-check-icon" class="ready-check-icon sm">âœ“</div>
+            <span id="right-printer-status-text" class="ready-text sm">Ready</span>
+          </div>
+          <span id="right-printer-desc" class="printer-strip-desc">Printer is online and ready</span>
+        </div>
+
+        <div class="printer-strip-right">
+          <div class="spooler-group">
+            <span class="spooler-label">Spooler:</span>
+            <span id="spec-queue-status" class="spec-badge-ok">
+              <span>â—</span> 0 in Queue
+            </span>
+          </div>
+          <button type="button" id="btn-refresh-printers" onclick="loadPrinters()" class="btn btn-secondary btn-xs" title="Refresh printer hardware status">
+            ðŸ”„ Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Full-Width Print Jobs Section (No Cramped Columns) -->
+      <div class="dashboard-main-col">
+        <div class="jobs-panel-header">
+          <div class="jobs-title-group">
+            <div class="jobs-icon-badge">
+              <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            </div>
+            <div>
+              <h3>Print Jobs</h3>
+              <p>Manage incoming cloud print jobs, track status, and control printing</p>
+            </div>
+          </div>
+
+          <div class="jobs-controls-group">
+            <div class="search-box-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="dash-search-input" type="text" class="search-input" placeholder="Search by customer, document..." />
+            </div>
+            <select id="dash-job-filter-select" class="select-pill">
+              <option value="all">All Jobs</option>
+              <option value="active">Active Jobs</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Tab Pills -->
+        <div class="filter-tabs-row">
+          <button class="filter-pill active" data-filter="all">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            All (<span id="pill-count-all">0</span>)
+          </button>
+          <button class="filter-pill" data-filter="active">
+            <span class="dot" style="background:#3b82f6;"></span>
+            â–¶ Active <span id="pill-count-active">0</span>
+          </button>
+          <button class="filter-pill" data-filter="completed">
+            <span class="dot" style="background:#10b981;"></span>
+            âœ“ Completed <span id="pill-count-completed">0</span>
+          </button>
+          <button class="filter-pill" data-filter="failed">
+            <span class="dot" style="background:#ef4444;"></span>
+            âœ• Failed <span id="pill-count-failed">0</span>
+          </button>
+          <button class="filter-pill" data-filter="cancelled">
+            <span class="dot" style="background:#94a3b8;"></span>
+            âŠ˜ Cancelled <span id="pill-count-cancelled">0</span>
+          </button>
+        </div>
+
+        <!-- Table Container (Fits comfortably with NO cutoff) -->
+        <div class="table-wrap">
+          <table id="dash-table">
+            <thead>
+              <tr>
+                <th style="width:85px;">Pickup #</th>
+                <th style="width:140px;">Customer</th>
+                <th>Document</th>
+                <th style="width:55px;text-align:center;">Pages</th>
+                <th style="width:130px;">Options</th>
+                <th style="width:75px;text-align:right;">Amount</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:75px;text-align:center;">Time</th>
+                <th style="min-width:165px;text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-jobs-tbody">
+              <!-- Injected via JavaScript or empty state below -->
+            </tbody>
+          </table>
+
+          <!-- Empty State Illustration & CTA -->
+          <div id="dash-empty-state" class="empty-state-card" style="display:none;">
+            <img src="assets/empty_illustration.png" alt="No Jobs" class="empty-illustration" onerror="this.style.display='none'" />
+            <div class="empty-state-title">No Print Jobs Yet</div>
+            <div class="empty-state-sub">Start by scanning customer QR code or adding a print job.</div>
+            <button id="cta-scan-qr-btn" class="btn-scan-qr">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Scan Customer QR &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden container for background activity log calls -->
+      <div id="printer-activity-list" style="display:none;"></div>
+    </section>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: PRINT JOBS (HISTORY)
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-jobs" class="page">
+      <div style="background:#ffffff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-card);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <h3 style="font-size:17px;font-weight:800;color:#0f172a;">All Print Jobs</h3>
+            <p style="font-size:12px;color:var(--text-muted);">Historical archive of all print submissions, receipts, and logs</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <select id="jobs-status-filter" class="select-pill" style="padding:8px 16px;">
+              <option value="">All Statuses</option>
+              <option value="QUEUED">Queued</option>
+              <option value="DOWNLOADING">Downloading</option>
+              <option value="PRINT_SUBMITTED">Print Submitted</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="FAILED">Failed</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:75px;">Pickup #</th>
+                <th>Customer</th>
+                <th>Job ID</th>
+                <th>Files</th>
+                <th>Print Options</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="all-jobs-tbody">
+              <tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:40px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: FINANCES, ANALYTICS & EASY SPLIT
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-finances" class="page">
+      <!-- Sub-Navigation Bar -->
+      <div class="fin-subnav">
+        <button class="fin-subnav-btn active" data-sub="analytics" onclick="switchFinSubTab('analytics')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics & Volume
+        </button>
+        <button class="fin-subnav-btn" data-sub="transactions" onclick="switchFinSubTab('transactions')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Transactions & Settlements
+        </button>
+        <button class="fin-subnav-btn" data-sub="easysplit" onclick="switchFinSubTab('easysplit')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
+          Easy Split & KYC Setup
+        </button>
+      </div>
+
+      <!-- â”€â”€â”€ SUBPANEL 1: ANALYTICS & VOLUME â”€â”€â”€ -->
+      <div id="fin-panel-analytics" class="fin-view-panel active">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 style="font-size:16px;font-weight:700;color:#0f172a;margin:0;">Shop Performance & Print Revenue</h3>
+          <div class="fin-period-group">
+            <button class="fin-period-btn active" data-period="today" onclick="changeAnalyticsPeriod('today')">Today</button>
+            <button class="fin-period-btn" data-period="week" onclick="changeAnalyticsPeriod('week')">Last 7 Days</button>
+            <button class="fin-period-btn" data-period="month" onclick="changeAnalyticsPeriod('month')">This Month</button>
+            <button class="fin-period-btn" data-period="all" onclick="changeAnalyticsPeriod('all')">All Time</button>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="fin-metric-grid">
+          <div class="stat-card green">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="stat-value" id="fin-net-earnings">â‚¹0.00</div>
+            <div class="stat-label">Net Vendor Earnings (95%)</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+            <div class="stat-value" id="fin-gross-revenue">â‚¹0.00</div>
+            <div class="stat-label">Gross Revenue Collected</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <div class="stat-value" id="fin-total-orders">0</div>
+            <div class="stat-label">Paid Print Orders</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="stat-value" id="fin-avg-order">â‚¹0.00</div>
+            <div class="stat-label">Average Order Value</div>
+          </div>
+        </div>
+
+        <!-- Volume & Breakdown -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;">
+          <!-- Card: Color vs B&W -->
+          <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;">Print Mode Distribution</div>
+            <div style="font-size:12px;color:var(--text-muted);">Pages printed by color type</div>
+            <div class="fin-ratio-bar">
+              <div id="fin-bw-bar" class="fin-ratio-fill" style="width:75%;background:#0f172a;" title="B&W"></div>
+              <div id="fin-color-bar" class="fin-ratio-fill" style="width:25%;background:#2563eb;" title="Color"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-top:8px;">
+              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0f172a;"></span> B&W: <strong id="fin-bw-pages">0 pages</strong></span>
+              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2563eb;"></span> Color: <strong id="fin-color-pages">0 pages</strong></span>
+            </div>
+          </div>
+
+          <!-- Card: Paper & Duplex -->
+          <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;">Paper & Sheet Economics</div>
+            <div style="font-size:12px;color:var(--text-muted);">Paper usage and 2-sided duplex efficiency</div>
+            <div class="fin-ratio-bar">
+              <div id="fin-duplex-bar" class="fin-ratio-fill" style="width:50%;background:#10b981;" title="Duplex"></div>
+              <div id="fin-simplex-bar" class="fin-ratio-fill" style="width:50%;background:#f59e0b;" title="Simplex"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-top:8px;">
+              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#10b981;"></span> 2-Sided (Duplex): <strong id="fin-duplex-sheets">0 sheets</strong></span>
+              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span> 1-Sided: <strong id="fin-simplex-sheets">0 sheets</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7-Day Performance Trend -->
+        <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
+          <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px;">Recent Daily Breakdown</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Completed Orders</th>
+                  <th>Gross Revenue</th>
+                  <th>Vendor Share (95%)</th>
+                </tr>
+              </thead>
+              <tbody id="fin-daily-tbody">
+                <tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px;">Loading trend data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- â”€â”€â”€ SUBPANEL 2: TRANSACTIONS & SETTLEMENTS â”€â”€â”€ -->
+      <div id="fin-panel-transactions" class="fin-view-panel">
+        <!-- Payout Overview Card -->
+        <div style="background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%);color:#ffffff;border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+            <div>
+              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.8px;color:#94a3b8;font-weight:700;">Automatic Bank Payout Balance</div>
+              <div style="font-size:32px;font-weight:800;letter-spacing:-0.5px;margin:4px 0 6px;" id="fin-pending-settlement">â‚¹0.00</div>
+              <div style="font-size:12.5px;color:#cbd5e1;display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;"></span>
+                Settles automatically to your bank account on T+1 cycle (Daily 8:00 AM)
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;text-align:right;">
+              <div style="background:rgba(255,255,255,0.08);padding:10px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);">
+                <div style="font-size:11px;color:#94a3b8;">Already Settled to Bank</div>
+                <div style="font-size:18px;font-weight:700;color:#38bdf8;" id="fin-settled-to-bank">â‚¹0.00</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.08);padding:10px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);">
+                <div style="font-size:11px;color:#94a3b8;">Total All-Time Earned</div>
+                <div style="font-size:18px;font-weight:700;color:#4ade80;" id="fin-total-alltime">â‚¹0.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Switcher -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="font-size:16px;font-weight:700;color:#0f172a;margin:0;">Itemized Ledger Transactions</h3>
+          <button class="btn btn-secondary btn-xs" onclick="loadTransactions(true)">Refresh Ledger</button>
+        </div>
+
+        <!-- Transactions Ledger Table -->
+        <div class="table-wrap" style="margin-bottom:24px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:75px;">Pickup #</th>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Pages</th>
+                <th>Gross</th>
+                <th>Fee (5%)</th>
+                <th>Your Share</th>
+                <th>Date & Time</th>
+                <th>Payout Status</th>
+              </tr>
+            </thead>
+            <tbody id="fin-transactions-tbody">
+              <tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:30px;">Loading ledger transactions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bank Settlements Log -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <h3 style="font-size:16px;font-weight:700;color:#0f172a;margin:0;">Cashfree Direct Bank Payout History</h3>
+            <div style="font-size:12px;color:var(--text-muted);">Verified transfers deposited directly to your bank account</div>
+          </div>
+          <button class="btn btn-secondary btn-xs" onclick="loadSettlements(true)">Refresh Payouts</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Settlement ID</th>
+                <th>Amount Deposited</th>
+                <th>Transfer Reference / UTR</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="fin-settlements-tbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px;">No bank transfers recorded yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- â”€â”€â”€ SUBPANEL 3: EASY SPLIT & KYC COMPLIANCE â”€â”€â”€ -->
+      <div id="fin-panel-easysplit" class="fin-view-panel">
+        <!-- Status Banner -->
+        <div id="fin-es-status-banner" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:12px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:26px;">ðŸ¦</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#15803d;" id="fin-es-status-title">Easy Split: ACTIVE (Auto-Payouts Enabled)</div>
+              <div style="font-size:12px;color:#166534;" id="fin-es-status-desc">Your bank account is verified. 95% of customer payments are deposited directly to your bank.</div>
+            </div>
+          </div>
+          <div>
+            <span class="badge completed" id="fin-es-badge">ACTIVE</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:20px;">
+          <!-- Bank Details & KYC Form -->
+          <div style="background:#ffffff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:var(--shadow-card);">
+            <h4 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 4px;">Bank Account & KYC Details</h4>
+            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 16px;">Ensure account holder matches legal ID to prevent rejection</p>
+
+            <form id="fin-kyc-form" onsubmit="event.preventDefault(); saveEasySplitKYC();">
+              <div class="form-group" style="margin-bottom:12px;">
+                <label class="form-label">Account Holder Name <span style="color:#ef4444;">*</span></label>
+                <input id="es-holder" type="text" class="form-input" placeholder="Legal Name as per Passbook" required />
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div class="form-group">
+                  <label class="form-label">Account Number <span style="color:#ef4444;">*</span></label>
+                  <input id="es-account" type="text" class="form-input" placeholder="e.g. 60123456789" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm Account Number <span style="color:#ef4444;">*</span></label>
+                  <input id="es-account-confirm" type="text" class="form-input" placeholder="Re-enter Account Number" required />
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div class="form-group">
+                  <label class="form-label">IFSC Code <span style="color:#ef4444;">*</span></label>
+                  <input id="es-ifsc" type="text" class="form-input" placeholder="11 chars (e.g. SBIN0001234)" maxlength="11" style="text-transform:uppercase;" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">UPI ID / VPA (Optional)</label>
+                  <input id="es-upi" type="text" class="form-input" placeholder="username@okhdfcbank" />
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div class="form-group">
+                  <label class="form-label">PAN Number <span style="color:#ef4444;">*</span></label>
+                  <input id="es-pan" type="text" class="form-input" placeholder="10 chars (e.g. ABCDE1234F)" maxlength="10" style="text-transform:uppercase;" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Account / Entity Type</label>
+                  <select id="es-account-type" class="form-input">
+                    <option value="INDIVIDUAL">Individual / Proprietor</option>
+                    <option value="BUSINESS">Registered Business / Firm</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                <div class="form-group">
+                  <label class="form-label">GSTIN (Optional)</label>
+                  <input id="es-gst" type="text" class="form-input" placeholder="15 chars (e.g. 27ABCDE1234F1Z5)" maxlength="15" style="text-transform:uppercase;" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Business / Shop Legal Name</label>
+                  <input id="es-biz-name" type="text" class="form-input" placeholder="Shop Trade Name" />
+                </div>
+              </div>
+
+              <button type="submit" id="fin-save-kyc-btn" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+                ðŸ’¾ Save & Verify with Cashfree Easy Split
+              </button>
+            </form>
+          </div>
+
+          <!-- Document Upload Box (Resolving Rejection due to missing KYC) -->
+          <div>
+            <div style="background:#ffffff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:var(--shadow-card);margin-bottom:18px;">
+              <h4 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 4px;">KYC Document Proofs</h4>
+              <p style="font-size:12px;color:var(--text-muted);margin:0 0 14px;">Upload verification documents to ensure zero Cashfree payout delays</p>
+
+              <!-- Upload 1: Bank Proof -->
+              <div style="margin-bottom:14px;">
+                <div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-bottom:6px;">1. Bank Passbook / Cancelled Cheque</div>
+                <div class="fin-upload-card" onclick="document.getElementById('kyc-file-bank').click()">
+                  <div class="fin-upload-icon">ðŸ“„</div>
+                  <div style="font-size:13px;font-weight:700;color:#0f172a;" id="kyc-bank-label">Click to upload Passbook or Cheque</div>
+                  <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">PNG, JPG, or PDF (Max 5MB)</div>
+                  <div id="kyc-bank-status" style="margin-top:6px;font-size:12px;color:#16a34a;font-weight:700;display:none;">âœ“ Uploaded</div>
+                </div>
+                <input type="file" id="kyc-file-bank" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" onchange="uploadKYCDocument('bank_proof', this)" />
+              </div>
+
+              <!-- Upload 2: PAN Card -->
+              <div>
+                <div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-bottom:6px;">2. PAN Card Photo / Scan</div>
+                <div class="fin-upload-card" onclick="document.getElementById('kyc-file-pan').click()">
+                  <div class="fin-upload-icon">ðŸªª</div>
+                  <div style="font-size:13px;font-weight:700;color:#0f172a;" id="kyc-pan-label">Click to upload PAN Card</div>
+                  <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">PNG, JPG, or PDF (Max 5MB)</div>
+                  <div id="kyc-pan-status" style="margin-top:6px;font-size:12px;color:#16a34a;font-weight:700;display:none;">âœ“ Uploaded</div>
+                </div>
+                <input type="file" id="kyc-file-pan" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" onchange="uploadKYCDocument('pan_card', this)" />
+              </div>
+            </div>
+
+            <!-- Notice card -->
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;font-size:12px;color:#1e40af;line-height:1.5;">
+              <strong style="display:block;margin-bottom:4px;">ðŸ’¡ Why do we need this?</strong>
+              Cashfree Easy Split routes funds directly into your verified bank account. Having your Account Holder Name match your PAN avoids manual compliance review.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: CUSTOMER QR
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-qr" class="page">
+      <div class="qr-card">
+        <div class="qr-preview">
+          <img id="qr-image" src="" alt="Loading QR..." />
+        </div>
+        <div class="qr-info">
+          <h3 style="font-size:20px;font-weight:800;color:#0f172a;">Customer Desk Standee / Poster</h3>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.5;">
+            Place this QR code on your counter or front glass. Customers point their mobile camera to open your instant cloud store, upload files, select B&W or Color options, and submit prints automatically.
+          </p>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Shop Store Link</label>
+            <div style="display:flex;gap:8px;">
+              <input id="qr-link-input" type="text" class="form-input" readonly value="" />
+              <button id="copy-qr-link-btn" class="btn btn-secondary">Copy</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <button id="print-poster-btn" class="btn btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print Standee Poster
+            </button>
+            <button id="reload-qr-btn" class="btn btn-secondary">Reload QR</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: SETTINGS
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-settings" class="page">
+      <div class="settings-grid">
+
+        <!-- Business Profile & Account -->
+        <div class="settings-card">
+          <h3 class="settings-card-title">ðŸ¢ Shop Profile & Account</h3>
+          <div class="form-group">
+            <label class="form-label">Shop / Business Name</label>
+            <input id="settings-shop-name" type="text" class="form-input" placeholder="Shop Name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Owner Email</label>
+            <input id="settings-owner-email" type="email" class="form-input" disabled style="opacity:0.75;cursor:not-allowed;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Custom Store URL Slug</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="font-size:12px;color:var(--text-muted);font-weight:600;">/shop/</span>
+              <input id="settings-shop-slug" type="text" class="form-input" placeholder="my-shop-name" style="flex:1;" />
+            </div>
+            <p style="font-size:11px;color:var(--text-dim);margin-top:4px;">Updating this changes your permanent customer QR code link.</p>
+          </div>
+        </div>
+
+        <!-- Station & Hardware -->
+        <div class="settings-card">
+          <h3 class="settings-card-title">ðŸ–¥ï¸ Station & Hardware</h3>
+          <div class="form-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <label class="form-label" style="margin-bottom:0;">Default Windows Printer</label>
+              <span id="settings-printer-status-pill" class="badge" style="background:#e2e8f0;color:#64748b;font-size:10px;">Checking...</span>
+            </div>
+            <select id="settings-printer-select" class="form-select">
+              <option value="">(Windows Default Printer)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Server Base URL</label>
+            <input id="settings-server-url" type="text" class="form-input" value="https://okinsite.com" />
+          </div>
+          <div class="toggle-group">
+            <label class="toggle-row">
+              <div>
+                <div class="toggle-label">Auto-Enhance Documents</div>
+                <div class="toggle-sub">AI-powered 300 DPI upscaling for customer phone photos</div>
+              </div>
+              <div class="toggle-switch">
+                <input id="settings-auto-enhance" type="checkbox" checked />
+                <span class="toggle-track"></span>
+              </div>
+            </label>
+            <label class="toggle-row">
+              <div>
+                <div class="toggle-label">Chime Alert on New Job</div>
+                <div class="toggle-sub">Audio notification whenever a customer places an order</div>
+              </div>
+              <div class="toggle-switch">
+                <input id="settings-sound-alert" type="checkbox" checked />
+                <span class="toggle-track"></span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="settings-card">
+          <h3 class="settings-card-title">ðŸ’° Pricing Rules</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label class="form-label">B&W Rate (â‚¹/page)</label>
+              <input id="settings-bw-price" type="number" step="0.50" min="0" class="form-input" value="1.50" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color Rate (â‚¹/page)</label>
+              <input id="settings-color-price" type="number" step="0.50" min="0" class="form-input" value="5.00" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duplex Discount (â‚¹/page)</label>
+            <input id="settings-duplex-discount" type="number" step="0.25" min="0" class="form-input" value="0.00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Copies Allowed per Order</label>
+            <input id="settings-max-copies" type="number" min="1" max="99" class="form-input" value="10" />
+          </div>
+        </div>
+
+        <!-- ðŸ¦ Automated Easy Split & Bank Payouts -->
+        <div class="settings-card" id="settings-easysplit-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h3 class="settings-card-title" style="margin-bottom:0;">ðŸ¦ Bank Account & Easy Split Auto-Payouts</h3>
+            <span id="desktop-easysplit-status" class="badge" style="background:#fee2e2;color:#ef4444;padding:4px 8px;font-weight:700;font-size:11px;">NOT CONNECTED</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-sub,#64748b);margin-bottom:14px;line-height:1.5;">
+            Customer payments are automatically split by Cashfree. Your shop earnings are disbursed directly into this bank account daily (T+1).
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group">
+              <label class="form-label">Account Holder Name *</label>
+              <input id="desktop-bank-holder" type="text" class="form-input" placeholder="Name as per Bank" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bank Account Number *</label>
+              <input id="desktop-bank-account" type="text" class="form-input" placeholder="Account Number" />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Bank IFSC Code *</label>
+              <input id="desktop-bank-ifsc" type="text" class="form-input" placeholder="e.g. HDFC0001234" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">UPI ID (Optional)</label>
+              <input id="desktop-bank-upi" type="text" class="form-input" placeholder="shop@upi" />
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:14px;">
+            <span style="font-size:12px;color:var(--text-sub,#64748b);">Platform Commission Cut: <strong id="desktop-easysplit-cut" style="color:#3b82f6;">5%</strong> (You receive <strong id="desktop-vendor-share" style="color:#10b981;">95%</strong>)</span>
+            <span style="font-size:11px;color:#10b981;font-weight:600;">âœ“ Automated Settlement</span>
+          </div>
+        </div>
+
+        <!-- Customer Options -->
+        <div class="settings-card">
+          <h3 class="settings-card-title">ðŸ‘¤ Customer Options</h3>
+          <div class="toggle-group">
+            <label class="toggle-row">
+              <div>
+                <div class="toggle-label">Require Customer Name</div>
+                <div class="toggle-sub">Customer must enter their name before paying</div>
+              </div>
+              <div class="toggle-switch">
+                <input id="settings-require-name" type="checkbox" />
+                <span class="toggle-track"></span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Print Options Control -->
+        <div class="settings-card full-width">
+          <h3 class="settings-card-title">ðŸ–¨ï¸ Customer Facing Print Options</h3>
+          <div class="options-grid">
+
+            <div class="options-section">
+              <div class="options-section-title">Color Mode</div>
+              <div class="toggle-group">
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Black & White</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-bw" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Color</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-color" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+              </div>
+              <div class="form-group" style="margin-top:10px;">
+                <label class="form-label">Default Color Mode</label>
+                <select id="opt-default-color" class="form-select">
+                  <option value="monochrome">Black & White</option>
+                  <option value="color">Color</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="options-section">
+              <div class="options-section-title">Duplex / Sides</div>
+              <div class="toggle-group">
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Single-Sided</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-simplex" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Double-Sided (Long)</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-duplex-long" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Double-Sided (Short)</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-duplex-short" type="checkbox" /><span class="toggle-track"></span></div>
+                </label>
+              </div>
+              <div class="form-group" style="margin-top:10px;">
+                <label class="form-label">Default Duplex</label>
+                <select id="opt-default-duplex" class="form-select">
+                  <option value="simplex">Single-Sided</option>
+                  <option value="duplexlong">Double-Sided (Long)</option>
+                  <option value="duplexshort">Double-Sided (Short)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="options-section">
+              <div class="options-section-title">Layout & Orientation</div>
+              <div class="toggle-group">
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Portrait</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-portrait" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow Landscape</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-landscape" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+                <label class="toggle-row">
+                  <div><div class="toggle-label">Allow 2-on-1 (2 Pages/Sheet)</div></div>
+                  <div class="toggle-switch"><input id="opt-allow-2on1" type="checkbox" checked /><span class="toggle-track"></span></div>
+                </label>
+              </div>
+              <div class="form-group" style="margin-top:10px;">
+                <label class="form-label">Default Orientation</label>
+                <select id="opt-default-orientation" class="form-select">
+                  <option value="portrait">Portrait</option>
+                  <option value="landscape">Landscape</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:20px;padding-bottom:32px;">
+        <button id="save-settings-btn" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save All Settings
+        </button>
+        <button id="reset-setup-btn" class="btn btn-secondary">Switch / Register Shop</button>
+      </div>
+    </section>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: SUBSCRIPTION
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-subscription" class="page">
+      <div class="tier-card">
+        <div class="tier-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/></svg>
+          Active Plan: Pro Vendor Station
+        </div>
+        <h2 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:6px;">Unlimited Commercial Station</h2>
+        <p style="font-size:13px;color:var(--text-muted);">
+          Your station is registered on the QrPrintDesk SaaS platform with 0% platform commission on all UPI & cash transactions.
+        </p>
+
+        <div class="feature-list">
+          <div class="feature-item"><span class="feature-check">âœ“</span> Unlimited Incoming Cloud Customer Orders</div>
+          <div class="feature-item"><span class="feature-check">âœ“</span> Automatic Windows Hardware Spooler Telemetry (WMI)</div>
+          <div class="feature-item"><span class="feature-check">âœ“</span> Multi-File Cart & Custom Page Range Submissions</div>
+          <div class="feature-item"><span class="feature-check">âœ“</span> 300 DPI AI Document Auto-Enhancer</div>
+          <div class="feature-item"><span class="feature-check">âœ“</span> Encrypted Zero-Knowledge File Processing</div>
+          <div class="feature-item"><span class="feature-check">âœ“</span> Dedicated Customer QR Desk Standee Poster</div>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Subscription Status</div>
+            <div style="font-size:15px;font-weight:800;color:#15803d;margin-top:2px;">â— Lifetime Early Adopter Beta</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('You are on the Lifetime Free Tier. No renewal required!', 'success')">Manage Plan</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PAGE: SUPPORT
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <section id="page-support" class="page">
+      <div class="tier-card">
+        <h2 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:6px;">Vendor Support & Diagnostics</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+          Need assistance or technical troubleshooting? We are here to support your Xerox / print shop.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+          <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="font-size:18px;margin-bottom:6px;">ðŸ’¬</div>
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">WhatsApp Desk</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Instant operator chat helpline</div>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="window.electronAPI.openExternal('https://wa.me/919960000000?text=Hi%20QrPrintDesk%20Support')">Chat on WhatsApp</button>
+          </div>
+
+          <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="font-size:18px;margin-bottom:6px;">âœ‰ï¸</div>
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">Email Support</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">support@okinsite.com</div>
+            <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="window.electronAPI.openExternal('mailto:support@okinsite.com?subject=QrPrintDesk%20Vendor%20Query')">Send Email</button>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:10px;">Station Diagnostic Tools</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="flushPrintSpooler()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.37"/></svg>
+            Flush Print Spooler
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="testPrinterCommunication()">
+            ðŸ–¨ï¸ Send Hardware Test Sheet
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="location.reload()">
+            ðŸ”„ Reload App View
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     AUTH GATE (When logged out)
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="auth-gate-container" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo-header">
+      <div class="auth-brand-badge">
+        <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        <span>QrPrintDesk SaaS</span>
+      </div>
+      <h2>Vendor Station Portal</h2>
+      <p>Log in to access your print queue, live orders, and shop settings</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button id="auth-tab-login" class="auth-tab-btn active">Sign In</button>
+      <button id="auth-tab-register" class="auth-tab-btn">Create Shop</button>
+    </div>
+
+    <!-- Sign In Pane -->
+    <div id="auth-login-pane">
+      <div class="form-group">
+        <label class="form-label">Owner Email Address</label>
+        <input id="login-email" type="email" class="form-input" placeholder="e.g. contact@yourphotocopy.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Owner PIN (4â€“8 digits)</label>
+        <input id="login-pin" type="password" maxlength="8" class="form-input" placeholder="â€¢â€¢â€¢â€¢" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Station Identifier</label>
+        <input id="login-station" type="text" class="form-input" value="Main Counter" placeholder="e.g. Counter 1, PC-Front" />
+      </div>
+      <button id="submit-login-btn" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;margin-top:6px;">
+        Sign In to My Shop
+      </button>
+
+      <div style="margin-top:16px;text-align:center;">
+        <span onclick="toggleTokenLogin()" style="font-size:11.5px;color:var(--text-muted);cursor:pointer;text-decoration:underline;">
+          Advanced: Connect using manual Agent Token
+        </span>
+      </div>
+      <div id="token-login-container" style="display:none;margin-top:12px;padding:12px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;">
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">Agent Token (agt_...)</label>
+          <input id="login-agent-token" type="text" class="form-input" placeholder="agt_..." />
+        </div>
+        <button id="submit-token-login-btn" class="btn btn-secondary btn-sm" style="width:100%;justify-content:center;">
+          Connect Station via Token
+        </button>
+      </div>
+    </div>
+
+    <!-- Register Pane -->
+    <div id="auth-register-pane" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Shop / Business Name</label>
+        <input id="reg-shop-name" type="text" class="form-input" placeholder="e.g. Om Digital Xerox & Cyber Cafe" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Owner Email</label>
+        <input id="reg-owner-email" type="email" class="form-input" placeholder="owner@gmail.com" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Set PIN (4â€“8 digits)</label>
+          <input id="reg-pin" type="password" maxlength="8" class="form-input" placeholder="1234" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Station Name</label>
+          <input id="reg-station" type="text" class="form-input" value="Main Counter" />
+        </div>
+      </div>
+      <button id="submit-register-btn" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;margin-top:6px;">
+        Create & Activate My Shop
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     JOB DETAIL MODAL
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="job-modal" class="modal-overlay">
+  <div class="modal-box" style="width:600px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <h3 style="font-size:18px;font-weight:800;color:#0f172a;">Print Job Details</h3>
+      <button onclick="closeJobModal()" class="btn btn-secondary btn-sm">âœ• Close</button>
+    </div>
+    <div id="job-modal-content">Loading...</div>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;" id="job-modal-actions"></div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     REJECT MODAL
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="reject-modal" class="modal-overlay">
+  <div class="modal-box" style="width:420px;">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:#0f172a;">Reject Print Job</h3>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">The job will be marked as rejected and customer notified.</p>
+    <div class="form-group">
+      <label class="form-label">Reason (optional)</label>
+      <input id="reject-reason-input" type="text" class="form-input" placeholder="e.g. File unreadable, wrong paper size..." />
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button id="confirm-reject-btn" class="btn btn-danger" style="flex:1;justify-content:center;">Confirm Reject</button>
+      <button onclick="closeRejectModal()" class="btn btn-secondary" style="flex:1;justify-content:center;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     PROMINENT FLOATING TOAST
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="new-job-toast" style="display:none;position:fixed;top:20px;right:24px;z-index:9999;width:380px;background:#ffffff;border:2px solid #2563eb;border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,0.18);padding:16px 18px;animation:slideIn 0.25s ease-out;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+    <div style="width:36px;height:36px;border-radius:10px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:18px;">
+      ðŸ””
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:800;color:#0f172a;">New Print Job Received!</div>
+      <div id="new-job-toast-sub" style="font-size:12px;color:#64748b;">Customer order just arrived</div>
+    </div>
+    <span onclick="dismissNewJobToast()" style="cursor:pointer;font-weight:bold;color:#94a3b8;font-size:16px;">âœ•</span>
+  </div>
+  <div id="toast-auto-countdown-bar" style="margin-top:6px;display:none;">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#2563eb;font-weight:700;margin-bottom:4px;">
+      <span>Auto-printing in progress...</span>
+      <span id="toast-countdown-seconds">3.0s</span>
+    </div>
+    <div style="width:100%;height:4px;background:#eff6ff;border-radius:4px;overflow:hidden;">
+      <div id="toast-countdown-progress" style="width:100%;height:100%;background:#2563eb;transition:width 0.1s linear;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>

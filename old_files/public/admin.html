@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopPrint - Shopkeeper Admin Console</title>
+  <script defer src="/vendor/alpine.min.js"></script>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-subtle: rgba(59, 130, 246, 0.12);
+      --bg: #090d16;
+      --panel: #0f172a;
+      --card: #1e293b;
+      --card-hover: #243247;
+      --border: #243248;
+      --border-light: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --success: #10b981;
+      --success-subtle: rgba(16, 185, 129, 0.14);
+      --warning: #f59e0b;
+      --warning-subtle: rgba(245, 158, 11, 0.14);
+      --danger: #ef4444;
+      --danger-subtle: rgba(239, 68, 68, 0.14);
+      --info: #0284c7;
+      --info-subtle: rgba(2, 132, 199, 0.14);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px 24px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 1480px; margin: 0 auto; }
+
+    /* Icons */
+    .icon { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0; }
+    .icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; }
+
+    /* Top Header */
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 22px; background: var(--panel); border-radius: 14px;
+      margin-bottom: 22px; border: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 14px; }
+    .brand-icon {
+      width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+    .brand-title { font-size: 19px; font-weight: 800; color: #fff; letter-spacing: -0.4px; }
+    .brand-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+    /* Navigation Tabs */
+    .nav-tabs { display: flex; background: #080d19; padding: 4px; border-radius: 10px; border: 1px solid var(--border); gap: 4px; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: none;
+      background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.18s ease;
+    }
+    .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.03); }
+    .nav-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35); }
+    .nav-badge { background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 12px; }
+
+    /* Header Actions */
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 14px; border-radius: 8px; border: 1px solid transparent; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: 0.15s ease; display: inline-flex; align-items: center; gap: 7px;
+    }
+    .btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: #059669; color: #fff; }
+    .btn-success:hover { background: #047857; }
+    .btn-warning { background: #d97706; color: #fff; }
+    .btn-warning:hover { background: #b45309; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-secondary { background: var(--card); color: #e2e8f0; border-color: var(--border); }
+    .btn-secondary:hover { background: var(--card-hover); border-color: var(--border-light); color: #fff; }
+    .btn-outline { background: transparent; border-color: var(--border); color: var(--text-muted); }
+    .btn-outline:hover { background: rgba(255,255,255,0.04); color: #fff; border-color: var(--border-light); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Badges */
+    .badge { padding: 4px 9px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-success { background: var(--success-subtle); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-danger { background: var(--danger-subtle); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-warning { background: var(--warning-subtle); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-info { background: var(--info-subtle); color: #38bdf8; border: 1px solid rgba(2, 132, 199, 0.3); }
+    .badge-neutral { background: rgba(148, 163, 184, 0.12); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.25); }
+
+    /* Stat Cards Row */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    @media (max-width: 960px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center; transition: 0.15s ease;
+    }
+    .stat-card:hover { border-color: var(--border-light); }
+    .stat-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.6px; }
+    .stat-value { font-size: 26px; font-weight: 800; color: #fff; line-height: 1.2; margin-top: 5px; letter-spacing: -0.5px; }
+    .stat-icon-wrap {
+      width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--text-muted);
+    }
+
+    /* Layout Grids */
+    .front-grid { display: grid; grid-template-columns: 340px 1fr; gap: 22px; align-items: start; }
+    @media (max-width: 1120px) { .front-grid { grid-template-columns: 1fr; } }
+
+    /* Panels */
+    .panel { background: var(--panel); border-radius: 14px; border: 1px solid var(--border); padding: 22px; margin-bottom: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.25); }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+    .panel-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 9px; letter-spacing: -0.2px; }
+    .panel-subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+    /* QR Code Display */
+    .qr-card { text-align: center; background: #ffffff; padding: 18px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .qr-img { width: 100%; max-width: 210px; height: auto; border-radius: 6px; display: block; margin: 0 auto; }
+    .url-chip {
+      background: #f1f5f9; color: #0f172a; padding: 8px 12px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 12px; font-weight: 700; word-break: break-all; margin-top: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+
+    /* Quick status indicators in QR card */
+    .printer-status-bar {
+      display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-top: 14px; font-size: 13px;
+    }
+
+    /* Table Toolbar */
+    .queue-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-tabs { display: flex; gap: 4px; background: #080d19; padding: 4px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
+    .filter-tab {
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; border: none; background: transparent; transition: 0.15s ease; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+    }
+    .filter-tab.active { background: var(--card); color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+    .filter-tab:hover:not(.active) { color: #fff; }
+    .search-wrap { position: relative; min-width: 240px; }
+    .search-input { width: 100%; padding: 8px 12px 8px 34px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: #fff; font-size: 13px; }
+    .search-input:focus { outline: none; border-color: var(--primary); }
+    .search-icon-pos { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none; }
+
+    /* Jobs Table */
+    .table-container { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: #0a0f1d; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { padding: 12px 16px; background: #0d1527; color: var(--text-dim); font-weight: 700; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+    td { padding: 14px 16px; border-bottom: 1px solid #162032; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.015); }
+    tr.row-pending td { background: rgba(245, 158, 11, 0.04); }
+    .code-tag {
+      font-family: ui-monospace, SFMono-Regular, monospace; font-size: 14px; font-weight: 800;
+      background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; display: inline-block;
+    }
+    .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+    /* Feature Badges in Table */
+    .pill-feature {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .pill-2on1 { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .pill-orient { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); }
+    .pill-price { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+
+    /* Form Controls */
+    .control-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 1px solid #182234; font-size: 14px; }
+    .control-row:last-child { border-bottom: none; }
+    .control-label { font-weight: 600; color: #fff; }
+    .control-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+    select, input[type="text"], input[type="password"], input[type="number"] {
+      width: 100%; padding: 10px 12px; border-radius: 8px; background: var(--card); color: #fff; border: 1px solid var(--border); font-size: 13px;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--primary); }
+
+    /* Custom Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #334155; transition: .25s ease; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #fff; transition: .25s ease; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Settings Screen Grid */
+    .settings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    @media (max-width: 960px) { .settings-grid { grid-template-columns: 1fr; } }
+
+    /* Segmented Radios */
+    .segmented-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
+    .segmented-2 { grid-template-columns: repeat(2, 1fr); }
+    .seg-btn {
+      padding: 9px; font-size: 12px; font-weight: 600; text-align: center; border-radius: 6px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--card); color: var(--text-muted); transition: 0.15s ease;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .seg-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* Stepper */
+    .stepper { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; max-width: 140px; margin-top: 6px; }
+    .stepper button { flex: 1; padding: 8px; background: var(--card); color: #fff; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .stepper button:hover { background: #334155; }
+    .stepper span { width: 50px; text-align: center; font-weight: 700; background: #0b1120; font-size: 14px; }
+
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+    .modal-content { background: var(--panel); border: 1px solid var(--border-light); border-radius: 16px; width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 45px rgba(0,0,0,0.7); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+    .modal-title { font-size: 17px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; }
+    .modal-close:hover { color: #fff; }
+
+    /* Login Screen */
+    .login-box { max-width: 400px; margin: 90px auto; background: var(--panel); border: 1px solid var(--border); padding: 36px 32px; border-radius: 18px; text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,0.6); }
+    .pin-input { font-size: 26px; letter-spacing: 12px; text-align: center; padding: 14px; width: 100%; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: #fff; margin: 18px 0; }
+  </style>
+</head>
+<body x-data="adminApp()" x-init="init()">
+  <div class="container">
+
+    <!-- Screen 1: Login / Set PIN -->
+    <template x-if="!isAuthenticated">
+      <div class="login-box">
+        <div style="width: 54px; height: 54px; border-radius: 12px; background: linear-gradient(135deg, #1d4ed8, #3b82f6); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #fff;">
+          <span class="icon" style="width: 28px; height: 28px;">
+            <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          </span>
+        </div>
+        <h2 style="margin-bottom: 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.4px;">ShopPrint Console</h2>
+        <p style="color: var(--text-muted); font-size: 13px;" x-text="isPinSet ? 'Enter shop master PIN to access console' : 'Set your master shopkeeper PIN (first run)'"></p>
+        
+        <form @submit.prevent="handleAuthSubmit">
+          <input type="password" class="pin-input" x-model="pinInput" maxlength="8" placeholder="••••" required autofocus>
+          <div style="color: var(--danger); font-size: 13px; margin-bottom: 12px;" x-show="authError" x-text="authError"></div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; justify-content: center;">
+            <span class="icon" style="width: 16px; height: 16px;"><svg viewBox="0 0 24 24"><path d="M7 11V7a5 5 0 0 1 10 0v4"/><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/></svg></span>
+            <span x-text="isPinSet ? 'Unlock Console' : 'Set PIN & Continue'"></span>
+          </button>
+          <div style="color: var(--text-dim); font-size: 12px; margin-top: 16px;">
+            Default master PIN: <strong style="color: #60a5fa;">1234</strong>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- Screen 2: Authenticated Dashboard -->
+    <template x-if="isAuthenticated">
+      <div>
+        <!-- Top Header Navigation Bar -->
+        <header class="header-bar">
+          <div class="brand-wrap">
+            <div class="brand-icon">
+              <span class="icon" style="width: 22px; height: 22px;">
+                <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+              </span>
+            </div>
+            <div>
+              <div class="brand-title" x-text="shopName || 'ShopPrint Station'"></div>
+              <div class="brand-subtitle">Automated Local Counter Print System</div>
+            </div>
+          </div>
+
+          <!-- Section Nav Switcher -->
+          <nav class="nav-tabs">
+            <button class="nav-btn" :class="{ 'active': currentSection === 'queue' }" @click="currentSection = 'queue'">
+              <span class="icon" style="width: 16px; height: 16px;"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+              <span>Print Queue</span>
+              <span class="nav-badge" x-show="pendingApprovalCount > 0" x-text="pendingApprovalCount"></span>
+            </button>
+            <button class="nav-btn" :class="{ 'active': currentSection === 'settings' }" @click="currentSection = 'settings'">
+              <span class="icon" style="width: 16px; height: 16px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+              <span>Station Settings</span>
+            </button>
+            <button class="nav-btn" :class="{ 'active': currentSection === 'tunnel' }" @click="currentSection = 'tunnel'; loadTunnelInfo()">
+              <span class="icon" style="width: 16px; height: 16px;"><svg viewBox="0 0 24 24"><path d="M1.5 8.5a13 13 0 0 1 21 0"/><path d="M5 12a10 10 0 0 1 14 0"/><path d="M8.5 15.5a6 6 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg></span>
+              <span>Remote Tunnel</span>
+              <span class="nav-badge" style="background:#f59e0b;" x-show="tunnelStatus === 'disconnected'">!</span>
+            </button>
+          </nav>
+
+          <!-- Quick Tools -->
+          <div class="header-actions">
+            <!-- Audio Chime Toggle & Test -->
+            <button class="btn btn-secondary btn-sm" @click="toggleSound" :title="soundEnabled ? 'Click to Mute' : 'Click to Unmute'">
+              <span class="icon" style="width: 15px; height: 15px;">
+                <svg x-show="soundEnabled" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <svg x-show="!soundEnabled" viewBox="0 0 24 24"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </span>
+              <span x-text="soundEnabled ? 'Sound Active' : 'Muted'"></span>
+            </button>
+
+            <!-- Test Chime Button -->
+            <button class="btn btn-outline btn-sm" @click="testSound" title="Test arrival chime sound">
+              <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
+              <span>Test Chime</span>
+            </button>
+
+            <!-- Change Master PIN -->
+            <button class="btn btn-secondary btn-sm" @click="openPinModal" title="Change master PIN">
+              <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span>
+              <span>PIN</span>
+            </button>
+
+            <!-- Logout -->
+            <button class="btn btn-outline btn-sm" @click="logout" title="Lock console">
+              <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Background Engine Active Banner -->
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); border-radius: 10px; padding: 8px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #34d399; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+            <span><strong>Background Service Active</strong> &mdash; ShopPrint runs continuously in the system tray. Closing this tab or window will <em>not</em> stop print jobs.</span>
+          </div>
+          <div style="color: #94a3b8; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+            <span>Tray Icon Active in Taskbar</span>
+            <span style="background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-family: monospace;">(click ^ if hidden)</span>
+          </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">Total Orders</div>
+              <div class="stat-value" x-text="jobs.length"></div>
+            </div>
+            <div class="stat-icon-wrap">
+              <span class="icon" style="width: 22px; height: 22px;"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            </div>
+          </div>
+
+          <div class="stat-card" :style="pendingApprovalCount > 0 ? 'border-color: #f59e0b; background: rgba(245, 158, 11, 0.04);' : ''">
+            <div>
+              <div class="stat-title" :style="pendingApprovalCount > 0 ? 'color: #fbbf24;' : ''">Pending Approval</div>
+              <div class="stat-value" :style="pendingApprovalCount > 0 ? 'color: #fbbf24;' : ''" x-text="pendingApprovalCount"></div>
+            </div>
+            <div class="stat-icon-wrap" :style="pendingApprovalCount > 0 ? 'border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;' : ''">
+              <span class="icon" style="width: 22px; height: 22px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">In Queue / Printing</div>
+              <div class="stat-value" x-text="queuedCount + printingCount"></div>
+            </div>
+            <div class="stat-icon-wrap">
+              <span class="icon" style="width: 22px; height: 22px;"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">Completed Today</div>
+              <div class="stat-value" style="color: #34d399;" x-text="doneCount"></div>
+            </div>
+            <div class="stat-icon-wrap" style="color: #34d399;">
+              <span class="icon" style="width: 22px; height: 22px;"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: PRINT QUEUE & FRONT COUNTER (CLEAN)-->
+        <!-- ========================================== -->
+        <div x-show="currentSection === 'queue'">
+          <div class="front-grid">
+            
+            <!-- Left Side: Clean Counter QR & Quick Status -->
+            <div>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <div class="panel-title">
+                      <span class="icon" style="width: 17px; height: 17px;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+                      <span>Customer QR Counter</span>
+                    </div>
+                    <div class="panel-subtitle">Display at counter for walk-ins</div>
+                  </div>
+                  <span class="badge badge-success">Live Ready</span>
+                </div>
+
+                <!-- High-contrast QR Box -->
+                <div class="qr-card">
+                  <img :src="qrDataUrl" alt="Counter QR Code" class="qr-img">
+                  <div class="url-chip">
+                    <span x-text="serverUrl" style="overflow: hidden; text-overflow: ellipsis;"></span>
+                    <button class="btn btn-secondary btn-sm" @click="copyServerUrl" title="Copy customer URL" style="padding: 3px 8px; font-size: 11px;">
+                      <span class="icon" style="width: 12px; height: 12px;"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                      <span x-text="copiedUrl ? 'Copied' : 'Copy'"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Printer Status Card -->
+                <div class="printer-status-bar" :style="isSelectedPrinterOffline ? 'border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08);' : ''">
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Active Printer</div>
+                    <div style="font-weight: 700; color: #fff; margin-top: 2px;" x-text="selectedPrinter || 'System Default'"></div>
+                    <div x-show="isSelectedPrinterOffline" style="color: #f87171; font-size: 11px; font-weight: 700; margin-top: 3px;">
+                      ⚠️ PRINTER OFFLINE / USB UNPLUGGED
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <span class="badge badge-danger" x-show="isSelectedPrinterOffline">Offline</span>
+                    <span class="badge badge-success" x-show="!isSelectedPrinterOffline && !queuePaused">Ready</span>
+                    <span class="badge badge-warning" x-show="!isSelectedPrinterOffline && queuePaused">Paused</span>
+                  </div>
+                </div>
+
+                <!-- Printer Offline Banner -->
+                <div x-show="isSelectedPrinterOffline" style="margin-top: 10px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #fca5a5; line-height: 1.5;">
+                  <strong>Printer Disconnected:</strong> Turn on printer power & plug in the USB cable to this PC. Queued jobs will print once connected.
+                </div>
+
+                <!-- Quick Action Toggles -->
+                <div style="margin-top: 14px; display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" style="flex: 1; justify-content: center;" @click="toggleQueuePause">
+                    <span class="icon" style="width: 13px; height: 13px;">
+                      <svg x-show="!queuePaused" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                      <svg x-show="queuePaused" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </span>
+                    <span x-text="queuePaused ? 'Resume Queue' : 'Pause Queue'"></span>
+                  </button>
+
+                  <a :href="serverUrl" target="_blank" class="btn btn-outline btn-sm" style="text-decoration: none; justify-content: center;" title="Open customer page in browser">
+                    <span class="icon" style="width: 13px; height: 13px;"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+                    <span>Test Mobile Page</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Print Orders Queue Table -->
+            <div>
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <div class="panel-title">
+                      <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg></span>
+                      <span>Print Queue Orders</span>
+                    </div>
+                    <div class="panel-subtitle">Real-time incoming customer jobs</div>
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-outline btn-sm" @click="fetchStatus" title="Refresh queue">
+                      <span class="icon" style="width: 13px; height: 13px;"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+                      <span>Refresh</span>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" @click="purgeWindowsSpooler" :disabled="purgingSpooler" title="Cancel any stuck/pending jobs in Windows printer queue so no surprise prints occur">
+                      <span class="icon" style="width: 13px; height: 13px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></span>
+                      <span x-text="purgingSpooler ? 'Flushing...' : 'Flush Spooler'"></span>
+                    </button>
+                    <button class="btn btn-danger btn-sm" @click="clearAllJobs" :disabled="jobs.length === 0" title="Delete all prints & clear spooler">
+                      <span class="icon" style="width: 13px; height: 13px;"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                      <span>Clear All</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Printer Alert Banner -->
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; display: flex; align-items: center; gap: 10px;" x-show="printerAlert">
+                  <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                  <div><strong>Printer Alert:</strong> <span x-text="printerAlert"></span></div>
+                </div>
+
+                <!-- Filter & Search Toolbar -->
+                <div class="queue-toolbar">
+                  <div class="filter-tabs">
+                    <button class="filter-tab" :class="{ 'active': activeTab === 'ALL' }" @click="activeTab = 'ALL'">
+                      <span>All</span>
+                      <span style="opacity: 0.7;" x-text="`(${jobs.length})`"></span>
+                    </button>
+                    <button class="filter-tab" :class="{ 'active': activeTab === 'PENDING_APPROVAL' }" @click="activeTab = 'PENDING_APPROVAL'">
+                      <span class="icon" style="width: 12px; height: 12px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                      <span>Pending</span>
+                      <span style="opacity: 0.7;" x-text="`(${pendingApprovalCount})`"></span>
+                    </button>
+                    <button class="filter-tab" :class="{ 'active': activeTab === 'QUEUED' }" @click="activeTab = 'QUEUED'">
+                      <span>Queued</span>
+                      <span style="opacity: 0.7;" x-text="`(${queuedCount})`"></span>
+                    </button>
+                    <button class="filter-tab" :class="{ 'active': activeTab === 'DONE' }" @click="activeTab = 'DONE'">
+                      <span>Done</span>
+                      <span style="opacity: 0.7;" x-text="`(${doneCount})`"></span>
+                    </button>
+                    <button class="filter-tab" :class="{ 'active': activeTab === 'FAILED' }" @click="activeTab = 'FAILED'">
+                      <span>Issues</span>
+                      <span style="opacity: 0.7;" x-text="`(${failedCount})`"></span>
+                    </button>
+                  </div>
+
+                  <div class="search-wrap">
+                    <span class="icon search-icon-pos" style="width: 15px; height: 15px;">
+                      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </span>
+                    <input type="text" class="search-input" x-model="searchQuery" placeholder="Search code, customer, file...">
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style="width: 80px;">Code</th>
+                        <th>Customer & Document</th>
+                        <th style="width: 110px;">Pages / Qty</th>
+                        <th style="width: 160px;">Print Settings</th>
+                        <th style="width: 120px;">Status</th>
+                        <th style="width: 170px; text-align: right;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="job in filteredJobs" :key="job.id">
+                        <tr :class="{ 'row-pending': job.status === 'PENDING_APPROVAL' }">
+                          <!-- Code -->
+                          <td>
+                            <span class="code-tag" x-text="'#' + job.code"></span>
+                          </td>
+                          <!-- Customer & File -->
+                          <td>
+                            <div style="font-weight: 700; color: #fff;" x-text="job.customer_name || 'Walk-in Customer'"></div>
+                            <div style="font-size: 11px; color: var(--text-muted); word-break: break-all; margin-top: 1px;" x-text="job.original_filename"></div>
+                            <template x-if="job.customer_note">
+                              <div style="font-size: 11px; color: #fbbf24; margin-top: 4px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 4px; padding: 2px 7px; display: inline-flex; align-items: center; gap: 5px;">
+                                <span class="icon" style="width: 11px; height: 11px;"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                                <span x-text="job.customer_note"></span>
+                              </div>
+                            </template>
+                          </td>
+                          <!-- Pages & Copies -->
+                          <td>
+                            <div style="font-weight: 700; font-size: 13px;" x-text="`${job.copies} copy` + (job.copies > 1 ? 's' : '')"></div>
+                            <div style="font-size: 11px; color: var(--text-dim);" x-text="`${job.page_count} page(s)/copy`"></div>
+                            <div style="font-size: 11px; color: #38bdf8; font-weight: 600; margin-top: 1px;" x-text="`Total: ${job.page_count * job.copies} sheets`"></div>
+                          </td>
+                          <!-- Print Settings -->
+                          <td>
+                            <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                              <span style="font-size: 12px; font-weight: 800; color: #60a5fa; text-transform: uppercase;" x-text="(job.paper_size || 'A4').toUpperCase()"></span>
+                              <span style="font-size: 11px; color: var(--text-dim);" x-text="`· ${job.fit_mode === 'noscale' ? '100%' : 'Fit'}`"></span>
+                              <span class="pill-feature pill-2on1" x-show="job.pages_per_sheet === 2">
+                                <span class="icon" style="width: 10px; height: 10px;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg></span>
+                                2-on-1
+                              </span>
+                            </div>
+                            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-top: 3px;" x-text="`${job.color_mode === 'color' ? 'Color' : 'B&W'} · ${job.duplex_mode === 'duplexlong' ? '2-Sided' : '1-Sided'}`"></div>
+                            <div style="margin-top: 3px; display: flex; gap: 4px; flex-wrap: wrap;">
+                              <span class="pill-feature pill-orient" x-show="job.orientation && job.orientation !== 'auto'">
+                                <span class="icon" style="width: 10px; height: 10px;">
+                                  <svg x-show="job.orientation === 'landscape'" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+                                  <svg x-show="job.orientation !== 'landscape'" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+                                </span>
+                                <span x-text="job.orientation"></span>
+                              </span>
+                              <span class="pill-feature pill-price" x-show="job.estimated_price">
+                                ₹<span x-text="Number(job.estimated_price).toFixed(2)"></span>
+                              </span>
+                            </div>
+                          </td>
+                          <!-- Status -->
+                          <td>
+                            <span class="badge" :class="getStatusBadgeClass(job.status)" x-text="job.status"></span>
+                            <div style="font-size: 11px; color: #f87171; margin-top: 3px;" x-show="job.failure_reason" x-text="job.failure_reason"></div>
+                          </td>
+                          <!-- Actions -->
+                          <td>
+                            <div class="actions-cell">
+                              <!-- Edit Button -->
+                              <template x-if="job.status !== 'PRINTING'">
+                                <button class="btn btn-secondary btn-sm" @click="openEditModal(job)" title="Edit print configuration">
+                                  <span class="icon" style="width: 11px; height: 11px;"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                                  <span>Edit</span>
+                                </button>
+                              </template>
+
+                              <!-- Approve / Reject when PENDING_APPROVAL -->
+                              <template x-if="job.status === 'PENDING_APPROVAL'">
+                                <button class="btn btn-success btn-sm" @click="jobAction(job.id, 'approve')" title="Approve and print">
+                                  <span class="icon" style="width: 11px; height: 11px;"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+                                  <span>Print</span>
+                                </button>
+                              </template>
+                              <template x-if="job.status === 'PENDING_APPROVAL'">
+                                <button class="btn btn-danger btn-sm" @click="jobAction(job.id, 'reject')" title="Reject order">
+                                  <span class="icon" style="width: 11px; height: 11px;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                                </button>
+                              </template>
+
+                              <!-- Cancel when QUEUED -->
+                              <template x-if="job.status === 'QUEUED'">
+                                <button class="btn btn-danger btn-sm" @click="jobAction(job.id, 'cancel')">Cancel</button>
+                              </template>
+
+                              <!-- Retry when FAILED or CHECK_REPRINT -->
+                              <template x-if="job.status === 'FAILED' || job.status === 'CHECK_REPRINT'">
+                                <button class="btn btn-warning btn-sm" @click="jobAction(job.id, 'retry')">Retry</button>
+                              </template>
+
+                              <!-- Reprint when DONE -->
+                              <template x-if="job.status === 'DONE'">
+                                <button class="btn btn-secondary btn-sm" @click="jobAction(job.id, 'reprint')">Reprint</button>
+                              </template>
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
+                      <template x-if="filteredJobs.length === 0">
+                        <tr>
+                          <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 48px;">
+                            <span class="icon" style="width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.4;"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+                            <div>No print orders found in this view.</div>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: STATION SETTINGS & MANAGEMENT (DETAILED)-->
+        <!-- ============================================== -->
+        <div x-show="currentSection === 'settings'">
+          <!-- Settings Top Action Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; margin-bottom: 20px;">
+            <div>
+              <div style="font-weight: 700; color: #fff; font-size: 15px;">Station Configuration</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Adjust hardware preferences, per-page rates, and customer mobile options</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="badge badge-success" x-show="settingsSavedToast" style="padding: 6px 12px; font-size: 12px;">
+                <span class="icon" style="width: 13px; height: 13px;"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <span>Settings Saved!</span>
+              </span>
+              <button class="btn btn-primary" @click="saveSettings" :disabled="isSavingSettings">
+                <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>
+                <span x-text="isSavingSettings ? 'Saving...' : 'Save Settings'"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            
+            <!-- Card 1: Hardware & Output Tray Rules -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">
+                    <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg></span>
+                    <span>Printer Hardware & Spool Rules</span>
+                  </div>
+                  <div class="panel-subtitle">Configure printer output and queue behavior</div>
+                </div>
+              </div>
+
+              <!-- Selected Printer -->
+              <div style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Selected Physical Printer:</label>
+                <select x-model="selectedPrinter" @change="saveSettings" style="margin-top: 6px;">
+                  <template x-for="p in printers" :key="p.name">
+                    <option :value="p.name" x-text="`${p.name} (${p.status})`"></option>
+                  </template>
+                </select>
+              </div>
+
+              <!-- Auto-print Toggle -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Instant Auto-Print</div>
+                  <div class="control-sub">Send prints directly to printer without requiring manual approval</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="autoPrint" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Queue Control -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Queue Processing</div>
+                  <div class="control-sub" x-text="queuePaused ? 'Queue is stopped — jobs stay queued' : 'Active — printing in FIFO arrival order'"></div>
+                </div>
+                <button class="btn btn-sm" :class="queuePaused ? 'btn-success' : 'btn-warning'" @click="toggleQueuePause">
+                  <span x-text="queuePaused ? 'Resume Processing' : 'Pause Processing'"></span>
+                </button>
+              </div>
+
+              <!-- Privacy Mode Toggle -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Strict Privacy Mode</div>
+                  <div class="control-sub">Permanently delete customer document file immediately after spooling</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="privacyMode" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Default Paper Size -->
+              <div style="margin-top: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Default Tray Paper Size:</label>
+                <select x-model="defaultPaperSize" @change="saveSettings" style="margin-top: 6px;">
+                  <option value="A4">A4 (Standard 210 × 297 mm)</option>
+                  <option value="legal">Legal (Stamp / Court 216 × 356 mm)</option>
+                  <option value="A3">A3 (Large Format 297 × 420 mm)</option>
+                  <option value="letter">Letter (216 × 279 mm)</option>
+                </select>
+              </div>
+
+              <!-- Default Scaling / Fit -->
+              <div style="margin-top: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Default Document Scaling Mode:</label>
+                <select x-model="defaultFitMode" @change="saveSettings" style="margin-top: 6px;">
+                  <option value="fit">Fit to Printable Margins (Recommended — avoids cutoff)</option>
+                  <option value="noscale">Actual Scale (100% — maintains exact original dimensions)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Card 2: Customer Mobile Options & Feature Toggles -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">
+                    <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+                    <span>Customer Mobile Page Features</span>
+                  </div>
+                  <div class="panel-subtitle">Only enabled features are shown to mobile customers</div>
+                </div>
+              </div>
+
+              <!-- Shop Display Name -->
+              <div style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Store Display Brand Name:</label>
+                <input type="text" x-model="shopName" @blur="saveSettings" placeholder="e.g. Om Xerox & Print Station" style="margin-top: 6px;">
+              </div>
+
+              <!-- Allow Duplex -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow Double-Sided (Duplex)</div>
+                  <div class="control-sub">Shows 1-Sided / 2-Sided option to customer</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allowDuplex" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Allow Color -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow Color Printing</div>
+                  <div class="control-sub">Allow customer to select Full Color (turn off for B&W only machines)</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allowColor" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Allow 2-on-1 -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow 2-on-1 Eco Sheet Mode</div>
+                  <div class="control-sub">Allow customer to place 2 pages side-by-side on 1 sheet</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allow2on1" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Allow Orientation -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow Orientation Choice</div>
+                  <div class="control-sub">Allow customer to force Portrait or Landscape</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allowOrientation" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Allow Custom Pages -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow Custom Page Range</div>
+                  <div class="control-sub">Allow customer to type specific pages (e.g. 1-5, 8)</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allowCustomPages" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Allow Copies -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow Multiple Copies</div>
+                  <div class="control-sub">Allow customer to choose quantity of copies</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allowCopies" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Allow Paper Size Selector -->
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Allow Paper Size Selector</div>
+                  <div class="control-sub">Allow customer to choose Legal/Letter/A3 (otherwise locked to A4)</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="allowPaperSize" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Card 3: Rates & Pricing Estimator -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">
+                    <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                    <span>Rates & Live Price Estimator</span>
+                  </div>
+                  <div class="panel-subtitle">Calculates estimated order price for customers in real-time</div>
+                </div>
+              </div>
+
+              <div class="control-row">
+                <div>
+                  <div class="control-label">Show Live Price Estimation</div>
+                  <div class="control-sub">Calculates and displays total cost (₹) dynamically on upload page</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" x-model="enablePricing" @change="saveSettings">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div x-show="enablePricing" style="margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div>
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">B&W Page Rate (₹):</label>
+                  <input type="text" x-model="priceBwPerPage" @blur="saveSettings" placeholder="2.00" style="margin-top: 4px;">
+                </div>
+                <div>
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Color Page Rate (₹):</label>
+                  <input type="text" x-model="priceColorPerPage" @blur="saveSettings" placeholder="10.00" style="margin-top: 4px;">
+                </div>
+                <div style="grid-column: span 2;">
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Duplex Discount per Back Side (₹):</label>
+                  <input type="text" x-model="priceDuplexDiscount" @blur="saveSettings" placeholder="0.50" style="margin-top: 4px;">
+                  <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Subtracted from the rate for each reverse page printed on a double-sided sheet.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Network, Custom Domain & Station Health -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">
+                    <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+                    <span>Network & System Health</span>
+                  </div>
+                  <div class="panel-subtitle">Station connectivity and storage telemetry</div>
+                </div>
+              </div>
+
+              <!-- Custom Subdomain URL -->
+              <div style="margin-bottom: 16px;">
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Company Domain / Custom URL:</label>
+                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                  <input type="text" x-model="publicUrl" placeholder="https://print.yourstore.com" style="flex: 1;">
+                  <button class="btn btn-primary btn-sm" @click="saveSettings">Save URL</button>
+                </div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">
+                  Updates the counter QR to redirect to your custom domain or Cloudflare tunnel.
+                </div>
+              </div>
+
+              <!-- Health Status Metrics -->
+              <div style="background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px;">
+                  <span style="color: var(--text-muted);">Station Local IP:</span>
+                  <strong style="color: #60a5fa; font-family: monospace;" x-text="localIp"></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px;">
+                  <span style="color: var(--text-muted);">Active Service Port:</span>
+                  <strong style="color: #fff; font-family: monospace;">3000 (HTTP)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                  <span style="color: var(--text-muted);">Available Disk Space:</span>
+                  <strong style="color: #34d399;" x-text="freeDiskMB + ' MB free'"></strong>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SECTION: REMOTE TUNNEL MANAGEMENT              -->
+        <!-- ============================================== -->
+        <div x-show="currentSection === 'tunnel'" style="max-width: 860px; margin: 0 auto;">
+
+          <!-- Status Banner -->
+          <div :style="tunnelStatus === 'connected'
+            ? 'background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.35);'
+            : 'background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);'"
+            style="border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+            <span :style="tunnelStatus === 'connected' ? 'color:#34d399' : 'color:#fbbf24'" style="font-size:24px;" x-text="tunnelStatus === 'connected' ? '●' : '○'"></span>
+            <div>
+              <div style="font-weight:700;font-size:15px;" :style="tunnelStatus === 'connected' ? 'color:#34d399' : 'color:#fbbf24'"
+                x-text="tunnelStatus === 'connected' ? 'Tunnel Connected — Customers Can Access Remotely' : 'Tunnel Disconnected — Customers Cannot Access Remotely'"></div>
+              <div style="font-size:12px;color:var(--text-dim);margin-top:2px;" x-text="tunnelPublicUrl ? 'Public URL: ' + tunnelPublicUrl : 'No public URL configured'"></div>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="margin-left:auto;" @click="loadTunnelInfo" :disabled="tunnelLoading">
+              <span x-text="tunnelLoading ? 'Checking...' : 'Refresh Status'"></span>
+            </button>
+          </div>
+
+          <!-- Step 1: Token Setup -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span style="background:#1d4ed8;color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">1</span>
+                  Cloudflare Tunnel Token
+                </div>
+                <div class="panel-subtitle">Paste your token from Cloudflare Zero Trust → Tunnels → your tunnel → "Configure" → copy the token</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Tunnel Token:</label>
+              <textarea x-model="tunnelToken" rows="3" placeholder="eyJhIjoiMTE5MmU4Zjg1ZmQ4N2E3ZDQyZ..."
+                style="width:100%;padding:10px 12px;border-radius:8px;background:var(--card);color:#fff;border:1px solid var(--border);font-size:12px;font-family:monospace;resize:vertical;margin-top:6px;"></textarea>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">
+                Go to <strong style="color:#60a5fa;">dash.cloudflare.com → Zero Trust → Networks → Tunnels</strong> → Create or select a tunnel → copy the token.
+              </div>
+              <div style="font-size:11px;color:#38bdf8;margin-top:8px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);border-radius:6px;padding:8px 12px;line-height:1.5;">
+                💡 <strong>Instant 1-Click Connect:</strong> You do <em>not</em> need to download any MSI installer or open Command Prompt! Simply paste either the token (<code>eyJh...</code>) or the full command (<code>cloudflared.exe service install eyJh...</code>) above. ShopPrint automatically connects using high-speed HTTP/2.
+              </div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Public URL (your tunnel domain):</label>
+              <input type="text" x-model="tunnelPublicUrl" placeholder="https://print.yourstore.com" style="margin-top:6px;">
+              <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">
+                This is the domain customers will use. Must match the Public Hostname you configure in Cloudflare.
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button class="btn btn-primary" @click="saveTunnelToken" :disabled="tunnelSaving || !tunnelToken.trim()">
+                <span x-text="tunnelSaving ? 'Saving & Restarting...' : 'Save Token & Restart Tunnel'"></span>
+              </button>
+              <button class="btn btn-danger btn-sm" @click="clearTunnelToken" x-show="tunnelHasToken" style="margin-left:auto;">Remove Token</button>
+            </div>
+
+            <div x-show="tunnelSaveMsg" :style="tunnelSaveError ? 'color:#f87171' : 'color:#34d399'" style="margin-top:10px;font-size:13px;font-weight:600;" x-text="tunnelSaveMsg"></div>
+          </div>
+
+          <!-- Step 2: DNS Setup Guide -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span style="background:#1d4ed8;color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">2</span>
+                  DNS Setup (Do Once Per Domain)
+                </div>
+                <div class="panel-subtitle">Tell Cloudflare DNS to route your domain to the tunnel — do this in Cloudflare dashboard</div>
+              </div>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;">In Cloudflare Dashboard:</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                  <span style="background:#1d4ed8;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">A</span>
+                  <div>
+                    <div style="font-size:13px;color:#fff;">Zero Trust → Networks → Tunnels → your tunnel → <strong>Public Hostname</strong> → Add</div>
+                    <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">
+                      Subdomain: <code style="background:#0f172a;padding:2px 6px;border-radius:4px;" x-text="tunnelPublicUrl ? tunnelPublicUrl.replace(/^https?:\/\//, '').split('.')[0] : 'print'"></code> &nbsp;
+                      Domain: <code style="background:#0f172a;padding:2px 6px;border-radius:4px;" x-text="tunnelPublicUrl ? tunnelPublicUrl.replace(/^https?:\/\//, '').split('.').slice(1).join('.') : 'yourstore.com'"></code> &nbsp;
+                      Service: <code style="background:#0f172a;padding:2px 6px;border-radius:4px;">HTTP → localhost:3000</code>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                  <span style="background:#059669;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">B</span>
+                  <div>
+                    <div style="font-size:13px;color:#fff;">Cloudflare will auto-create a CNAME DNS record pointing to:</div>
+                    <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">
+                      <code style="background:#0f172a;padding:2px 6px;border-radius:4px;" x-text="tunnelId ? tunnelId + '.cfargotunnel.com' : '&lt;tunnel-id&gt;.cfargotunnel.com'"></code>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                  <span style="background:#dc2626;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">!</span>
+                  <div>
+                    <div style="font-size:13px;color:#f87171;">Delete any old A record for the same subdomain</div>
+                    <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Old A records pointing to Cloudflare proxy IPs will conflict with the tunnel CNAME.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tunnel ID display -->
+            <div x-show="tunnelId" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Your Tunnel ID:</div>
+                <code style="font-size:13px;color:#60a5fa;" x-text="tunnelId"></code>
+              </div>
+              <button class="btn btn-secondary btn-sm" @click="navigator.clipboard.writeText(tunnelId)">Copy</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Test Connection -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span style="background:#1d4ed8;color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">3</span>
+                  Test &amp; Verify
+                </div>
+                <div class="panel-subtitle">Make sure customers can reach your print page from mobile</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-success" @click="testTunnelUrl" :disabled="!tunnelPublicUrl || tunnelTesting">
+                <span x-text="tunnelTesting ? 'Testing...' : 'Test Public URL'"></span>
+              </button>
+              <a :href="tunnelPublicUrl" target="_blank" x-show="tunnelPublicUrl" class="btn btn-secondary">Open in Browser</a>
+            </div>
+
+            <div x-show="tunnelTestResult" style="margin-top:12px;padding:12px 14px;border-radius:8px;font-size:13px;"
+              :style="tunnelTestOk ? 'background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#34d399' : 'background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171'"
+              x-text="tunnelTestResult"></div>
+
+            <!-- Quick Help for DNS Error 1033 -->
+            <div x-show="tunnelTestResult && !tunnelTestOk" style="margin-top:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:6px;">Common Fixes:</div>
+              <ul style="font-size:12px;color:var(--text-dim);padding-left:16px;line-height:1.8;">
+                <li>Error 1033: Add Public Hostname in Cloudflare Zero Trust (Step 2 above)</li>
+                <li>Error 1033: Delete old A record for the subdomain in DNS settings</li>
+                <li>Cannot connect: Make sure token is saved and tunnel is restarted (Step 1)</li>
+                <li>Timeout: Cloudflare DNS can take 1–5 minutes to propagate after setup</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Multiple Tunnels Info -->
+          <div class="panel" style="border-color: rgba(59,130,246,0.3);">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span class="icon" style="width:18px;height:18px;color:#60a5fa;"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><path d="M5 9v3M12 9v3M19 9v3M5 12h14"/><rect x="9" y="15" width="6" height="6" rx="1"/></svg></span>
+                  Multiple Devices / Shops
+                </div>
+                <div class="panel-subtitle">How to run ShopPrint on multiple shop PCs, each with its own tunnel</div>
+              </div>
+            </div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+              <div style="margin-bottom:8px;"><strong style="color:#fff;">Each PC = 1 separate Cloudflare tunnel.</strong> Setup steps for each device:</div>
+              <ol style="padding-left:18px;line-height:2;">
+                <li>Install ShopPrint on the new PC</li>
+                <li>Go to <strong style="color:#60a5fa;">dash.cloudflare.com → Zero Trust → Networks → Tunnels → Create tunnel</strong></li>
+                <li>Name it e.g. <code style="background:var(--card);padding:1px 5px;border-radius:3px;">shop-branch-2</code></li>
+                <li>Copy the token → paste here in <strong>Remote Tunnel tab</strong></li>
+                <li>Use a different subdomain e.g. <code style="background:var(--card);padding:1px 5px;border-radius:3px;">print2.yourstore.com</code></li>
+                <li>Done — each shop gets its own QR code pointing to its own public URL</li>
+              </ol>
+              <div style="margin-top:10px;font-size:12px;color:var(--text-dim);">Cloudflare free plan allows up to <strong style="color:#fff;">unlimited tunnels</strong> at no cost.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MODAL 1: EDIT JOB PRINT SETTINGS               -->
+        <!-- ============================================== -->
+        <template x-if="editModalOpen">
+          <div class="modal-overlay" @click.self="editModalOpen = false">
+            <div class="modal-content">
+              <div class="modal-header">
+                <div class="modal-title">
+                  <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                  <span>Edit Print Job #<span x-text="editForm.code"></span></span>
+                </div>
+                <button class="modal-close" @click="editModalOpen = false">
+                  <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                </button>
+              </div>
+
+              <form @submit.prevent="saveJobEdit">
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Customer Name:</label>
+                  <input type="text" x-model="editForm.customerName" placeholder="Customer name" style="margin-top: 4px;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Number of Copies:</label>
+                  <div class="stepper">
+                    <button type="button" @click="editForm.copies = Math.max(1, editForm.copies - 1)">-</button>
+                    <span x-text="editForm.copies"></span>
+                    <button type="button" @click="editForm.copies = Math.min(50, editForm.copies + 1)">+</button>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Paper Size:</label>
+                  <div class="segmented-grid">
+                    <div class="seg-btn" :class="{ 'active': editForm.paperSize === 'A4' }" @click="editForm.paperSize = 'A4'">A4</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.paperSize === 'legal' }" @click="editForm.paperSize = 'legal'">Legal</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.paperSize === 'A3' }" @click="editForm.paperSize = 'A3'">A3</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.paperSize === 'letter' }" @click="editForm.paperSize = 'letter'">Letter</div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Color Mode:</label>
+                  <div class="segmented-grid segmented-2">
+                    <div class="seg-btn" :class="{ 'active': editForm.colorMode === 'monochrome' }" @click="editForm.colorMode = 'monochrome'">Black & White</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.colorMode === 'color' }" @click="editForm.colorMode = 'color'">Full Color</div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Sides (Duplex):</label>
+                  <div class="segmented-grid segmented-2">
+                    <div class="seg-btn" :class="{ 'active': editForm.duplexMode === 'simplex' }" @click="editForm.duplexMode = 'simplex'">Single-Sided</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.duplexMode === 'duplexlong' }" @click="editForm.duplexMode = 'duplexlong'">Double-Sided</div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Layout (Pages per Sheet):</label>
+                  <div class="segmented-grid segmented-2">
+                    <div class="seg-btn" :class="{ 'active': editForm.pagesPerSheet === 1 }" @click="editForm.pagesPerSheet = 1">1 Page / Sheet</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.pagesPerSheet === 2 }" @click="editForm.pagesPerSheet = 2">2-on-1 Eco Sheet</div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Orientation:</label>
+                  <div class="segmented-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="seg-btn" :class="{ 'active': editForm.orientation === 'auto' }" @click="editForm.orientation = 'auto'">Auto</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.orientation === 'portrait' }" @click="editForm.orientation = 'portrait'">Portrait</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.orientation === 'landscape' }" @click="editForm.orientation = 'landscape'">Landscape</div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Scaling:</label>
+                  <div class="segmented-grid segmented-2">
+                    <div class="seg-btn" :class="{ 'active': editForm.fitMode === 'fit' }" @click="editForm.fitMode = 'fit'">Fit to Page</div>
+                    <div class="seg-btn" :class="{ 'active': editForm.fitMode === 'noscale' }" @click="editForm.fitMode = 'noscale'">Actual Size (100%)</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                  <button type="button" class="btn btn-secondary" @click="editModalOpen = false">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </template>
+
+        <!-- ============================================== -->
+        <!-- MODAL 2: CHANGE MASTER PIN                     -->
+        <!-- ============================================== -->
+        <template x-if="pinModalOpen">
+          <div class="modal-overlay" @click.self="pinModalOpen = false">
+            <div class="modal-content" style="max-width: 400px;">
+              <div class="modal-header">
+                <div class="modal-title">
+                  <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span>
+                  <span>Change Master PIN</span>
+                </div>
+                <button class="modal-close" @click="pinModalOpen = false">
+                  <span class="icon" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                </button>
+              </div>
+
+              <form @submit.prevent="submitPinChange">
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Current PIN:</label>
+                  <input type="password" x-model="pinChangeCurrent" placeholder="Current PIN" required style="margin-top: 4px;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">New PIN (4+ digits):</label>
+                  <input type="password" x-model="pinChangeNew" placeholder="New PIN" required minlength="4" maxlength="8" style="margin-top: 4px;">
+                </div>
+
+                <div style="color: var(--danger); font-size: 13px; margin-bottom: 12px;" x-show="pinChangeError" x-text="pinChangeError"></div>
+                <div style="color: var(--success); font-size: 13px; margin-bottom: 12px;" x-show="pinChangeSuccess" x-text="pinChangeSuccess"></div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                  <button type="button" class="btn btn-secondary" @click="pinModalOpen = false">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Update PIN</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </template>
+
+      </div>
+    </template>
+  </div>
+
+  <script>
+    // Robust Sound & Audio Chime System
+    const audioStation = {
+      ctx: null,
+      unlocked: false,
+      ensureUnlocked() {
+        try {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+          this.unlocked = true;
+        } catch (e) {}
+      },
+      playChime() {
+        this.ensureUnlocked();
+        if (!this.ctx) return;
+        try {
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+          const now = this.ctx.currentTime;
+          
+          // Pleasant high-quality counter chime (Ding-Dong: D5 -> A5)
+          const osc1 = this.ctx.createOscillator();
+          const osc2 = this.ctx.createOscillator();
+          const gain1 = this.ctx.createGain();
+          const gain2 = this.ctx.createGain();
+
+          // Tone 1: 587.33 Hz (D5)
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(587.33, now);
+          gain1.gain.setValueAtTime(0.25, now);
+          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc1.connect(gain1);
+          gain1.connect(this.ctx.destination);
+
+          // Tone 2: 880.00 Hz (A5)
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(880.0, now + 0.12);
+          gain2.gain.setValueAtTime(0.3, now + 0.12);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc2.connect(gain2);
+          gain2.connect(this.ctx.destination);
+
+          osc1.start(now);
+          osc1.stop(now + 0.35);
+          osc2.start(now + 0.12);
+          osc2.stop(now + 0.6);
+        } catch (err) {
+          console.warn('Audio playback error:', err);
+        }
+      }
+    };
+
+    // Unlock browser audio upon first user click, touch or keydown
+    ['click', 'touchstart', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, () => audioStation.ensureUnlocked(), { passive: true, once: false });
+    });
+
+    function adminApp() {
+      return {
+        isPinSet: false,
+        isAuthenticated: false,
+        pinInput: '',
+        authError: '',
+        currentSection: 'queue', // 'queue' or 'settings'
+
+        serverUrl: '',
+        localIp: '',
+        publicUrl: '',
+        qrDataUrl: '',
+        printers: [],
+        selectedPrinter: '',
+        autoPrint: false,
+        queuePaused: false,
+        privacyMode: false,
+        defaultPaperSize: 'A4',
+        defaultFitMode: 'fit',
+        allowDuplex: true,
+        allowColor: true,
+        allow2on1: true,
+        allowOrientation: true,
+        allowCustomPages: true,
+        allowCopies: true,
+        maxCopies: 20,
+        allowPaperSize: false,
+        shopName: 'ShopPrint Station',
+        enablePricing: true,
+        priceBwPerPage: '2.00',
+        priceColorPerPage: '10.00',
+        priceDuplexDiscount: '0.50',
+        soundEnabled: localStorage.getItem('shopprint_sound') !== 'false',
+        freeDiskMB: 0,
+        jobs: [],
+        printerAlert: '',
+        eventSource: null,
+        pollInterval: null,
+        copiedUrl: false,
+
+        // Incoming job detection
+        knownJobIds: new Set(),
+        hasLoadedJobsOnce: false,
+        hasLoadedSettingsOnce: false,
+        isSavingSettings: false,
+        settingsSavedToast: false,
+
+        // Queue Filtering & Search
+        searchQuery: '',
+        activeTab: 'ALL',
+
+        // Edit Modal State
+        editModalOpen: false,
+        editForm: {
+          id: null,
+          code: '',
+          customerName: '',
+          copies: 1,
+          paperSize: 'A4',
+          colorMode: 'monochrome',
+          duplexMode: 'simplex',
+          pagesPerSheet: 1,
+          orientation: 'auto',
+          fitMode: 'fit'
+        },
+
+        // PIN Change Modal State
+        pinModalOpen: false,
+        pinChangeCurrent: '',
+        pinChangeNew: '',
+        pinChangeError: '',
+        pinChangeSuccess: '',
+        purgingSpooler: false,
+
+        // Tunnel Management State
+        tunnelStatus: 'disconnected',
+        tunnelToken: '',
+        tunnelPublicUrl: '',
+        tunnelId: '',
+        tunnelHasToken: false,
+        tunnelLoading: false,
+        tunnelSaving: false,
+        tunnelSaveMsg: '',
+        tunnelSaveError: false,
+        tunnelTesting: false,
+        tunnelTestResult: '',
+        tunnelTestOk: false,
+
+        get pendingApprovalCount() {
+          return this.jobs.filter(j => j.status === 'PENDING_APPROVAL').length;
+        },
+        get queuedCount() {
+          return this.jobs.filter(j => j.status === 'QUEUED').length;
+        },
+        get printingCount() {
+          return this.jobs.filter(j => j.status === 'PRINTING').length;
+        },
+        get doneCount() {
+          return this.jobs.filter(j => j.status === 'DONE').length;
+        },
+        get isSelectedPrinterOffline() {
+          if (!this.selectedPrinter || !this.printers || this.printers.length === 0) return false;
+          const p = this.printers.find(pr => pr.name.toLowerCase() === this.selectedPrinter.toLowerCase());
+          return p ? Boolean(p.isOffline) : false;
+        },
+        get failedCount() {
+          return this.jobs.filter(j => ['FAILED', 'CHECK_REPRINT', 'REJECTED', 'CANCELLED'].includes(j.status)).length;
+        },
+
+        get filteredJobs() {
+          let list = this.jobs;
+
+          if (this.activeTab !== 'ALL') {
+            if (this.activeTab === 'FAILED') {
+              list = list.filter(j => ['FAILED', 'CHECK_REPRINT', 'REJECTED', 'CANCELLED'].includes(j.status));
+            } else {
+              list = list.filter(j => j.status === this.activeTab);
+            }
+          }
+
+          if (this.searchQuery.trim()) {
+            const q = this.searchQuery.trim().toLowerCase();
+            list = list.filter(j => {
+              const code = (j.code || '').toLowerCase();
+              const name = (j.customer_name || '').toLowerCase();
+              const file = (j.original_filename || '').toLowerCase();
+              const note = (j.customer_note || '').toLowerCase();
+              return code.includes(q) || name.includes(q) || file.includes(q) || note.includes(q);
+            });
+          }
+
+          return list;
+        },
+
+        init() {
+          this.checkAuth();
+        },
+
+        toggleSound() {
+          audioStation.ensureUnlocked();
+          this.soundEnabled = !this.soundEnabled;
+          localStorage.setItem('shopprint_sound', this.soundEnabled);
+          if (this.soundEnabled) {
+            audioStation.playChime();
+          }
+        },
+
+        testSound() {
+          audioStation.ensureUnlocked();
+          audioStation.playChime();
+        },
+
+        copyServerUrl() {
+          if (navigator.clipboard && this.serverUrl) {
+            navigator.clipboard.writeText(this.serverUrl).then(() => {
+              this.copiedUrl = true;
+              setTimeout(() => { this.copiedUrl = false; }, 2000);
+            });
+          }
+        },
+
+        checkAuth() {
+          fetch('/api/admin/auth-status')
+            .then(r => r.json())
+            .then(data => {
+              this.isPinSet = data.pinSet;
+              this.isAuthenticated = data.authenticated;
+              if (this.isAuthenticated) {
+                audioStation.ensureUnlocked();
+                this.fetchStatus();
+                this.startAdminSSE();
+              }
+            })
+            .catch(() => {});
+        },
+
+        handleAuthSubmit() {
+          audioStation.ensureUnlocked();
+          this.authError = '';
+          const endpoint = this.isPinSet ? '/api/admin/login' : '/api/admin/setup-pin';
+          fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pin: (this.pinInput || '').toString().trim() })
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              this.isAuthenticated = true;
+              this.pinInput = '';
+              audioStation.ensureUnlocked();
+              this.fetchStatus();
+              this.startAdminSSE();
+            } else {
+              this.authError = data.error || 'Authentication failed.';
+            }
+          })
+          .catch(() => {
+            this.authError = 'Network error.';
+          });
+        },
+
+        logout() {
+          fetch('/api/admin/logout', { method: 'POST' }).then(() => {
+            this.isAuthenticated = false;
+            if (this.eventSource) this.eventSource.close();
+            if (this.pollInterval) { clearInterval(this.pollInterval); this.pollInterval = null; }
+            this.checkAuth();
+          });
+        },
+
+        fetchStatus(forceSettings = false) {
+          fetch('/api/admin/status')
+            .then(r => {
+              if (r.status === 401) {
+                this.isAuthenticated = false;
+                return null;
+              }
+              return r.json();
+            })
+            .then(data => {
+              if (!data) return;
+
+              // Operational telemetry that always updates cleanly
+              this.serverUrl = data.serverUrl;
+              this.localIp = data.localIp;
+              this.qrDataUrl = data.qrDataUrl;
+              this.printers = data.printers || [];
+              this.freeDiskMB = data.freeDiskMB;
+              this.queuePaused = data.queuePaused;
+
+              // Guard: Check if shopkeeper is actively typing into an input field or modal
+              const isUserTyping = document.activeElement && 
+                (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
+
+              // ONLY update editable settings on first load or upon explicit save, and NEVER when user is actively typing!
+              if ((!this.hasLoadedSettingsOnce || forceSettings) && !isUserTyping) {
+                this.publicUrl = data.publicUrl || '';
+                this.selectedPrinter = data.selectedPrinter;
+                this.autoPrint = data.autoPrint;
+                this.privacyMode = data.privacyMode;
+                if (data.defaultPaperSize) this.defaultPaperSize = data.defaultPaperSize;
+                if (data.defaultFitMode) this.defaultFitMode = data.defaultFitMode;
+                if (data.allowDuplex !== undefined) this.allowDuplex = data.allowDuplex;
+                if (data.allowColor !== undefined) this.allowColor = data.allowColor;
+                if (data.allow2on1 !== undefined) this.allow2on1 = data.allow2on1;
+                if (data.allowOrientation !== undefined) this.allowOrientation = data.allowOrientation;
+                if (data.allowCustomPages !== undefined) this.allowCustomPages = data.allowCustomPages;
+                if (data.allowCopies !== undefined) this.allowCopies = data.allowCopies;
+                if (data.maxCopies !== undefined) this.maxCopies = data.maxCopies;
+                if (data.allowPaperSize !== undefined) this.allowPaperSize = data.allowPaperSize;
+                if (data.shopName !== undefined) this.shopName = data.shopName;
+                if (data.enablePricing !== undefined) this.enablePricing = data.enablePricing;
+                if (data.priceBwPerPage !== undefined) this.priceBwPerPage = data.priceBwPerPage;
+                if (data.priceColorPerPage !== undefined) this.priceColorPerPage = data.priceColorPerPage;
+                if (data.priceDuplexDiscount !== undefined) this.priceDuplexDiscount = data.priceDuplexDiscount;
+                this.hasLoadedSettingsOnce = true;
+              }
+
+              // Check for newly arrived print jobs to trigger chime sound!
+              const currentJobs = data.jobs || [];
+              const incomingJobIds = new Set(currentJobs.map(j => j.id));
+
+              if (this.hasLoadedJobsOnce) {
+                let hasNewJob = false;
+                for (const id of incomingJobIds) {
+                  if (!this.knownJobIds.has(id)) {
+                    hasNewJob = true;
+                    break;
+                  }
+                }
+                if (hasNewJob && this.soundEnabled) {
+                  audioStation.playChime();
+                }
+              }
+
+              this.knownJobIds = incomingJobIds;
+              this.hasLoadedJobsOnce = true;
+              this.jobs = currentJobs;
+            });
+        },
+
+        saveSettings() {
+          this.isSavingSettings = true;
+          return fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              autoPrint: this.autoPrint,
+              selectedPrinter: this.selectedPrinter,
+              queuePaused: this.queuePaused,
+              privacyMode: this.privacyMode,
+              defaultPaperSize: this.defaultPaperSize,
+              defaultFitMode: this.defaultFitMode,
+              publicUrl: this.publicUrl,
+              allowDuplex: this.allowDuplex,
+              allowColor: this.allowColor,
+              allow2on1: this.allow2on1,
+              allowOrientation: this.allowOrientation,
+              allowCustomPages: this.allowCustomPages,
+              allowCopies: this.allowCopies,
+              maxCopies: this.maxCopies,
+              allowPaperSize: this.allowPaperSize,
+              shopName: this.shopName,
+              enablePricing: this.enablePricing,
+              priceBwPerPage: this.priceBwPerPage,
+              priceColorPerPage: this.priceColorPerPage,
+              priceDuplexDiscount: this.priceDuplexDiscount
+            })
+          })
+          .then(() => {
+            this.isSavingSettings = false;
+            this.settingsSavedToast = true;
+            setTimeout(() => { this.settingsSavedToast = false; }, 2500);
+            this.fetchStatus(true);
+          })
+          .catch(() => {
+            this.isSavingSettings = false;
+          });
+        },
+
+        toggleQueuePause() {
+          this.queuePaused = !this.queuePaused;
+          this.saveSettings();
+        },
+
+        openEditModal(job) {
+          this.editForm = {
+            id: job.id,
+            code: job.code,
+            customerName: job.customer_name || '',
+            copies: job.copies || 1,
+            paperSize: job.paper_size || 'A4',
+            colorMode: job.color_mode || 'monochrome',
+            duplexMode: job.duplex_mode || 'simplex',
+            pagesPerSheet: job.pages_per_sheet || 1,
+            orientation: job.orientation || 'auto',
+            fitMode: job.fit_mode || 'fit'
+          };
+          this.editModalOpen = true;
+        },
+
+        saveJobEdit() {
+          fetch(`/api/admin/jobs/${this.editForm.id}/edit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.editForm)
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              this.editModalOpen = false;
+              this.fetchStatus();
+            } else {
+              alert(data.error || 'Failed to update job settings.');
+            }
+          })
+          .catch(() => alert('Network error while saving changes.'));
+        },
+
+        openPinModal() {
+          this.pinChangeCurrent = '';
+          this.pinChangeNew = '';
+          this.pinChangeError = '';
+          this.pinChangeSuccess = '';
+          this.pinModalOpen = true;
+        },
+
+        submitPinChange() {
+          this.pinChangeError = '';
+          this.pinChangeSuccess = '';
+          fetch('/api/admin/change-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              currentPin: this.pinChangeCurrent,
+              newPin: this.pinChangeNew
+            })
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              this.pinChangeSuccess = 'Master PIN updated successfully.';
+              setTimeout(() => { this.pinModalOpen = false; }, 1500);
+            } else {
+              this.pinChangeError = data.error || 'Failed to change PIN.';
+            }
+          })
+          .catch(() => {
+            this.pinChangeError = 'Network error while updating PIN.';
+          });
+        },
+
+        jobAction(jobId, action) {
+          audioStation.ensureUnlocked();
+          fetch(`/api/admin/jobs/${jobId}/action`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action })
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              this.fetchStatus();
+            } else {
+              alert(data.error || 'Action failed.');
+            }
+          });
+        },
+
+        clearAllJobs() {
+          if (!confirm('Are you sure you want to delete ALL print orders and clear files from the system? (This also clears the Windows print spooler so no old jobs print)')) {
+            return;
+          }
+          fetch('/api/admin/clear-all', {
+            method: 'POST'
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              this.fetchStatus();
+            } else {
+              alert(data.error || 'Failed to clear jobs.');
+            }
+          })
+          .catch(() => alert('Network error while clearing jobs.'));
+        },
+
+        purgeWindowsSpooler() {
+          if (!confirm('Flush Windows Print Spooler? This cancels all stuck, pending, or error prints currently inside Windows printer queues so no surprise prints occur.')) return;
+          this.purgingSpooler = true;
+          fetch('/api/admin/spooler/clear', { method: 'POST' })
+            .then(r => r.json())
+            .then(d => {
+              this.purgingSpooler = false;
+              alert(d.message || 'Windows Print Spooler cleared.');
+              this.fetchStatus();
+            })
+            .catch(() => {
+              this.purgingSpooler = false;
+              alert('Error clearing spooler.');
+            });
+        },
+
+        startAdminSSE() {
+          if (this.eventSource) this.eventSource.close();
+          this.eventSource = new EventSource('/api/admin/sse');
+
+          const refresh = () => this.fetchStatus();
+
+          this.eventSource.addEventListener('job_incoming', () => {
+            if (this.soundEnabled) audioStation.playChime();
+            refresh();
+          });
+
+          this.eventSource.addEventListener('job_needs_approval', () => {
+            if (this.soundEnabled) audioStation.playChime();
+            refresh();
+          });
+
+          this.eventSource.addEventListener('job_updated', refresh);
+          this.eventSource.addEventListener('job_update', refresh);
+          this.eventSource.addEventListener('settings_updated', refresh);
+          this.eventSource.addEventListener('settings_update', refresh);
+
+          this.eventSource.addEventListener('printer_alert', (e) => {
+            try {
+              const data = JSON.parse(e.data);
+              this.printerAlert = data.message;
+            } catch (err) {}
+          });
+
+          // Heartbeat polling every 2.5 seconds to guarantee instant synchronization
+          if (!this.pollInterval) {
+            this.pollInterval = setInterval(() => {
+              if (this.isAuthenticated) {
+                this.fetchStatus();
+              }
+            }, 2500);
+          }
+        },
+
+
+        async loadTunnelInfo() {
+          this.tunnelLoading = true;
+          try {
+            const res = await fetch('/api/admin/tunnel');
+            if (res.ok) {
+              const d = await res.json();
+              this.tunnelStatus    = d.connected ? 'connected' : 'disconnected';
+              this.tunnelHasToken  = d.hasToken;
+              this.tunnelPublicUrl = d.publicUrl || '';
+              this.tunnelId        = d.tunnelId  || '';
+              // Don't pre-fill token field (security) — show masked placeholder if set
+              if (d.hasToken && !this.tunnelToken) {
+                this.tunnelToken = '';
+              }
+            }
+          } catch(e) { /* ignore */ }
+          this.tunnelLoading = false;
+        },
+
+        async saveTunnelToken() {
+          this.tunnelSaving  = true;
+          this.tunnelSaveMsg = '';
+          this.tunnelSaveError = false;
+          try {
+            const res = await fetch('/api/admin/tunnel/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                token:     this.tunnelToken.trim(),
+                publicUrl: this.tunnelPublicUrl.trim()
+              })
+            });
+            const d = await res.json();
+            if (res.ok) {
+              this.tunnelSaveMsg  = 'Token saved! Tunnel restarting — wait 5–10 seconds then click Refresh.';
+              this.tunnelHasToken = true;
+              this.tunnelToken    = '';
+              // Also update global publicUrl
+              if (this.tunnelPublicUrl) this.publicUrl = this.tunnelPublicUrl;
+              setTimeout(() => this.loadTunnelInfo(), 6000);
+            } else {
+              this.tunnelSaveMsg  = d.error || 'Save failed.';
+              this.tunnelSaveError = true;
+            }
+          } catch(e) {
+            this.tunnelSaveMsg  = 'Network error: ' + e.message;
+            this.tunnelSaveError = true;
+          }
+          this.tunnelSaving = false;
+        },
+
+        async clearTunnelToken() {
+          if (!confirm('Remove the tunnel token? Customers will lose remote access until a new token is added.')) return;
+          try {
+            await fetch('/api/admin/tunnel/clear', { method: 'POST' });
+            this.tunnelHasToken  = false;
+            this.tunnelToken     = '';
+            this.tunnelStatus    = 'disconnected';
+            this.tunnelSaveMsg   = 'Token removed. Tunnel stopped.';
+            this.tunnelSaveError = false;
+          } catch(e) {}
+        },
+
+        async testTunnelUrl() {
+          if (!this.tunnelPublicUrl) return;
+          this.tunnelTesting    = true;
+          this.tunnelTestResult = '';
+          this.tunnelTestOk     = false;
+          try {
+            const res = await fetch('/api/admin/tunnel/test', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: this.tunnelPublicUrl })
+            });
+            const d = await res.json();
+            if (d.ok) {
+              this.tunnelTestOk     = true;
+              this.tunnelTestResult = '✓ Public URL is reachable! HTTP ' + d.statusCode + ' — customers can access the print page.';
+              this.tunnelStatus = 'connected';
+            } else {
+              this.tunnelTestOk     = false;
+              this.tunnelTestResult = '✗ Could not reach URL. Error: ' + (d.error || 'HTTP ' + d.statusCode);
+            }
+          } catch(e) {
+            this.tunnelTestOk     = false;
+            this.tunnelTestResult = '✗ Test failed: ' + e.message;
+          }
+          this.tunnelTesting = false;
+        },
+
+        getStatusBadgeClass(status) {
+          switch (status) {
+            case 'DONE': return 'badge-success';
+            case 'PRINTING': return 'badge-info';
+            case 'QUEUED': return 'badge-neutral';
+            case 'PENDING_APPROVAL': return 'badge-warning';
+            case 'FAILED':
+            case 'CHECK_REPRINT':
+            case 'REJECTED':
+            case 'CANCELLED':
+              return 'badge-danger';
+            default:
+              return 'badge-neutral';
+          }
+        }
+      };
+    }
+  </script>
+</body>
+</html>

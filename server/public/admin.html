@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QrPrintDesk Secured Admin  Easy Split &amp; Operations Control</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --sidebar: #1e293b;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar { width: 240px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 16px; }
+    .brand { font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+    .nav-item { padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; margin-bottom: 6px; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+    .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+    /* Content Area */
+    .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh; }
+    .topbar { height: 64px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(8px); }
+    .page-title { font-size: 18px; font-weight: 700; }
+    .auth-badge { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+    .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.05); border-color: var(--border); color: #fff; }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn-success { background: var(--success); color: #fff; }
+
+    .content-body { padding: 28px; }
+
+    /* Metric Cards */
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .card-label { font-size: 12px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .card-val { font-size: 26px; font-weight: 800; color: #fff; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* Tables */
+    .table-container { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin-bottom: 28px; }
+    .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .table-title { font-size: 16px; font-weight: 700; color: #fff; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { background: rgba(0,0,0,0.2); padding: 12px 16px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: #e2e8f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Badges */
+    .badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; }
+    .badge-active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-notreg { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 999; }
+    .modal { background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #fff; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
+    .form-input:focus { border-color: var(--primary); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand" style="display:flex;flex-direction:column;gap:6px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <img src="/assets/logo_dark.png" alt="QrPrintDesk" style="height:28px;width:auto;display:block;">
+      <span style="font-size:11px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Secured Admin</span>
+    </div>
+    <div class="nav-item active" onclick="switchTab('overview')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:-2px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview</div>
+    <div class="nav-item" onclick="switchTab('vendors')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:-2px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Vendors &amp; Easy Split</div>
+    <div class="nav-item" onclick="switchTab('payments')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:-2px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payment Tracking</div>
+    <div class="nav-item" onclick="switchTab('settlements')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:-2px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Settlements &amp; Ledger</div>
+    <div class="nav-item" onclick="switchTab('transfers')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:-2px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>On-Demand Transfers</div>
+  </div>
+
+  <!-- Main View -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">Admin Dashboard</div>
+      <div class="auth-badge">
+        <span id="adminStatusText">Connected as Super Admin</span>
+        <button onclick="promptChangeKey()" class="btn btn-secondary">Admin Key</button>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <!-- Overview Tab -->
+      <div id="tab-overview" class="tab-content active">
+        <div class="metric-grid">
+          <div class="card">
+            <div class="card-label">Gross Revenue</div>
+            <div class="card-val" id="metricGross">0.00</div>
+            <div class="card-sub">Total payments collected</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Platform Commission</div>
+            <div class="card-val" id="metricPlatform" style="color: #60a5fa;">0.00</div>
+            <div class="card-sub">Net platform cut collected</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Vendor Payouts</div>
+            <div class="card-val" id="metricVendor" style="color: #34d399;">0.00</div>
+            <div class="card-sub">Settled via Easy Split</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Active Vendors</div>
+            <div class="card-val" id="metricVendors">0</div>
+            <div class="card-sub" id="metricSettlementsCount">0 settlements logged</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">Recent Easy Split Settlements</div>
+            <button onclick="loadSettlements()" class="btn btn-secondary">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Settlement ID</th>
+                <th>Vendor ID</th>
+                <th>Event Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="overviewSettlementsBody">
+              <tr><td colspan="6" style="text-align: center; color: var(--muted);">Loading settlements...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vendors Tab -->
+      <div id="tab-vendors" class="tab-content">
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">Vendors & Cashfree Easy Split Setup</div>
+            <button onclick="loadVendors()" class="btn btn-secondary">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Shop Name</th>
+                <th>Slug</th>
+                <th>Easy Split Status</th>
+                <th>Cashfree Vendor ID</th>
+                <th>Bank / UPI</th>
+                <th>Platform Cut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vendorsTableBody">
+              <tr><td colspan="7" style="text-align: center; color: var(--muted);">Loading vendors...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payments Tab -->
+      <div id="tab-payments" class="tab-content">
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">Payment Collections Tracker</div>
+            <button onclick="loadPayments()" class="btn btn-secondary">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total Amount</th>
+                <th>Platform Cut</th>
+                <th>Vendor Share</th>
+                <th>Payment Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTableBody">
+              <tr><td colspan="7" style="text-align: center; color: var(--muted);">Loading payments...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Settlements Tab -->
+      <div id="tab-settlements" class="tab-content">
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">Easy Split Webhook Settlements Ledger</div>
+            <button onclick="loadSettlements()" class="btn btn-secondary">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Settlement ID</th>
+                <th>Vendor ID</th>
+                <th>Order ID</th>
+                <th>Event Type</th>
+                <th>Amount (Rs.)</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="settlementsTableBody">
+              <tr><td colspan="7" style="text-align: center; color: var(--muted);">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- On-Demand Transfers Tab -->
+      <div id="tab-transfers" class="tab-content">
+        <div class="card" style="max-width: 600px; margin-bottom: 28px;">
+          <div class="card-label">Execute On-Demand Transfer</div>
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 18px;">
+            Directly disburse funds from the platform merchant account to an active Easy Split vendor outside standard schedule.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Vendor ID</label>
+            <input type="text" id="odVendorId" class="form-input" placeholder="CF_VEND_...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (Rs.)</label>
+            <input type="number" id="odAmount" class="form-input" placeholder="e.g. 500" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Remarks</label>
+            <input type="text" id="odRemarks" class="form-input" placeholder="Weekly bonus adjustment">
+          </div>
+          <button onclick="executeOnDemandTransfer()" class="btn btn-success" style="width: 100%;">Initiate Transfer &rarr;</button>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+          <div class="card-label">Sandbox Testing</div>
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 14px;">
+            Activate Cashfree Easy Split simulation mode in Sandbox.
+          </p>
+          <button onclick="enableSandboxSimulation()" class="btn btn-secondary">Enable Sandbox Simulation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Vendor Modal -->
+  <div id="registerModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">Register Vendor on Easy Split</div>
+      <input type="hidden" id="modalShopId">
+      <div class="form-group">
+        <label class="form-label">Account Holder Name *</label>
+        <input type="text" id="modalHolder" class="form-input" placeholder="Name as per Bank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank Account Number *</label>
+        <input type="text" id="modalAccount" class="form-input" placeholder="9876543210">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank IFSC Code *</label>
+        <input type="text" id="modalIfsc" class="form-input" placeholder="HDFC0001234">
+      </div>
+      <div class="form-group">
+        <label class="form-label">UPI ID (Optional)</label>
+        <input type="text" id="modalUpi" class="form-input" placeholder="shopname@upi">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Platform Commission Cut (%)</label>
+        <input type="number" id="modalCommission" class="form-input" value="5" min="0" max="100">
+      </div>
+      <div class="modal-actions">
+        <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+        <button onclick="submitVendorRegistration()" class="btn btn-primary">Register Vendor</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let adminKey = localStorage.getItem('qrprintdesk_admin_key') || 'admin_secret_key_2026';
+
+    function getHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + adminKey
+      };
+    }
+
+    function promptChangeKey() {
+      const newKey = prompt('Enter Admin Secret Key:', adminKey);
+      if (newKey) {
+        adminKey = newKey.trim();
+        localStorage.setItem('qrprintdesk_admin_key', adminKey);
+        loadAll();
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + tabName);
+      if (target) target.classList.add('active');
+
+      const titles = {
+        overview: 'Admin Dashboard  Financial Overview',
+        vendors: 'Vendors & Easy Split Management',
+        payments: 'Customer Payment Collections',
+        settlements: 'Settlements & Reconciliation Ledger',
+        transfers: 'On-Demand Transfers & Tools'
+      };
+      document.getElementById('pageTitle').textContent = titles[tabName] || 'Admin Console';
+
+      if (tabName === 'overview') loadMetrics();
+      if (tabName === 'vendors') loadVendors();
+      if (tabName === 'payments') loadPayments();
+      if (tabName === 'settlements') loadSettlements();
+    }
+
+    async function loadMetrics() {
+      try {
+        const res = await fetch('/api/admin/metrics', { headers: getHeaders() });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const m = data.metrics;
+        document.getElementById('metricGross').textContent = '' + m.grossRevenueRupees;
+        document.getElementById('metricPlatform').textContent = '' + m.platformCommissionRupees;
+        document.getElementById('metricVendor').textContent = '' + m.vendorPayoutsRupees;
+        document.getElementById('metricVendors').textContent = m.activeShops + ' / ' + m.totalShops;
+        document.getElementById('metricSettlementsCount').textContent = m.settlementsLogged + ' settlements logged';
+
+        renderSettlementRows(data.recentSettlements, 'overviewSettlementsBody');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadVendors() {
+      try {
+        const res = await fetch('/api/admin/vendors', { headers: getHeaders() });
+        const data = await res.json();
+        const tbody = document.getElementById('vendorsTableBody');
+        tbody.innerHTML = '';
+
+        if (!data.vendors || data.vendors.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No vendors found.</td></tr>';
+          return;
+        }
+
+        data.vendors.forEach(v => {
+          const es = v.easySplit || {};
+          const status = es.status || 'NOT_REGISTERED';
+          const badgeClass = status === 'ACTIVE' ? 'badge-active' : (status === 'PENDING' ? 'badge-pending' : 'badge-notreg');
+          const bank = es.bankDetails ? `${es.bankDetails.accountNumber} (${es.bankDetails.ifsc})` : (es.bankDetails?.upiId || 'Not Set');
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${v.name}</strong></td>
+            <td><code>${v.slug}</code></td>
+            <td><span class="badge ${badgeClass}">${status}</span></td>
+            <td><code>${es.vendorId || 'N/A'}</code></td>
+            <td>${bank}</td>
+            <td>${es.commissionPercent || 5}%</td>
+            <td>
+              ${status !== 'ACTIVE' ? `<button onclick="openRegisterModal('${v.shopId}', '${v.name}')" class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;">Register Easy Split</button>` : `<span style="color: #34d399; font-weight: 600;"> Active</span>`}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadPayments() {
+      try {
+        const res = await fetch('/api/admin/payments', { headers: getHeaders() });
+        const data = await res.json();
+        const tbody = document.getElementById('paymentsTableBody');
+        tbody.innerHTML = '';
+
+        if (!data.payments || data.payments.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No payment records found.</td></tr>';
+          return;
+        }
+
+        data.payments.forEach(p => {
+          const gross = ((p.pricing?.amountPaise || 0) / 100).toFixed(2);
+          const platform = ((p.pricing?.platformFeePaise || 0) / 100).toFixed(2);
+          const vendor = ((p.pricing?.vendorSharePaise || 0) / 100).toFixed(2);
+          const date = new Date(p.createdAt).toLocaleDateString();
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code>${p.orderId}</code></td>
+            <td>${p.customerName || 'Customer'} ${p.customerPhone ? '(' + p.customerPhone + ')' : ''}</td>
+            <td>${gross}</td>
+            <td style="color:#60a5fa;">${platform}</td>
+            <td style="color:#34d399;">${vendor}</td>
+            <td><span class="badge ${p.status === 'PAID' || p.status === 'COMPLETED' ? 'badge-active' : 'badge-pending'}">${p.status}</span></td>
+            <td>${date}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadSettlements() {
+      try {
+        const res = await fetch('/api/admin/settlements', { headers: getHeaders() });
+        const data = await res.json();
+        renderSettlementRows(data.settlements, 'settlementsTableBody');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderSettlementRows(list, elementId) {
+      const tbody = document.getElementById(elementId);
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--muted);">No settlements recorded yet.</td></tr>';
+        return;
+      }
+
+      list.forEach(s => {
+        const tr = document.createElement('tr');
+        const badgeClass = s.status === 'SUCCESS' ? 'badge-active' : (s.status === 'INITIATED' ? 'badge-pending' : 'badge-notreg');
+        tr.innerHTML = `
+          <td><code>${s.settlementId}</code></td>
+          <td><code>${s.vendorId}</code></td>
+          <td>${s.orderId ? '<code>' + s.orderId + '</code>' : '-'}</td>
+          <td><strong>${s.eventType}</strong></td>
+          <td style="color: #34d399; font-weight: 700;">${Number(s.amountRupees || 0).toFixed(2)}</td>
+          <td><span class="badge ${badgeClass}">${s.status}</span></td>
+          <td>${new Date(s.createdAt).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openRegisterModal(shopId, name) {
+      document.getElementById('modalShopId').value = shopId;
+      document.getElementById('modalHolder').value = name || '';
+      document.getElementById('registerModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('registerModal').style.display = 'none';
+    }
+
+    async function submitVendorRegistration() {
+      const shopId = document.getElementById('modalShopId').value;
+      const accountHolder = document.getElementById('modalHolder').value.trim();
+      const accountNumber = document.getElementById('modalAccount').value.trim();
+      const ifsc = document.getElementById('modalIfsc').value.trim();
+      const upiId = document.getElementById('modalUpi').value.trim();
+      const commissionPercent = parseFloat(document.getElementById('modalCommission').value) || 5;
+
+      if (!accountHolder || !accountNumber || !ifsc) {
+        alert('Please fill Account Holder, Account Number, and IFSC code.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/admin/vendors/${shopId}/register-easy-split`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            accountHolder,
+            accountNumber,
+            ifsc,
+            upiId: upiId || undefined,
+            commissionPercent
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to register');
+
+        alert('Vendor registered successfully on Easy Split!');
+        closeModal();
+        loadVendors();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function executeOnDemandTransfer() {
+      const vendorId = document.getElementById('odVendorId').value.trim();
+      const amountRupees = parseFloat(document.getElementById('odAmount').value);
+      const remarks = document.getElementById('odRemarks').value.trim();
+
+      if (!vendorId || !amountRupees || amountRupees <= 0) {
+        alert('Please provide valid Vendor ID and amount.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/transfers/on-demand', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ vendorId, amountRupees, remarks })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        alert('Transfer executed! Transfer ID: ' + data.transferId);
+        document.getElementById('odAmount').value = '';
+        loadSettlements();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function enableSandboxSimulation() {
+      try {
+        const res = await fetch('/api/admin/easy-split/simulation/enable', {
+          method: 'POST',
+          headers: getHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        alert('Sandbox simulation enabled successfully!');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function loadAll() {
+      loadMetrics();
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>

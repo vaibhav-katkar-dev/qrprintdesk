@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vendor Portal  QrPrintDesk Bank &amp; Payouts</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 60%); color: var(--text-main); min-height: 100vh; padding: 20px 16px 80px; }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); }
+    .brand { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #fff; }
+    .shop-pill { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+    .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.05); border-color: var(--card-border); color: #fff; }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn-success { background: var(--success); color: #fff; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; backdrop-filter: blur(8px); }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
+
+    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-val { font-size: 24px; font-weight: 800; color: #fff; }
+
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .badge-notreg { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 11px 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+    .form-input:focus { border-color: var(--primary); }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { padding: 10px 14px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); font-weight: 600; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--card-border); color: #e2e8f0; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Login Box */
+    #loginSection { max-width: 420px; margin: 60px auto 0; }
+    #portalSection { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Vendor Login -->
+    <div id="loginSection" class="card">
+      <div class="card-title" style="display:flex;align-items:center;gap:10px;">
+        <img src="/assets/logo_dark.png" alt="QrPrintDesk" style="height:26px;width:auto;">
+        <span>Vendor Portal Login</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+        Sign in with your Shop Slug and PIN to manage your bank account and track automated Easy Split settlements.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Shop Slug</label>
+        <input type="text" id="loginSlug" class="form-input" placeholder="e.g. default">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Shop PIN</label>
+        <input type="password" id="loginPin" class="form-input" placeholder="e.g. 1234">
+      </div>
+      <button onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">Sign In &rarr;</button>
+    </div>
+
+    <!-- Vendor Main Portal -->
+    <div id="portalSection">
+      <header>
+        <div class="brand" style="display:flex;align-items:center;gap:10px;">
+          <img src="/assets/logo_dark.png" alt="QrPrintDesk" style="height:28px;width:auto;">
+          <span id="shopTitleName" style="color:#94a3b8;font-size:15px;font-weight:600;">Vendor Station</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="shop-pill" id="shopSlugPill">shop: default</span>
+          <button onclick="handleLogout()" class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;">Logout</button>
+        </div>
+      </header>
+
+      <!-- Earnings Overview -->
+      <div class="grid-stats">
+        <div class="stat-card">
+          <div class="stat-label">Today's Earnings</div>
+          <div class="stat-val" id="statToday" style="color: #60a5fa;">0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Settled to Bank</div>
+          <div class="stat-val" id="statSettled" style="color: #34d399;">0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Payout</div>
+          <div class="stat-val" id="statPending" style="color: #fbbf24;">0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Your Share %</div>
+          <div class="stat-val" id="statShare">95%</div>
+        </div>
+      </div>
+
+      <!-- Bank & Easy Split Account -->
+      <div class="card">
+        <div class="card-title">
+          <span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Bank Account for Automated Payouts</span>
+          <span id="easySplitStatusBadge" class="badge badge-notreg">NOT REGISTERED</span>
+        </div>
+
+        <div id="bankDetailsView" style="display: none;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <div>
+              <div class="stat-label">Bank Account</div>
+              <div style="font-weight: 700; font-size: 16px;" id="viewAccount">  1234</div>
+            </div>
+            <div>
+              <div class="stat-label">IFSC Code</div>
+              <div style="font-weight: 700; font-size: 16px;" id="viewIfsc">HDFC0001234</div>
+            </div>
+            <div>
+              <div class="stat-label">UPI ID</div>
+              <div style="font-weight: 700; font-size: 16px;" id="viewUpi">shop@upi</div>
+            </div>
+            <div>
+              <div class="stat-label">Payout Schedule</div>
+              <div style="font-weight: 700; font-size: 16px; color: #34d399;">T+1 Daily Auto-Settlement</div>
+            </div>
+          </div>
+          <button onclick="toggleEditBank(true)" class="btn btn-secondary">Update Bank / UPI Details</button>
+        </div>
+
+        <div id="bankRegisterForm">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Connect your bank account or UPI ID to receive automatic daily settlements for all counter print orders.
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+            <div class="form-group">
+              <label class="form-label">Account Holder Name *</label>
+              <input type="text" id="regHolder" class="form-input" placeholder="Name as per Passbook">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bank Account Number *</label>
+              <input type="text" id="regAccount" class="form-input" placeholder="e.g. 123456789012">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bank IFSC Code *</label>
+              <input type="text" id="regIfsc" class="form-input" placeholder="e.g. SBIN0001234">
+            </div>
+            <div class="form-group">
+              <label class="form-label">UPI ID (Optional)</label>
+              <input type="text" id="regUpi" class="form-input" placeholder="e.g. shopname@upi">
+            </div>
+            <div class="form-group">
+              <label class="form-label">PAN Card Number (For KYC Auto-Verification)</label>
+              <input type="text" id="regPan" class="form-input" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform: uppercase;">
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="submitBankRegistration()" class="btn btn-success">Save & Connect Bank &rarr;</button>
+            <button id="cancelEditBtn" onclick="toggleEditBank(false)" class="btn btn-secondary" style="display: none;">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settlements Ledger -->
+      <div class="card">
+        <div class="card-title">
+          <span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Payout Settlements History</span>
+          <button onclick="loadSettlements()" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;">Refresh</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Settlement ID</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="settlementsTableBody">
+              <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading settlement records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSlug = localStorage.getItem('qrprintdesk_vendor_slug') || '';
+    let currentPin = localStorage.getItem('qrprintdesk_vendor_pin') || '';
+
+    function getVendorHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'x-shop-slug': currentSlug,
+        'x-shop-pin': currentPin
+      };
+    }
+
+    async function handleLogin() {
+      const slug = document.getElementById('loginSlug').value.trim();
+      const pin = document.getElementById('loginPin').value.trim();
+      if (!slug || !pin) {
+        alert('Please enter both Shop Slug and PIN');
+        return;
+      }
+
+      currentSlug = slug;
+      currentPin = pin;
+
+      try {
+        const res = await fetch('/api/auth/shop/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shopSlug: slug, pin })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+
+        localStorage.setItem('qrprintdesk_vendor_slug', slug);
+        localStorage.setItem('qrprintdesk_vendor_pin', pin);
+
+        showPortal(data);
+      } catch (err) {
+        alert('Login Error: ' + err.message);
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('qrprintdesk_vendor_slug');
+      localStorage.removeItem('qrprintdesk_vendor_pin');
+      currentSlug = '';
+      currentPin = '';
+      document.getElementById('portalSection').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'block';
+    }
+
+    function showPortal(shopInfo) {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('portalSection').style.display = 'block';
+      document.getElementById('shopTitleName').textContent = shopInfo.name || 'Vendor Station';
+      document.getElementById('shopSlugPill').textContent = 'shop: ' + currentSlug;
+      loadAll();
+    }
+
+    async function loadAll() {
+      loadEarnings();
+      loadAccount();
+      loadSettlements();
+    }
+
+    async function loadEarnings() {
+      try {
+        const res = await fetch('/api/vendor/easy-split/earnings', { headers: getVendorHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById('statToday').textContent = '' + data.todayEarningsRupees;
+        document.getElementById('statSettled').textContent = '' + data.settledToBankRupees;
+        document.getElementById('statPending').textContent = '' + data.pendingSettlementRupees;
+        document.getElementById('statShare').textContent = (100 - data.commissionPercent) + '%';
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadAccount() {
+      try {
+        const res = await fetch('/api/vendor/easy-split', { headers: getVendorHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        const badge = document.getElementById('easySplitStatusBadge');
+
+        if (data.status === 'ACTIVE' && data.bankDetails) {
+          badge.textContent = 'ACTIVE [AUTO-PAYOUTS ON]';
+          badge.className = 'badge badge-active';
+
+          document.getElementById('viewAccount').textContent = data.bankDetails.accountNumber ? '  ' + data.bankDetails.accountNumber.slice(-4) : 'Not Set';
+          document.getElementById('viewIfsc').textContent = data.bankDetails.ifsc || 'Not Set';
+          document.getElementById('viewUpi').textContent = data.bankDetails.upiId || 'Not Set';
+
+          document.getElementById('bankDetailsView').style.display = 'block';
+          document.getElementById('bankRegisterForm').style.display = 'none';
+        } else {
+          badge.textContent = 'NOT CONNECTED';
+          badge.className = 'badge badge-notreg';
+          document.getElementById('bankDetailsView').style.display = 'none';
+          document.getElementById('bankRegisterForm').style.display = 'block';
+          document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function toggleEditBank(showEdit) {
+      document.getElementById('bankDetailsView').style.display = showEdit ? 'none' : 'block';
+      document.getElementById('bankRegisterForm').style.display = showEdit ? 'block' : 'none';
+      document.getElementById('cancelEditBtn').style.display = showEdit ? 'inline-block' : 'none';
+    }
+
+    async function submitBankRegistration() {
+      const accountHolder = document.getElementById('regHolder').value.trim();
+      const accountNumber = document.getElementById('regAccount').value.trim();
+      const ifsc = document.getElementById('regIfsc').value.trim().toUpperCase();
+      const upiId = document.getElementById('regUpi').value.trim();
+      const pan = (document.getElementById('regPan')?.value || '').trim().toUpperCase();
+
+      if (!accountHolder || !accountNumber || !ifsc) {
+        alert('Please fill Account Holder, Account Number, and IFSC code.');
+        return;
+      }
+
+      if (ifsc.length !== 11) {
+        alert('Bank IFSC code must be exactly 11 characters (e.g. SBIN0001234, MAHB0000684).');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/vendor/easy-split/register', {
+          method: 'POST',
+          headers: getVendorHeaders(),
+          body: JSON.stringify({ accountHolder, accountNumber, ifsc, upiId, pan })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to save bank details');
+
+        alert('Bank Account Successfully Connected with Cashfree Easy Split for Auto-Payouts!');
+        loadAccount();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function loadSettlements() {
+      try {
+        const res = await fetch('/api/vendor/easy-split/settlements', { headers: getVendorHeaders() });
+        const data = await res.json();
+        const tbody = document.getElementById('settlementsTableBody');
+        tbody.innerHTML = '';
+
+        if (!data.settlements || data.settlements.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No settlements transferred yet. Future daily payouts will appear here automatically.</td></tr>';
+          return;
+        }
+
+        data.settlements.forEach(s => {
+          const tr = document.createElement('tr');
+          const badgeClass = s.status === 'SUCCESS' ? 'badge badge-active' : 'badge badge-notreg';
+          tr.innerHTML = `
+            <td><code>${s.settlementId}</code></td>
+            <td style="color: #34d399; font-weight: 700;">${Number(s.amountRupees || 0).toFixed(2)}</td>
+            <td>${s.eventType}</td>
+            <td><span class="${badgeClass}">${s.status}</span></td>
+            <td>${new Date(s.date).toLocaleString()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Auto-login if credentials exist in localStorage
+    if (currentSlug && currentPin) {
+      document.getElementById('loginSlug').value = currentSlug;
+      document.getElementById('loginPin').value = currentPin;
+      handleLogin();
+    }
+  </script>
+</body>
+</html>
