@@ -204,6 +204,11 @@
       background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     }
 
+    .upload-tile.tile-idcard {
+      border-color: #f0abfc;
+      background: linear-gradient(180deg, #ffffff 0%, #fdf4ff 100%);
+    }
+
     .tile-icon-box {
       width: 36px;
       height: 36px;
@@ -221,6 +226,11 @@
     .tile-pdf .tile-icon-box {
       background: #fef2f2;
       color: #dc2626;
+    }
+
+    .tile-idcard .tile-icon-box {
+      background: #fae8ff;
+      color: #9333ea;
     }
 
     .tile-title {
@@ -484,9 +494,47 @@
       max-width: 440px;
       margin: 0 auto;
       display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-top-row {
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      width: 100%;
+    }
+
+    .footer-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .counter-pay-btn {
+      background: #f8fafc;
+      color: #0f172a;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 13.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .counter-pay-btn:active:not(:disabled) {
+      background: #e2e8f0;
+      transform: scale(0.98);
+    }
+    .counter-pay-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .total-price-block {
@@ -867,29 +915,41 @@
             <span class="block-counter" x-show="fileList.length > 0" x-text="`${fileList.length} file(s) added`"></span>
           </div>
 
-          <!-- Dual Upload Targets -->
-          <div class="upload-action-row">
-            <!-- Photos & ID Cards -->
-            <label class="upload-tile tile-camera">
-              <input type="file" multiple accept="image/*" class="input-overlay" @change="onFilesSelected">
-              <div class="tile-icon-box">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              </div>
-              <div>
-                <div class="tile-title">Photos &amp; ID Card</div>
-                <div class="tile-sub">Aadhaar, PAN, Camera</div>
-              </div>
-            </label>
-
-            <!-- PDF Documents -->
-            <label class="upload-tile tile-pdf">
+          <!-- 3 Smart Upload Categories: PDF, Photos, and ID Cards -->
+          <div class="upload-action-row" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+            <!-- 1. PDF Documents -->
+            <label class="upload-tile tile-pdf" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center;">
               <input type="file" multiple accept="application/pdf,.pdf" class="input-overlay" @change="onFilesSelected">
-              <div class="tile-icon-box">
+              <div class="tile-icon-box" style="margin-bottom: 6px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </div>
               <div>
-                <div class="tile-title">PDF &amp; Documents</div>
-                <div class="tile-sub">PDF, Notes, Resumes</div>
+                <div class="tile-title" style="font-size: 12.5px;">PDF &amp; Docs</div>
+                <div class="tile-sub" style="font-size: 10px;">Resumes, Notes</div>
+              </div>
+            </label>
+
+            <!-- 2. Photos & Gallery -->
+            <label class="upload-tile tile-camera" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center;">
+              <input type="file" multiple accept="image/*" class="input-overlay" @change="onFilesSelected">
+              <div class="tile-icon-box" style="margin-bottom: 6px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+              <div>
+                <div class="tile-title" style="font-size: 12.5px;">Photos</div>
+                <div class="tile-sub" style="font-size: 10px;">Camera, Images</div>
+              </div>
+            </label>
+
+            <!-- 3. Smart ID Card Mode (Front + Back) -->
+            <label class="upload-tile tile-idcard" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center;">
+              <input type="file" multiple accept="image/*" class="input-overlay" @change="onIDCardFilesSelected">
+              <div class="tile-icon-box" style="margin-bottom: 6px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg>
+              </div>
+              <div>
+                <div class="tile-title" style="font-size: 12.5px; color:#9333ea;">ID Card</div>
+                <div class="tile-sub" style="font-size: 10px; color:#a21caf;">Aadhaar 2-in-1</div>
               </div>
             </label>
           </div>
@@ -1085,15 +1145,31 @@
           </div>
 
           <div class="footer-content-wrap">
-            <div class="total-price-block">
-              <div class="total-figure">Rs.<span x-text="totalPriceRupees"></span></div>
-              <div class="total-subscript" x-text="`${totalSheets} sheet(s)  ${copies} copy`"></div>
+            <div class="footer-top-row">
+              <div class="total-price-block">
+                <div class="total-figure">Rs.<span x-text="totalPriceRupees"></span></div>
+                <div class="total-subscript" x-text="`${totalSheets} sheet(s)  ${copies} copy`"></div>
+              </div>
+              <div style="font-size: 11.5px; font-weight: 700; color: #16a34a; background: #dcfce7; padding: 4px 8px; border-radius: 6px;">
+                Instant Print Station
+              </div>
             </div>
-            <button type="button" class="primary-submit-btn" :disabled="loading || anyUploadFailed" @click="shopInfo.payAtCounter ? startPayAtCounter() : startPayAndPrint()">
-              <span class="spinner-ring" x-show="loading"></span>
-              <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading (' + uploadPercent + '%)...' : (shopInfo.payAtCounter ? 'Submit & Pay at Counter' : 'Pay & Print'))"></span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!loading"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
+
+            <!-- Distinct Dual Action Buttons: Pay Now (Online) & Pay at Counter (Cash) -->
+            <div class="footer-actions-grid">
+              <!-- Option A: Pay at Counter (Always available or when shop enables) -->
+              <button type="button" class="counter-pay-btn" :disabled="loading || anyUploadFailed" @click="startPayAtCounter()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                <span>Pay at Counter</span>
+              </button>
+
+              <!-- Option B: Pay Online (UPI / Card / Cashfree) -->
+              <button type="button" class="primary-submit-btn" style="justify-content:center; padding: 12px 14px;" :disabled="loading || anyUploadFailed" @click="startPayAndPrint()">
+                <span class="spinner-ring" x-show="loading"></span>
+                <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading...' : 'Pay Online')"></span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!loading"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1347,6 +1423,102 @@
           try { e.target.value = ''; } catch (_) {}
         },
 
+        async onIDCardFilesSelected(e) {
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+          this.errorMessage = '';
+
+          // If customer selects 2 images directly (Front & Back), automatically merge into 1 A4 page!
+          if (files.length === 2) {
+            this.loading = true;
+            this.loadingText = 'Auto-combining Aadhaar Front & Back into 1 A4 page...';
+            try {
+              const loadImage = (f) => new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(f);
+                img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image decode error')); };
+                img.src = url;
+              });
+
+              const [img1, img2] = await Promise.all([loadImage(files[0]), loadImage(files[1])]);
+
+              // 200 DPI standard A4 sheet
+              const canvas = document.createElement('canvas');
+              canvas.width = 1654;
+              canvas.height = 2338;
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+              const cardWidth = 1180;
+              const cardHeight = 750;
+              const leftX = (canvas.width - cardWidth) / 2;
+
+              // Front (Top)
+              ctx.drawImage(img1, leftX, 280, cardWidth, cardHeight);
+              ctx.strokeStyle = '#e2e8f0';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(leftX, 280, cardWidth, cardHeight);
+
+              // Back (Bottom)
+              ctx.drawImage(img2, leftX, 1260, cardWidth, cardHeight);
+              ctx.strokeStyle = '#e2e8f0';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(leftX, 1260, cardWidth, cardHeight);
+
+              const mergedBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.88));
+              const mergedFile = new File([mergedBlob], 'ID_Card_Front_Back_Merged.jpg', { type: 'image/jpeg' });
+
+              const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+              this.fileList.push({
+                id,
+                file: mergedFile,
+                name: mergedFile.name,
+                size: mergedFile.size,
+                pageCount: 1,
+                status: 'pending',
+                progress: 0,
+                loadedBytes: 0,
+                uploadedMeta: null,
+                errorMessage: '',
+                xhr: null
+              });
+              this.loading = false;
+              setTimeout(() => this.uploadSingleFile(id), 10);
+              this.recomputeOverallProgress();
+              this.updatePageCounts();
+              try { e.target.value = ''; } catch (_) {}
+              return;
+            } catch (err) {
+              console.warn('ID Card auto-merge fallback to standard files:', err);
+              this.loading = false;
+            }
+          }
+
+          // Fallback if 1 or more than 2 files selected: add normally
+          for (const file of files) {
+            const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            this.fileList.push({
+              id,
+              file,
+              name: file.name,
+              size: file.size,
+              pageCount: 1,
+              status: 'pending',
+              progress: 0,
+              loadedBytes: 0,
+              uploadedMeta: null,
+              errorMessage: '',
+              xhr: null
+            });
+            setTimeout(() => this.uploadSingleFile(id), 10);
+          }
+          this.recomputeOverallProgress();
+          this.updatePageCounts();
+          try { e.target.value = ''; } catch (_) {}
+        },
+
         uploadSingleFile(id) {
           const item = this.getFileItem(id);
           if (!item || item.status === 'done') return;
@@ -1419,7 +1591,10 @@
               const e = await metaRes.json().catch(() => ({}));
               throw new Error(e.error || 'Could not get upload URL');
             }
-            const { uploadUrl, fileKey, pageCount } = await metaRes.json();
+            const resJson = await metaRes.json();
+            const uploadUrl = resJson.uploadUrl;
+            const fileKey = resJson.fileKey || resJson.key;
+            const pageCount = resJson.pageCount || 1;
 
             // 3b. PUT file directly to cloud (server never touches the bytes)
             await new Promise((resolve, reject) => {
@@ -1757,14 +1932,22 @@
 
           try {
             this.loadingText = 'Submitting Order...';
-            const uploadedFiles = this.fileList.map(item => ({
-              fileKey: item.uploadedMeta.fileKey,
-              originalFilename: item.uploadedMeta.originalFilename,
-              fileSize: item.uploadedMeta.fileSize,
-              mimeType: item.uploadedMeta.mimeType,
-              pageCount: item.uploadedMeta.pageCount || 1,
-              pageRange: this.showRangeInput ? this.customPageRange : undefined
-            }));
+            const uploadedFiles = this.fileList
+              .filter(item => item && item.uploadedMeta && item.uploadedMeta.fileKey)
+              .map(item => ({
+                fileKey: item.uploadedMeta.fileKey,
+                originalFilename: item.uploadedMeta.originalFilename || item.name || 'document',
+                fileSize: item.uploadedMeta.fileSize || item.size || 1024,
+                mimeType: item.uploadedMeta.mimeType || 'application/octet-stream',
+                pageCount: item.uploadedMeta.pageCount || item.pageCount || 1,
+                pageRange: this.showRangeInput ? this.customPageRange : undefined
+              }));
+
+            if (!uploadedFiles.length) {
+              this.loading = false;
+              this.errorMessage = 'Please wait for documents to finish uploading before continuing.';
+              return;
+            }
 
             const orderPayload = {
               shopSlug: this.shopSlug,
@@ -1841,14 +2024,22 @@
 
           try {
             this.loadingText = 'Opening Payment...';
-            const uploadedFiles = this.fileList.map(item => ({
-              fileKey: item.uploadedMeta.fileKey,
-              originalFilename: item.uploadedMeta.originalFilename,
-              fileSize: item.uploadedMeta.fileSize,
-              mimeType: item.uploadedMeta.mimeType,
-              pageCount: item.uploadedMeta.pageCount || 1,
-              pageRange: this.showRangeInput ? this.customPageRange : undefined
-            }));
+            const uploadedFiles = this.fileList
+              .filter(item => item && item.uploadedMeta && item.uploadedMeta.fileKey)
+              .map(item => ({
+                fileKey: item.uploadedMeta.fileKey,
+                originalFilename: item.uploadedMeta.originalFilename || item.name || 'document',
+                fileSize: item.uploadedMeta.fileSize || item.size || 1024,
+                mimeType: item.uploadedMeta.mimeType || 'application/octet-stream',
+                pageCount: item.uploadedMeta.pageCount || item.pageCount || 1,
+                pageRange: this.showRangeInput ? this.customPageRange : undefined
+              }));
+
+            if (!uploadedFiles.length) {
+              this.loading = false;
+              this.errorMessage = 'Please wait for documents to finish uploading before continuing.';
+              return;
+            }
 
             const orderPayload = {
               shopSlug: this.shopSlug,

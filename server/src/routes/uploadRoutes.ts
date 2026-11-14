@@ -146,6 +146,7 @@ export const uploadRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
 
     return reply.send({
       key,
+      fileKey: key,
       uploadUrl: url,
       expiresIn: 300
     });
