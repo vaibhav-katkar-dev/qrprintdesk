@@ -27,12 +27,14 @@ package-lock.json.backup
 *.iso
 *.msi
 
-# Unpacked Electron application & build directories
+# ── Legacy & Old Folders (Keep repo strictly server & vendor-desktop) ──
+old_files/
+windows-software/
 vendor-app/
-windows-software/dist/
-windows-software/bin/
-windows-software/data/tmp/
-vendor-desktop/dist/
+INSTALL_TUNNEL_SERVICE_PERMANENT.bat
+server.zip
+build.log
+temp_screen.png
 
 # ── Runtime Data, Caches & Temporary Storage ──────────────────────
 data/
