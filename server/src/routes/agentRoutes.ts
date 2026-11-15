@@ -117,6 +117,9 @@ export const agentRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         mimeType: f.mimeType,
         pageCount: f.pageCount,
         fileSize: f.fileSize,
+        pageRange: (f as any).pageRange,
+        copies: (f as any).copies,
+        colorMode: (f as any).colorMode,
         downloadUrl: await getPresignedDownloadUrl(f.fileKey, 300)
       }))
     );

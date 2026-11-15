@@ -107,6 +107,8 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         mimeType: string;
         pageCount: number;
         pageRange?: string;
+        copies?: number;
+        colorMode?: 'monochrome' | 'color';
       }>;
       printOptions: {
         copies: number;
@@ -159,17 +161,45 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
 
     // 4. Server-side pricing calculation in paise
     const platformFeePercent = shop.easySplit?.commissionPercent ?? 5;
-    const pricing = calculateOrderPrice(
-      {
-        pageCount: totalPages,
-        copies: Math.min(Math.max(1, printOptions.copies || 1), shop.printOptions?.maxCopies ?? 10),
-        colorMode: printOptions.colorMode || 'monochrome',
-        duplexMode: printOptions.duplexMode || 'simplex',
-        pagesPerSheet: printOptions.pagesPerSheet || 1
-      },
-      shop.pricing,
-      platformFeePercent
-    );
+    const hasPerFileOverrides = files.some(f => f.copies !== undefined || f.colorMode !== undefined);
+
+    let pricing: ReturnType<typeof calculateOrderPrice>;
+    if (hasPerFileOverrides) {
+      let grossPaise = 0;
+      for (const file of files) {
+        const fileColor = file.colorMode || printOptions.colorMode || 'monochrome';
+        const fileCopies = file.copies || printOptions.copies || 1;
+        const baseRate = fileColor === 'color' ? shop.pricing.colorPerPagePaise : shop.pricing.bwPerPagePaise;
+        let perPageRate = baseRate;
+        if (printOptions.duplexMode === 'duplexlong' && shop.pricing.duplexDiscountPaise > 0) {
+          perPageRate = Math.max(1, perPageRate - shop.pricing.duplexDiscountPaise);
+        }
+        const effPages = (printOptions.pagesPerSheet === 2)
+          ? Math.max(1, Math.ceil((file.pageCount || 1) / 2))
+          : (file.pageCount || 1);
+        grossPaise += Math.round(perPageRate * effPages * Math.max(1, fileCopies));
+      }
+      const platformFeePaise = Math.round((grossPaise * platformFeePercent) / 100);
+      const vendorSharePaise = grossPaise - platformFeePaise;
+      pricing = {
+        amountPaise: grossPaise,
+        platformFeePaise,
+        vendorSharePaise,
+        currency: 'INR'
+      };
+    } else {
+      pricing = calculateOrderPrice(
+        {
+          pageCount: totalPages,
+          copies: Math.min(Math.max(1, printOptions.copies || 1), shop.printOptions?.maxCopies ?? 10),
+          colorMode: printOptions.colorMode || 'monochrome',
+          duplexMode: printOptions.duplexMode || 'simplex',
+          pagesPerSheet: printOptions.pagesPerSheet || 1
+        },
+        shop.pricing,
+        platformFeePercent
+      );
+    }
 
     const orderId = `ord_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const now = new Date();

@@ -62,7 +62,13 @@ async function _executePrintJob(jobId) {
   // ── Download & spool ───────────────────────────────────────────────────────
   logPrinterActivity(`[QUEUE] Starting job #${shortId} (${_printQueue.length} remaining after this)`, 'blue');
   const meta = await _getJobDownloadMeta(jobId);
-  const downloadUrls = meta.files.map(f => ({ url: f.downloadUrl, filename: f.originalFilename }));
+  const downloadUrls = meta.files.map(f => ({
+    url: f.downloadUrl,
+    filename: f.originalFilename,
+    pageRange: f.pageRange,
+    copies: f.copies,
+    colorMode: f.colorMode
+  }));
   const r = await window.electronAPI.printJob({ jobId, downloadUrls, printOptions: meta.printOptions });
 
   if (r.success) {
@@ -940,13 +946,25 @@ window.openJobModal = async function(jobId) {
           const dl = downloadUrls[idx] || downloadUrls.find(d => d.originalFilename === f.originalFilename) || {};
           const fileUrl = dl.downloadUrl || '';
           const isImg = f.mimeType?.includes('image') || /\.(jpe?g|png|webp|bmp)$/i.test(f.originalFilename || '');
+          const pageBadge = f.pageRange 
+            ? `<span style="background:#fee2e2;color:#b91c1c;font-weight:700;padding:1px 6px;border-radius:4px;font-size:11px;">Pgs: ${escHtml(f.pageRange)}</span>` 
+            : `<span style="color:var(--text-muted);">${f.pageCount || 1} pgs</span>`;
+          const copyBadge = (f.copies && f.copies > 1) 
+            ? `<span style="background:#fef3c7;color:#92400e;font-weight:700;padding:1px 6px;border-radius:4px;font-size:11px;">${f.copies} copies</span>` 
+            : '';
+          const colorBadge = f.colorMode 
+            ? `<span style="background:${f.colorMode === 'color' ? '#dbeafe' : '#f1f5f9'};color:${f.colorMode === 'color' ? '#1e40af' : '#475569'};font-weight:700;padding:1px 6px;border-radius:4px;font-size:11px;">${f.colorMode === 'color' ? '🎨 Color' : '⚫ B&W'}</span>` 
+            : '';
           return `
           <div class="file-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#ffffff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,0.03);">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-              <div style="font-size:24px;">${isImg ? '' : ''}</div>
+              <div style="font-size:24px;">${isImg ? '🖼️' : '📄'}</div>
               <div style="min-width:0;flex:1;">
                 <div class="file-name" style="font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(f.originalFilename)}</div>
-                <div class="file-meta" style="font-size:11.5px;color:var(--text-muted);">${f.pageCount || 1} pages  ${formatSize(f.fileSize)}</div>
+                <div class="file-meta" style="font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;">
+                  ${pageBadge} ${copyBadge} ${colorBadge}
+                  <span style="color:var(--text-muted);">· ${formatSize(f.fileSize)}</span>
+                </div>
               </div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;margin-left:12px;">
@@ -1217,7 +1235,13 @@ window.printJobRow = async function(jobId) {
   try {
     // Uses cached presigned URL  no extra round-trip if viewed recently
     const meta = await _getJobDownloadMeta(jobId);
-    const downloadUrls = meta.files.map(f => ({ url: f.downloadUrl, filename: f.originalFilename }));
+    const downloadUrls = meta.files.map(f => ({
+      url: f.downloadUrl,
+      filename: f.originalFilename,
+      pageRange: f.pageRange,
+      copies: f.copies,
+      colorMode: f.colorMode
+    }));
     const overrides = window.jobOverrides[jobId] || {};
     const effectivePrintOptions = Object.assign({}, meta.printOptions, overrides);
     const r = await window.electronAPI.printJob({ jobId, downloadUrls, printOptions: effectivePrintOptions });
