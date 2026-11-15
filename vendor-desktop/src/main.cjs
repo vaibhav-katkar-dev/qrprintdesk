@@ -348,6 +348,25 @@ ipcMain.handle('flush-spooler', async () => {
   });
 });
 
+// IPC: Query Windows Spooler Page Audit (Hardware audit to prevent paper theft / leak)
+ipcMain.handle('get-spooler-audit', async () => {
+  return new Promise((resolve) => {
+    const psCmd = `Get-CimInstance -ClassName Win32_PrintJob -ErrorAction SilentlyContinue | Select-Object JobId,Document,TotalPages,PagesPrinted,DriverName,JobStatus | ConvertTo-Json -Compress`;
+    execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psCmd], { timeout: 10000 }, (error, stdout) => {
+      if (error || !stdout || !stdout.trim()) {
+        return resolve({ success: true, jobs: [] });
+      }
+      try {
+        const parsed = JSON.parse(stdout.trim());
+        const jobs = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
+        resolve({ success: true, jobs });
+      } catch (_) {
+        resolve({ success: true, jobs: [] });
+      }
+    });
+  });
+});
+
 // IPC: Open External URL
 ipcMain.handle('open-external', async (event, url) => {
   if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
@@ -505,13 +524,14 @@ function enhanceImage(inputPath, outputPath, colorMode) {
 async function createJobPrintablePdf(jobId, localFiles, printOptions) {
   const is2on1 = Number(printOptions?.pagesPerSheet) === 2;
   const isLandscape = printOptions?.orientation === 'landscape';
+  const isStampPaper = Boolean(printOptions?.stampPaperMode);
 
   // Standard A4 dimensions in PDF points (72 points/inch)
   const A4_W = isLandscape ? 841.89 : 595.28;
   const A4_H = isLandscape ? 595.28 : 841.89;
 
-  // If only 1 PDF file with 1-on-1 layout, use direct file
-  if (!is2on1 && localFiles.length === 1 && path.extname(localFiles[0]).toLowerCase() === '.pdf') {
+  // If only 1 PDF file with 1-on-1 layout and NOT Stamp Paper mode, use direct file
+  if (!is2on1 && !isStampPaper && localFiles.length === 1 && path.extname(localFiles[0]).toLowerCase() === '.pdf') {
     return localFiles[0];
   }
 
@@ -588,14 +608,23 @@ async function createJobPrintablePdf(jobId, localFiles, printOptions) {
       }
     }
   } else {
-    // 1-on-1: One item per sheet with clean, safe margins
+    // 1-on-1: One item per sheet with clean, safe margins (handles Indian Legal Stamp Paper top clearance)
     const margin = 20;
-    const boxW = A4_W - (margin * 2);
-    const boxH = A4_H - (margin * 2);
 
-    for (const item of items) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
       const page = pdfDoc.addPage([A4_W, A4_H]);
-      drawInBox(page, item, margin, margin, boxW, boxH);
+      if (isStampPaper && i === 0) {
+        // Stamp Paper Mode: Leave 3.5 inches (252 points) top margin clear for government seal & revenue stamp
+        const topStampClearance = 252;
+        const boxW = A4_W - (margin * 2);
+        const boxH = A4_H - topStampClearance - margin;
+        drawInBox(page, item, margin, margin, boxW, boxH);
+      } else {
+        const boxW = A4_W - (margin * 2);
+        const boxH = A4_H - (margin * 2);
+        drawInBox(page, item, margin, margin, boxW, boxH);
+      }
     }
   }
 

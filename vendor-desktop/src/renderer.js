@@ -596,6 +596,28 @@ async function flushPrintSpooler() {
   }
 }
 
+//  Hardware Print Spooler Page Audit 
+window.runSpoolerAudit = async function() {
+  const btn = document.getElementById('spooler-audit-btn');
+  if (btn) btn.disabled = true;
+  showToast('Auditing hardware print spooler...', 'info');
+  try {
+    const res = await window.electronAPI.getSpoolerAudit();
+    const jobs = res && res.jobs ? res.jobs : [];
+    const totalQueuedPages = jobs.reduce((sum, j) => sum + (Number(j.TotalPages) || 0), 0);
+    const totalPrinted = jobs.reduce((sum, j) => sum + (Number(j.PagesPrinted) || 0), 0);
+    const activePrinters = jobs.map(j => j.DriverName).filter(Boolean);
+    const uniqueDrivers = Array.from(new Set(activePrinters)).join(', ') || config.printerName || 'Default Printer';
+
+    alert(`📊 Hardware Print Spooler Audit:\n\nActive Printer: ${uniqueDrivers}\nTotal Spooler Jobs: ${jobs.length}\nTotal Pages Spooled: ${totalQueuedPages}\nPages Completed: ${totalPrinted}\n\nTip: Match this against your daily counter log to verify 100% paper accountability.`);
+    logPrinterActivity(`Hardware spooler audit run: ${jobs.length} jobs, ${totalQueuedPages} pages`, 'blue');
+  } catch (err) {
+    showToast(`Audit error: ${err.message}`, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
+
 //  Hardware Diagnostic Test 
 async function testPrinterCommunication() {
   showToast('Testing printer connection...', 'info');
@@ -758,7 +780,10 @@ function renderDashboardTable(jobs) {
       <td style="width:75px;text-align:center;font-size:11px;color:var(--text-dim);">${time}</td>
       <td style="text-align:right;white-space:nowrap;min-width:165px;">
         <button class="btn btn-secondary btn-xs" onclick="openJobModal('${j.jobId}')">View</button>
-        <button class="btn btn-primary btn-xs" onclick="printJobRow('${j.jobId}')">Print</button>
+        ${st === 'completed' 
+          ? `<button class="btn btn-success btn-xs" style="background:#16a34a;color:#ffffff;border:none;margin-left:2px;" onclick="sendWhatsAppReady('${j.jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${amt}')">📲 WhatsApp</button>` 
+          : `<button class="btn btn-primary btn-xs" onclick="printJobRow('${j.jobId}')">Print</button>`
+        }
         ${canAct ? `<button class="btn btn-danger btn-xs" onclick="openRejectModal('${j.jobId}')">Reject</button>` : ''}
       </td>
     </tr>`;
@@ -827,6 +852,11 @@ window.openJobModal = async function(jobId) {
     const st  = (job.status || '').toLowerCase();
     const canAct = !['completed', 'rejected', 'cancelled'].includes(st);
 
+    window.jobOverrides = window.jobOverrides || {};
+    const activeColor  = (window.jobOverrides[jobId]?.colorMode) || o.colorMode || 'monochrome';
+    const activeCopies = (window.jobOverrides[jobId]?.copies) !== undefined ? window.jobOverrides[jobId].copies : (o.copies || 1);
+    const activeStamp  = (window.jobOverrides[jobId]?.stampPaperMode) !== undefined ? window.jobOverrides[jobId].stampPaperMode : Boolean(o.stampPaperMode);
+
     const content = `
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
         <div>
@@ -858,8 +888,40 @@ window.openJobModal = async function(jobId) {
         </div>
       </div>
 
+      <!-- Quick Counter Override Toolbar to fix customer mistakes without re-upload -->
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:800;color:#166534;display:flex;align-items:center;gap:5px;">
+            <span>⚡ Counter Quick-Adjust (Fix Customer Mistake)</span>
+          </div>
+          <span style="font-size:11px;color:#15803d;font-weight:600;">Overrides apply instantly when you click Print</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+          <div style="background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid #bbf7d0;">
+            <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:4px;">Copies</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button type="button" class="btn btn-secondary btn-xs" onclick="adjustJobCopies('${jobId}', -1)">-</button>
+              <span id="override-copies-${jobId}" style="font-weight:800;font-size:14px;min-width:20px;text-align:center;">${activeCopies}</span>
+              <button type="button" class="btn btn-secondary btn-xs" onclick="adjustJobCopies('${jobId}', 1)">+</button>
+            </div>
+          </div>
+          <div style="background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid #bbf7d0;">
+            <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:4px;">Color Mode</div>
+            <button type="button" id="override-color-${jobId}" class="btn btn-xs ${activeColor === 'color' ? 'btn-primary' : 'btn-secondary'}" onclick="toggleJobColor('${jobId}')" style="width:100%;">
+              ${activeColor === 'color' ? '🌈 Color' : '⚫ Black & White'}
+            </button>
+          </div>
+          <div style="background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid #bbf7d0;">
+            <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:4px;">Stamp Paper</div>
+            <button type="button" id="override-stamp-${jobId}" class="btn btn-xs ${activeStamp ? 'btn-primary' : 'btn-secondary'}" onclick="toggleJobStamp('${jobId}')" style="width:100%;">
+              ${activeStamp ? '🏛️ Stamp (3.5")' : 'Standard'}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;">
-        <div class="job-detail-label" style="margin-bottom:10px;">Print Options</div>
+        <div class="job-detail-label" style="margin-bottom:10px;">Original Customer Print Options</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;">
           ${printOptTag('Color', o.colorMode === 'color' ? ' Color' : ' B&W')}
           ${printOptTag('Copies', `${o.copies || 1}`)}
@@ -867,6 +929,7 @@ window.openJobModal = async function(jobId) {
           ${printOptTag('Layout', o.pagesPerSheet === 2 ? '2-on-1' : '1 per sheet')}
           ${printOptTag('Orientation', o.orientation || 'portrait')}
           ${printOptTag('Paper', o.paperSize || 'A4')}
+          ${o.stampPaperMode ? printOptTag('Stamp Paper', 'Yes (3.5" Margin)') : ''}
         </div>
       </div>
 
@@ -905,10 +968,21 @@ window.openJobModal = async function(jobId) {
       <button class="btn btn-secondary" onclick="previewJobRow('${jobId}')">
          Preview Full Document
       </button>
+      <button class="btn btn-success" style="background:#16a34a;color:#ffffff;border:none;" onclick="sendWhatsAppReady('${jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${o.amountRupees || '0.00'}')">
+        📲 WhatsApp Ready
+      </button>
       <button class="btn btn-danger" onclick="closeJobModal();openRejectModal('${jobId}')">
          Reject Job
       </button>
-    ` : `<span style="color:var(--text-dim);font-size:12.5px;">Job is ${job.status}  no actions available</span>`;
+    ` : `
+      <button class="btn btn-success" style="background:#16a34a;color:#ffffff;border:none;" onclick="sendWhatsAppReady('${jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${o.amountRupees || '0.00'}')">
+        📲 WhatsApp Ready
+      </button>
+      <button class="btn btn-secondary" onclick="printJobRow('${jobId}');closeJobModal();">
+        Reprint
+      </button>
+      <span style="color:var(--text-dim);font-size:12.5px;margin-left:8px;">Job is ${job.status}</span>
+    `;
 
     document.getElementById('job-modal-actions').innerHTML = actionsHtml;
   } catch (err) {
@@ -1068,6 +1142,64 @@ function _renderJobsTable(tbody, jobs) {
 }
 
 //  Row Actions 
+window.jobOverrides = window.jobOverrides || {};
+
+window.adjustJobCopies = function(jobId, delta) {
+  window.jobOverrides[jobId] = window.jobOverrides[jobId] || {};
+  let cur = window.jobOverrides[jobId].copies;
+  if (cur === undefined) {
+    const el = document.getElementById(`override-copies-${jobId}`);
+    cur = el ? parseInt(el.innerText, 10) : 1;
+  }
+  const next = Math.max(1, Math.min(50, cur + delta));
+  window.jobOverrides[jobId].copies = next;
+  const el = document.getElementById(`override-copies-${jobId}`);
+  if (el) el.innerText = next;
+};
+
+window.toggleJobColor = function(jobId) {
+  window.jobOverrides[jobId] = window.jobOverrides[jobId] || {};
+  let cur = window.jobOverrides[jobId].colorMode;
+  if (!cur) {
+    const btn = document.getElementById(`override-color-${jobId}`);
+    cur = btn && btn.innerText.includes('Color') ? 'color' : 'monochrome';
+  }
+  const next = cur === 'color' ? 'monochrome' : 'color';
+  window.jobOverrides[jobId].colorMode = next;
+  const btn = document.getElementById(`override-color-${jobId}`);
+  if (btn) {
+    btn.className = `btn btn-xs ${next === 'color' ? 'btn-primary' : 'btn-secondary'}`;
+    btn.innerText = next === 'color' ? '🌈 Color' : '⚫ Black & White';
+  }
+};
+
+window.toggleJobStamp = function(jobId) {
+  window.jobOverrides[jobId] = window.jobOverrides[jobId] || {};
+  const cur = Boolean(window.jobOverrides[jobId].stampPaperMode);
+  const next = !cur;
+  window.jobOverrides[jobId].stampPaperMode = next;
+  const btn = document.getElementById(`override-stamp-${jobId}`);
+  if (btn) {
+    btn.className = `btn btn-xs ${next ? 'btn-primary' : 'btn-secondary'}`;
+    btn.innerText = next ? '🏛️ Stamp (3.5")' : 'Standard';
+  }
+};
+
+window.sendWhatsAppReady = function(jobId, phone, pickupCode, amount) {
+  let targetPhone = phone ? phone.trim().replace(/\D/g, '') : '';
+  if (!targetPhone) {
+    const input = window.prompt('Enter customer 10-digit WhatsApp number:', '');
+    if (!input) return;
+    targetPhone = input.trim().replace(/\D/g, '');
+  }
+  if (targetPhone.length === 10) targetPhone = '91' + targetPhone;
+  const shopName = config.shopName || 'Print Station';
+  const text = `Namaste! Your print job ${pickupCode} is ready for pickup at ${shopName}. Total: Rs. ${amount}. Thank you!`;
+  const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`;
+  window.electronAPI.openExternal(url);
+  showToast(`WhatsApp message opened for ${pickupCode}`, 'success');
+};
+
 /** Shared helper: get cached download-url metadata for a job (or fetch if stale) */
 async function _getJobDownloadMeta(jobId) {
   const hdr = { 'Authorization': `Bearer ${config.agentToken}` };
@@ -1076,13 +1208,15 @@ async function _getJobDownloadMeta(jobId) {
 
 window.printJobRow = async function(jobId) {
   const btn = event && event.target;
-  if (btn) { btn.disabled = true; btn.innerText = ''; }
+  if (btn) { btn.disabled = true; btn.innerText = 'Printing...'; }
 
   try {
     // Uses cached presigned URL  no extra round-trip if viewed recently
     const meta = await _getJobDownloadMeta(jobId);
     const downloadUrls = meta.files.map(f => ({ url: f.downloadUrl, filename: f.originalFilename }));
-    const r = await window.electronAPI.printJob({ jobId, downloadUrls, printOptions: meta.printOptions });
+    const overrides = window.jobOverrides[jobId] || {};
+    const effectivePrintOptions = Object.assign({}, meta.printOptions, overrides);
+    const r = await window.electronAPI.printJob({ jobId, downloadUrls, printOptions: effectivePrintOptions });
     if (r.success) {
       showToast(`[PRINT] Job #${jobId.substring(0, 8)} sent to printer!`, 'success');
       logPrinterActivity(`Job #${jobId.substring(0, 8)} sent to printer`, 'blue');

@@ -117,6 +117,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         orientation?: string;
         pagesPerSheet?: number;
         pageRange?: string;
+        stampPaperMode?: boolean;
       };
     };
   }>('/orders', async (request, reply) => {
@@ -225,7 +226,8 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         pagesPerSheet: printOptions.pagesPerSheet || 1,
         paperSize: printOptions.paperSize || 'A4',
         fitMode: printOptions.fitMode || 'fit',
-        orientation: printOptions.orientation || 'portrait'
+        orientation: printOptions.orientation || 'portrait',
+        stampPaperMode: Boolean(printOptions.stampPaperMode)
       },
       pricing,
       orderSplits: orderSplitsInput.map((s) => ({

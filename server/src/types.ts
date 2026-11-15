@@ -89,6 +89,7 @@ export interface ShopDocument {
     defaultDuplex: 'simplex' | 'duplexlong' | 'duplexshort';
     defaultPagesPerSheet: 1 | 2;
     maxCopies: number;
+    allowStampPaper?: boolean;
   };
   requireCustomerName?: boolean;
   payAtCounter?: boolean;
@@ -130,6 +131,7 @@ export interface OrderDocument {
     orientation: string;
     pagesPerSheet: number;
     pageRange?: string; // Global or per-order page range
+    stampPaperMode?: boolean;
   };
   pricing: {
     amountPaise: number; // integer paise

@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveConfig: (cfg) => ipcRenderer.invoke('save-config', cfg),
   getPrinters: () => ipcRenderer.invoke('get-printers'),
   flushSpooler: () => ipcRenderer.invoke('flush-spooler'),
+  getSpoolerAudit: () => ipcRenderer.invoke('get-spooler-audit'),
   printJob: (jobData) => ipcRenderer.invoke('print-job', jobData),
   previewJob: (data) => ipcRenderer.invoke('preview-job', data),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
