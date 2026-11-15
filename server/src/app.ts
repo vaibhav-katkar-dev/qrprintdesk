@@ -187,7 +187,7 @@ export function buildApp(db: Db, mongoClient: MongoClient, startWorkers: boolean
   app.register(webhookRoutes, { prefix: '/api', db, mongoClient, wsHub });
   app.register(dashboardRoutes, { db, wsHub });
   app.register(localStorageRoutes, { prefix: '/api' });
-  app.register(vendorRoutes, { prefix: '/api', db });
+  app.register(vendorRoutes, { prefix: '/api', db, wsHub });
 
   if (startWorkers) {
     outboxWorker.start();

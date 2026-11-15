@@ -24,8 +24,9 @@ const DEFAULT_PRINT_OPTIONS = {
   allowIDCardMerge: true,
 };
 
-export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts) => {
+export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (fastify, opts) => {
   const db = opts.db;
+  const wsHub = opts.wsHub;
 
   async function getAuthenticatedShop(request: any, reply: any): Promise<{ shopId: ObjectId; shop: ShopDocument } | null> {
     const authHeader = (request.headers.authorization || request.headers['x-agent-key']) as string;
@@ -216,6 +217,54 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
       );
 
       return reply.send({ success: true, jobId, status: 'REJECTED', reason });
+    }
+  );
+
+  // POST /api/vendor/jobs/:jobId/complete - Vendor manually marks job as COMPLETED
+  fastify.post<{ Params: { jobId: string } }>(
+    '/vendor/jobs/:jobId/complete',
+    async (request, reply) => {
+      const auth = await getAuthenticatedShop(request, reply);
+      if (!auth) return;
+      const { shopId } = auth;
+      const { jobId } = request.params;
+
+      const job = await db.collection<JobDocument>('jobs').findOne({ jobId, shopId });
+      if (!job) return reply.code(404).send({ error: 'Job not found' });
+
+      const now = new Date();
+      await db.collection<JobDocument>('jobs').updateOne(
+        { jobId, shopId },
+        {
+          $set: { status: 'COMPLETED' as any, updatedAt: now },
+          $push: {
+            auditTrail: {
+              actor: 'agent',
+              from: job.status,
+              to: 'COMPLETED' as any,
+              reason: 'Marked completed by vendor',
+              time: now
+            }
+          } as any
+        }
+      );
+
+      // Also update order status to COMPLETED
+      await db.collection<OrderDocument>('orders').updateOne(
+        { orderId: job.orderId, shopId },
+        { $set: { status: 'COMPLETED' as any, updatedAt: now } }
+      );
+
+      if (wsHub) {
+        wsHub.broadcastToShop(shopId, {
+          type: 'job_status_change',
+          jobId,
+          orderId: job.orderId,
+          status: 'COMPLETED'
+        });
+      }
+
+      return reply.send({ success: true, jobId, status: 'COMPLETED' });
     }
   );
 

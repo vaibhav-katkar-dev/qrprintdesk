@@ -782,7 +782,8 @@ function renderDashboardTable(jobs) {
         <button class="btn btn-secondary btn-xs" onclick="openJobModal('${j.jobId}')">View</button>
         ${st === 'completed' 
           ? `<button class="btn btn-success btn-xs" style="background:#16a34a;color:#ffffff;border:none;margin-left:2px;" onclick="sendWhatsAppReady('${j.jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${amt}')">📲 WhatsApp</button>` 
-          : `<button class="btn btn-primary btn-xs" onclick="printJobRow('${j.jobId}')">Print</button>`
+          : `<button class="btn btn-primary btn-xs" onclick="printJobRow('${j.jobId}')">Print</button>
+             <button class="btn btn-success btn-xs" style="background:#10b981;color:#ffffff;border:none;margin-left:2px;" onclick="completeJobRow('${j.jobId}')" title="Mark completed / Ready for pickup">✅ Done</button>`
         }
         ${canAct ? `<button class="btn btn-danger btn-xs" onclick="openRejectModal('${j.jobId}')">Reject</button>` : ''}
       </td>
@@ -964,6 +965,9 @@ window.openJobModal = async function(jobId) {
       <button class="btn btn-primary" onclick="printJobRow('${jobId}');closeJobModal();">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         Print Now
+      </button>
+      <button class="btn btn-success" style="background:#10b981;color:#ffffff;border:none;" onclick="completeJobRow('${jobId}');closeJobModal();" title="Mark print completed and ready">
+        ✅ Mark Done
       </button>
       <button class="btn btn-secondary" onclick="previewJobRow('${jobId}')">
          Preview Full Document
@@ -1220,6 +1224,13 @@ window.printJobRow = async function(jobId) {
     if (r.success) {
       showToast(`[PRINT] Job #${jobId.substring(0, 8)} sent to printer!`, 'success');
       logPrinterActivity(`Job #${jobId.substring(0, 8)} sent to printer`, 'blue');
+      // Guarantee server marks job & linked order as COMPLETED so customer side updates immediately
+      try {
+        await apiFetch(`complete:${jobId}`, `${config.serverUrl}/api/vendor/jobs/${jobId}/complete`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${config.agentToken}`, 'Content-Type': 'application/json' }
+        }, 0);
+      } catch (_) {}
       invalidateCache('jobs', 'dashboard'); // force fresh stats after print
       refreshDashboard(true);
     } else {
@@ -1229,6 +1240,21 @@ window.printJobRow = async function(jobId) {
     alert(`Print error: ${err.message}`);
   } finally {
     if (btn) { btn.disabled = false; btn.innerText = 'Print'; }
+  }
+};
+
+window.completeJobRow = async function(jobId) {
+  try {
+    await apiFetch(`complete:${jobId}`, `${config.serverUrl}/api/vendor/jobs/${jobId}/complete`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${config.agentToken}`, 'Content-Type': 'application/json' }
+    }, 0);
+    showToast(`✅ Job #${jobId.substring(0, 8)} marked Completed!`, 'success');
+    logPrinterActivity(`Job #${jobId.substring(0, 8)} marked Completed`, 'green');
+    invalidateCache('jobs', 'dashboard');
+    refreshDashboard(true);
+  } catch (err) {
+    showToast(`Failed to mark complete: ${err.message}`, 'error');
   }
 };
 
