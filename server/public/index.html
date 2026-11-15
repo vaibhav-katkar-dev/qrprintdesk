@@ -1089,21 +1089,6 @@
             </div>
           </div>
 
-          <!-- Indian Legal Stamp Paper / Notary Mode -->
-          <div class="field-row">
-            <div class="field-label">Stamp Paper / Notary Document?</div>
-            <div class="segmented-tabs">
-              <button type="button" class="segmented-tab" :class="{ 'active': !stampPaperMode }" @click="stampPaperMode = false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="16" rx="2"/></svg>
-                <span>Standard Paper</span>
-              </button>
-              <button type="button" class="segmented-tab" :class="{ 'active': stampPaperMode }" @click="stampPaperMode = true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                <span>Stamp Paper (3.5" Top Margin)</span>
-              </button>
-            </div>
-          </div>
-
           <!-- Copies Stepper -->
           <div class="field-row">
             <div class="stepper-bar">
@@ -1255,7 +1240,17 @@
             </div>
           </div>
 
-          <button type="button" class="primary-submit-btn" style="width:100%;justify-content:center;margin-top:20px;" @click="resetToUpload">
+          <!-- Invoice Download (shown after print completes) -->
+          <div x-show="isCompleted" style="display:flex;gap:10px;margin-top:20px;">
+            <button type="button" class="primary-submit-btn" style="flex:1;justify-content:center;background:#059669;border-color:#059669;" @click="downloadReceipt()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Download Receipt</span>
+            </button>
+            <button type="button" class="primary-submit-btn" style="flex:1;justify-content:center;" @click="resetToUpload">
+              <span>Print More</span>
+            </button>
+          </div>
+          <button type="button" class="primary-submit-btn" x-show="!isCompleted" style="width:100%;justify-content:center;margin-top:20px;" @click="resetToUpload">
             <span>Print More Documents</span>
           </button>
         </div>
@@ -2262,6 +2257,62 @@
               }
             } catch (_) {}
           }, 1500);
+        },
+
+        downloadReceipt() {
+          const shopName = this.shopInfo?.name || 'QrPrintDesk';
+          const code = this.orderCode || '#----';
+          const date = new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+          const mode = this.colorMode === 'color' ? 'Color' : 'B&W';
+          const duplex = this.duplexMode === 'duplexlong' ? 'Double-Sided' : 'Single-Sided';
+          const payMode = this.isPayAtCounterOrder ? 'Pay at Counter (Cash)' : 'Paid Online';
+          const amount = `Rs.${this.totalPriceRupees}`;
+          const fileRows = this.fileList.map(f =>
+            `<tr><td style="padding:4px 8px;">${f.name}</td><td style="padding:4px 8px;text-align:right;">${f.pageCount} pg</td></tr>`
+          ).join('');
+
+          const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt ${code}</title>
+<style>body{font-family:Arial,sans-serif;max-width:360px;margin:20px auto;font-size:13px;color:#0f172a;}
+h2{text-align:center;font-size:17px;margin:0 0 2px;}
+.sub{text-align:center;color:#64748b;font-size:11px;margin-bottom:14px;}
+hr{border:none;border-top:1px dashed #cbd5e1;margin:10px 0;}
+table{width:100%;border-collapse:collapse;}
+th{background:#f1f5f9;padding:4px 8px;text-align:left;font-size:11px;}
+.row{display:flex;justify-content:space-between;padding:3px 0;}
+.label{color:#64748b;}
+.total{font-size:16px;font-weight:700;color:#059669;text-align:center;margin:12px 0;}
+.footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:16px;}
+@media print{body{margin:0;}button{display:none;}}</style></head>
+<body>
+<h2>${shopName}</h2>
+<div class="sub">Cloud Print Receipt</div>
+<hr>
+<div class="row"><span class="label">Order Code</span><strong>${code}</strong></div>
+<div class="row"><span class="label">Date</span><span>${date}</span></div>
+<div class="row"><span class="label">Payment</span><span>${payMode}</span></div>
+<hr>
+<table><thead><tr><th>Document</th><th style="text-align:right;">Pages</th></tr></thead>
+<tbody>${fileRows}</tbody></table>
+<hr>
+<div class="row"><span class="label">Print Mode</span><span>${mode} · ${duplex}</span></div>
+<div class="row"><span class="label">Copies</span><span>${this.copies}</span></div>
+<div class="row"><span class="label">Pages/Sheet</span><span>${this.pagesPerSheet === 2 ? '2-in-1' : 'Standard'}</span></div>
+<hr>
+<div class="total">Total: ${amount}</div>
+<hr>
+<div class="footer">Thank you for printing with ${shopName}!<br>Keep this receipt for your records.</div>
+<br><button onclick="window.print()" style="width:100%;padding:8px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;">🖨️ Print / Save PDF</button>
+</body></html>`;
+
+          const blob = new Blob([html], { type: 'text/html' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Receipt_${code.replace('#', '')}_${Date.now()}.html`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
         },
 
         resetToUpload() {

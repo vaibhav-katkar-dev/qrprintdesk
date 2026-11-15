@@ -809,12 +809,12 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
       })
       .toArray();
 
-    const dailyMap: Record<string, { date: string; orders: number; grossPaise: number; vendorPaise: number }> = {};
+    const dailyMap: Record<string, { date: string; orders: number; grossPaise: number; vendorPaise: number; totalPages: number }> = {};
     for (let i = 0; i < 7; i++) {
       const d = new Date(sevenDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().split('T')[0];
       const displayDate = d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
-      dailyMap[key] = { date: displayDate, orders: 0, grossPaise: 0, vendorPaise: 0 };
+      dailyMap[key] = { date: displayDate, orders: 0, grossPaise: 0, vendorPaise: 0, totalPages: 0 };
     }
 
     for (const o of recentOrders) {
@@ -823,6 +823,8 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
         dailyMap[key].orders++;
         dailyMap[key].grossPaise += o.pricing?.amountPaise || 0;
         dailyMap[key].vendorPaise += o.pricing?.vendorSharePaise || 0;
+        const orderPages = (o.files || []).reduce((acc, f) => acc + (f.pageCount || 1), 0) * (o.printOptions?.copies || 1);
+        dailyMap[key].totalPages += orderPages;
       }
     }
 
@@ -830,7 +832,8 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
       date: d.date,
       orders: d.orders,
       grossRupees: (d.grossPaise / 100).toFixed(2),
-      vendorShareRupees: (d.vendorPaise / 100).toFixed(2)
+      vendorShareRupees: (d.vendorPaise / 100).toFixed(2),
+      totalPages: d.totalPages
     }));
 
     return reply.send({
@@ -854,6 +857,57 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
       },
       dailyTrend
     });
+  });
+
+  // GET /api/vendor/analytics/monthly -- Last 12 months of archived monthly summaries
+  // Upserts the current month on each call; past months are read-only from the archive collection.
+  fastify.get('/vendor/analytics/monthly', async (request, reply) => {
+    const auth = await getAuthenticatedShop(request, reply);
+    if (!auth) return;
+    const { shopId } = auth;
+
+    const now = new Date();
+    const curYM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+
+    // Always recompute current month from live orders and upsert
+    const curOrders = await db.collection<OrderDocument>('orders')
+      .find({ shopId, createdAt: { $gte: monthStart }, status: { $in: ['PAID', 'QUEUED', 'DOWNLOADING', 'PRINT_SUBMITTED', 'COMPLETED'] } })
+      .toArray();
+
+    let curGross = 0, curVendor = 0, curBw = 0, curColor = 0, curPages = 0;
+    for (const o of curOrders) {
+      curGross += o.pricing?.amountPaise || 0;
+      curVendor += o.pricing?.vendorSharePaise || 0;
+      const pg = (o.files || []).reduce((a, f) => a + (f.pageCount || 1), 0) * (o.printOptions?.copies || 1);
+      curPages += pg;
+      if (o.printOptions?.colorMode === 'color') curColor += pg; else curBw += pg;
+    }
+
+    await db.collection('analytics_monthly').updateOne(
+      { shopId, yearMonth: curYM },
+      { $set: { shopId, yearMonth: curYM, totalOrders: curOrders.length, grossPaise: curGross, vendorSharePaise: curVendor, bwPages: curBw, colorPages: curColor, totalPages: curPages, updatedAt: now } },
+      { upsert: true }
+    );
+
+    // Fetch last 12 months from archive (sorted newest first)
+    const archive = await db.collection('analytics_monthly')
+      .find({ shopId })
+      .sort({ yearMonth: -1 })
+      .limit(12)
+      .toArray();
+
+    const months = archive.map((m: any) => ({
+      yearMonth: m.yearMonth,
+      totalOrders: m.totalOrders || 0,
+      grossRupees: ((m.grossPaise || 0) / 100).toFixed(2),
+      vendorShareRupees: ((m.vendorSharePaise || 0) / 100).toFixed(2),
+      bwPages: m.bwPages || 0,
+      colorPages: m.colorPages || 0,
+      totalPages: m.totalPages || 0
+    }));
+
+    return reply.send({ months });
   });
 
   // GET /api/vendor/transactions -- Detailed itemized ledger transactions with pickup codes

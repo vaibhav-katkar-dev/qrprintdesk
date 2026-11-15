@@ -1896,22 +1896,49 @@ async function loadAnalytics(period = 'today') {
     if (dupTxt) dupTxt.innerText = `${v.duplexSheets || 0} sheets (${dupPercent}%)`;
     if (simpTxt) simpTxt.innerText = `${v.simplexSheets || 0} sheets (${simpPercent}%)`;
 
-    // 7-day table
+    // 7-day table (now with pages column)
     const dailyTbody = document.getElementById('fin-daily-tbody');
     if (dailyTbody) {
       const rows = data.dailyTrend || [];
       if (rows.length === 0) {
-        dailyTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px;">No historical orders yet.</td></tr>';
+        dailyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px;">No historical orders yet.</td></tr>';
       } else {
         dailyTbody.innerHTML = rows.map(r => `
           <tr>
             <td style="font-weight:600;">${escHtml(r.date)}</td>
             <td><strong style="color:#0f172a;">${r.orders}</strong> orders</td>
+            <td><strong style="color:#6366f1;">${r.totalPages || 0}</strong> pg</td>
             <td>Rs.${r.grossRupees}</td>
             <td style="color:#16a34a;font-weight:700;">Rs.${r.vendorShareRupees}</td>
           </tr>
         `).join('');
       }
+    }
+
+    // Fetch and render monthly archive
+    try {
+      const mdata = await apiFetch('analytics:monthly', `${config.serverUrl}/api/vendor/analytics/monthly`, { headers: hdr }, 15000);
+      const monthlyTbody = document.getElementById('fin-monthly-tbody');
+      if (monthlyTbody && mdata) {
+        const months = mdata.months || [];
+        if (months.length === 0) {
+          monthlyTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px;">No monthly data yet. Data accumulates as orders are processed.</td></tr>';
+        } else {
+          monthlyTbody.innerHTML = months.map(m => `
+            <tr>
+              <td style="font-weight:700;">${escHtml(m.yearMonth)}</td>
+              <td>${m.totalOrders}</td>
+              <td>${m.totalPages || 0}</td>
+              <td style="color:#475569;">${m.bwPages}</td>
+              <td style="color:#2563eb;">${m.colorPages}</td>
+              <td>Rs.${m.grossRupees}</td>
+              <td style="color:#16a34a;font-weight:700;">Rs.${m.vendorShareRupees}</td>
+            </tr>
+          `).join('');
+        }
+      }
+    } catch (mErr) {
+      console.warn('Monthly analytics fetch error:', mErr);
     }
   } catch (err) {
     console.error('loadAnalytics error:', err);

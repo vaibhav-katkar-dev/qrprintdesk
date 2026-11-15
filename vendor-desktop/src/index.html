@@ -419,19 +419,46 @@
 
         <!-- 7-Day Performance Trend -->
         <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
-          <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px;">Recent Daily Breakdown</div>
+          <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px;">Recent Daily Breakdown (Last 7 Days)</div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Completed Orders</th>
+                  <th>Orders</th>
+                  <th>Pages Printed</th>
                   <th>Gross Revenue</th>
                   <th>Vendor Share (95%)</th>
                 </tr>
               </thead>
               <tbody id="fin-daily-tbody">
-                <tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px;">Loading trend data...</td></tr>
+                <tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px;">Loading trend data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Monthly Archive (last 12 months) -->
+        <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);margin-top:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">Monthly Archive (Last 12 Months)</div>
+            <div style="font-size:11px;color:var(--text-muted);">Auto-persisted · survives order expiry</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Orders</th>
+                  <th>Total Pages</th>
+                  <th>B&amp;W</th>
+                  <th>Color</th>
+                  <th>Gross</th>
+                  <th>Your Earnings</th>
+                </tr>
+              </thead>
+              <tbody id="fin-monthly-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px;">Loading monthly archive...</td></tr>
               </tbody>
             </table>
           </div>
