@@ -20,6 +20,8 @@ const DEFAULT_PRINT_OPTIONS = {
   defaultDuplex: 'simplex' as const,
   defaultPagesPerSheet: 1 as const,
   maxCopies: 10,
+  allowStampPaper: true,
+  allowIDCardMerge: true,
 };
 
 export const vendorRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts) => {

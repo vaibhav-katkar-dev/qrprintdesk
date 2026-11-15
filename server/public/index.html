@@ -191,23 +191,31 @@
 
     .upload-tile:active {
       transform: scale(0.98);
-      background: var(--surface-subtle);
     }
 
-    .upload-tile.tile-camera {
-      border-color: #cbd5e1;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    }
-
+    /* PDF — Red accent */
     .upload-tile.tile-pdf {
-      border-color: #cbd5e1;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-color: #fca5a5;
+      background: linear-gradient(160deg, #fff 0%, #fff5f5 100%);
     }
+    .tile-pdf .tile-icon-box { background: #fef2f2; color: #dc2626; }
+    .tile-pdf .tile-title { color: #b91c1c; }
 
-    .upload-tile.tile-idcard {
-      border-color: #f0abfc;
-      background: linear-gradient(180deg, #ffffff 0%, #fdf4ff 100%);
+    /* Photo — Blue accent */
+    .upload-tile.tile-camera {
+      border-color: #93c5fd;
+      background: linear-gradient(160deg, #fff 0%, #eff6ff 100%);
     }
+    .tile-camera .tile-icon-box { background: #eff6ff; color: #2563eb; }
+    .tile-camera .tile-title { color: #1d4ed8; }
+
+    /* ID Card — Amber accent */
+    .upload-tile.tile-idcard {
+      border-color: #fcd34d;
+      background: linear-gradient(160deg, #fff 0%, #fffbeb 100%);
+    }
+    .tile-idcard .tile-icon-box { background: #fef3c7; color: #d97706; }
+    .tile-idcard .tile-title { color: #b45309; }
 
     .tile-icon-box {
       width: 36px;
@@ -218,30 +226,14 @@
       justify-content: center;
     }
 
-    .tile-camera .tile-icon-box {
-      background: var(--brand-blue-soft);
-      color: var(--brand-blue);
-    }
-
-    .tile-pdf .tile-icon-box {
-      background: #fef2f2;
-      color: #dc2626;
-    }
-
-    .tile-idcard .tile-icon-box {
-      background: #fae8ff;
-      color: #9333ea;
-    }
-
     .tile-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
-      color: var(--text-primary);
       letter-spacing: -0.01em;
     }
 
     .tile-sub {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-tertiary);
       font-weight: 500;
       line-height: 1.25;
@@ -249,14 +241,146 @@
 
     .input-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 10;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; z-index: 10;
     }
+
+    /* ── Document Cards (color-coded by type) ── */
+    .doc-card {
+      border-radius: 12px;
+      border: 1.5px solid var(--border-subtle);
+      background: #fff;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+    .doc-card.type-pdf   { border-left: 4px solid #ef4444; }
+    .doc-card.type-photo { border-left: 4px solid #3b82f6; }
+    .doc-card.type-idcard{ border-left: 4px solid #f59e0b; }
+
+    .doc-card-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; cursor: default;
+    }
+
+    .doc-type-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.06em;
+      padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .badge-pdf   { background: #fee2e2; color: #b91c1c; }
+    .badge-photo { background: #dbeafe; color: #1d4ed8; }
+    .badge-idcard{ background: #fef3c7; color: #b45309; }
+
+    .doc-thumb {
+      width: 42px; height: 42px;
+      border-radius: 6px; object-fit: cover;
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .doc-thumb-placeholder {
+      width: 42px; height: 42px; border-radius: 6px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface-subtle); color: var(--text-tertiary);
+    }
+
+    .doc-edit-btn {
+      background: var(--surface-subtle); border: 1px solid var(--border-subtle);
+      border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600;
+      color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .doc-edit-btn:hover { background: var(--surface-hover); }
+
+    /* ── ID Card Dual-Slot ── */
+    .idcard-slots {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 0 12px 12px;
+    }
+    .idcard-slot {
+      position: relative; border: 1.5px dashed #fcd34d;
+      border-radius: 10px; min-height: 80px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 6px; cursor: pointer;
+      background: #fffbeb; transition: background 0.15s;
+      overflow: hidden;
+    }
+    .idcard-slot.filled { border-style: solid; border-color: #f59e0b; background: #fff; }
+    .idcard-slot input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+    .idcard-slot-label { font-size: 11px; font-weight: 700; color: #b45309; }
+    .idcard-slot-sub   { font-size: 9.5px; color: #92400e; }
+    .idcard-slot-img   { width: 100%; height: 72px; object-fit: cover; border-radius: 6px; }
+    .idcard-slot-clear { position: absolute; top: 4px; right: 4px; z-index: 3;
+      background: rgba(0,0,0,0.5); border: none; border-radius: 50%;
+      width: 18px; height: 18px; color: #fff; cursor: pointer; font-size: 10px;
+      display: flex; align-items: center; justify-content: center; }
+    .idcard-merge-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; background: #fffbeb; border-top: 1px solid #fde68a;
+    }
+
+    /* ── Crop Editor Modal ── */
+    .crop-modal-backdrop {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.75);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .crop-modal {
+      background: #fff; border-radius: 18px;
+      width: 100%; max-width: 440px;
+      display: flex; flex-direction: column; overflow: hidden;
+      max-height: 90vh;
+    }
+    .crop-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .crop-stage {
+      position: relative; background: #0f172a;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; min-height: 220px; max-height: 50vh;
+    }
+    .crop-stage img {
+      max-width: 100%; max-height: 50vh;
+      object-fit: contain; display: block;
+    }
+    .crop-overlay {
+      position: absolute; border: 2px solid #fff;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+      cursor: move; pointer-events: all;
+    }
+    .crop-handle {
+      position: absolute; width: 16px; height: 16px;
+      background: #fff; border-radius: 3px;
+      border: 2px solid #2563eb;
+    }
+    .crop-handle.tl { top:-8px; left:-8px; cursor:nw-resize; }
+    .crop-handle.tr { top:-8px; right:-8px; cursor:ne-resize; }
+    .crop-handle.bl { bottom:-8px; left:-8px; cursor:sw-resize; }
+    .crop-handle.br { bottom:-8px; right:-8px; cursor:se-resize; }
+
+    .crop-toolbar {
+      display: flex; gap: 8px; padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap;
+    }
+    .crop-action-row {
+      display: flex; gap: 8px; padding: 12px 14px;
+    }
+    .crop-btn {
+      flex: 1; padding: 10px; border-radius: 10px; font-size: 13px;
+      font-weight: 600; border: none; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; gap: 6px;
+    }
+    .crop-btn.cancel { background: var(--surface-subtle); color: var(--text-secondary); }
+    .crop-btn.apply  { background: var(--brand-blue); color: #fff; }
+    .crop-btn.skip   { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .enhance-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11.5px; font-weight: 600; color: var(--text-secondary);
+      padding: 5px 10px; border-radius: 8px; background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle); cursor: pointer;
+    }
+    .enhance-toggle input { accent-color: #2563eb; }
 
     /*  Selected Documents List  */
     .document-list {
@@ -915,11 +1039,11 @@
             <span class="block-counter" x-show="fileList.length > 0" x-text="`${fileList.length} file(s) added`"></span>
           </div>
 
-          <!-- 3 Smart Upload Categories: PDF, Photos, and ID Cards -->
+          <!-- 3 Smart Upload Categories — Color-coded tiles -->
           <div class="upload-action-row" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
-            <!-- 1. PDF Documents -->
+            <!-- 1. PDF Documents — RED -->
             <label class="upload-tile tile-pdf" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center;">
-              <input type="file" multiple accept="application/pdf,.pdf" class="input-overlay" @change="onFilesSelected">
+              <input type="file" multiple accept="application/pdf,.pdf" class="input-overlay" @change="onPDFFilesSelected">
               <div class="tile-icon-box" style="margin-bottom: 6px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </div>
@@ -929,98 +1053,197 @@
               </div>
             </label>
 
-            <!-- 2. Photos & Gallery -->
+            <!-- 2. Photos & Gallery — BLUE -->
             <label class="upload-tile tile-camera" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center;">
-              <input type="file" multiple accept="image/*" class="input-overlay" @change="onFilesSelected">
+              <input type="file" multiple accept="image/*" class="input-overlay" @change="onPhotoFilesSelected">
               <div class="tile-icon-box" style="margin-bottom: 6px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               </div>
               <div>
                 <div class="tile-title" style="font-size: 12.5px;">Photos</div>
-                <div class="tile-sub" style="font-size: 10px;">Camera, Images</div>
+                <div class="tile-sub" style="font-size: 10px;">Gallery, Camera</div>
               </div>
             </label>
 
-            <!-- 3. Smart ID Card Mode (Front + Back) -->
-            <label class="upload-tile tile-idcard" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center;">
-              <input type="file" multiple accept="image/*" class="input-overlay" @change="onIDCardFilesSelected">
+            <!-- 3. ID Card 2-in-1 — AMBER -->
+            <button type="button" class="upload-tile tile-idcard" style="padding: 12px 8px; text-align: center; flex-direction: column; align-items: center; width:100%;" @click="startIDCardFlow()">
               <div class="tile-icon-box" style="margin-bottom: 6px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg>
               </div>
               <div>
-                <div class="tile-title" style="font-size: 12.5px; color:#9333ea;">ID Card</div>
-                <div class="tile-sub" style="font-size: 10px; color:#a21caf;">Aadhaar 2-in-1</div>
+                <div class="tile-title" style="font-size: 12.5px;">ID Card</div>
+                <div class="tile-sub" style="font-size: 10px;">Aadhaar 2-in-1</div>
               </div>
-            </label>
-          </div>
-
-          <!-- Smart 1-Click Aadhaar / Dual ID Card Merger Box -->
-          <div class="id-card-banner" x-show="canMergeIDCards">
-            <div class="id-card-text">
-              <div class="id-card-title">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg>
-                <span>Aadhaar / ID Card Detected</span>
-              </div>
-              <div class="id-card-sub">Merge Front + Back neatly onto 1 single A4 sheet to save paper.</div>
-            </div>
-            <button type="button" class="id-card-btn" @click="mergeIDCardImages()">
-              <span>Combine to 1 Page</span>
             </button>
           </div>
 
-          <!-- Selected Files Rows with Live Upload Tracking -->
-          <div class="document-list" x-show="fileList.length > 0">
-            <template x-for="(f, idx) in fileList" :key="f.id || idx">
-              <div class="document-item" style="flex-direction:column;align-items:stretch;gap:8px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;">
-                  <div class="document-info-cell">
-                    <div class="doc-type-icon">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="f.name.toLowerCase().endsWith('.pdf')"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" x-show="!f.name.toLowerCase().endsWith('.pdf')"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    </div>
-                    <div class="doc-text-wrap">
-                      <div class="doc-filename" x-text="f.name"></div>
-                      <div class="doc-meta" x-text="`${formatBytes(f.size)}  ${f.pageCount} page(s)`"></div>
-                    </div>
+          <!-- ID Card Dual-Slot (shows when ID card mode is active) -->
+          <div class="doc-card type-idcard" x-show="idCardPair.active" style="margin-top:4px;">
+            <div class="doc-card-header" style="justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="doc-type-badge badge-idcard">ID Card · 2-in-1</span>
+                <span style="font-size:11px;color:var(--text-secondary);">Front + Back → 1 A4 sheet</span>
+              </div>
+              <button type="button" class="doc-remove-btn" @click="cancelIDCardFlow()" title="Cancel ID card">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="idcard-slots">
+              <!-- Front slot -->
+              <div class="idcard-slot" :class="{ filled: idCardPair.frontPreview }">
+                <input type="file" accept="image/*" @change="onIDSlotSelected($event, 'front')" :style="idCardPair.frontPreview ? 'display:none' : ''">
+                <template x-if="!idCardPair.frontPreview">
+                  <div style="text-align:center;pointer-events:none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    <div class="idcard-slot-label">Front Side</div>
+                    <div class="idcard-slot-sub">Tap to pick photo</div>
                   </div>
+                </template>
+                <template x-if="idCardPair.frontPreview">
+                  <div style="width:100%;position:relative;">
+                    <img :src="idCardPair.frontPreview" class="idcard-slot-img" alt="Front">
+                    <button type="button" class="idcard-slot-clear" @click.stop="clearIDSlot('front')">✕</button>
+                    <button type="button" class="doc-edit-btn" style="position:absolute;bottom:4px;left:4px;font-size:9px;padding:2px 6px;z-index:3;" @click.stop="openCropEditor('idfront')">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 3v18"/></svg> Crop
+                    </button>
+                  </div>
+                </template>
+              </div>
+              <!-- Back slot -->
+              <div class="idcard-slot" :class="{ filled: idCardPair.backPreview }">
+                <input type="file" accept="image/*" @change="onIDSlotSelected($event, 'back')" :style="idCardPair.backPreview ? 'display:none' : ''">
+                <template x-if="!idCardPair.backPreview">
+                  <div style="text-align:center;pointer-events:none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    <div class="idcard-slot-label">Back Side</div>
+                    <div class="idcard-slot-sub">Tap to pick photo</div>
+                  </div>
+                </template>
+                <template x-if="idCardPair.backPreview">
+                  <div style="width:100%;position:relative;">
+                    <img :src="idCardPair.backPreview" class="idcard-slot-img" alt="Back">
+                    <button type="button" class="idcard-slot-clear" @click.stop="clearIDSlot('back')">✕</button>
+                    <button type="button" class="doc-edit-btn" style="position:absolute;bottom:4px;left:4px;font-size:9px;padding:2px 6px;z-index:3;" @click.stop="openCropEditor('idback')">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 3v18"/></svg> Crop
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="idcard-merge-row" x-show="idCardPair.frontPreview && idCardPair.backPreview">
+              <span style="font-size:11px;color:#92400e;font-weight:600;">✅ Both sides ready</span>
+              <button type="button" class="id-card-btn" @click="commitIDCardMerge()">Merge to 1 A4 →</button>
+            </div>
+            <div class="idcard-merge-row" x-show="idCardPair.frontPreview && !idCardPair.backPreview">
+              <span style="font-size:11px;color:#b45309;">Front added — now pick the Back side</span>
+            </div>
+          </div>
 
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <!-- Uploading status -->
-                    <template x-if="f.status === 'uploading'">
-                      <span class="doc-status-badge uploading">
-                        <span class="spinner-ring" style="width:10px;height:10px;border-width:1.5px;border-top-color:#2563eb;"></span>
+          <!-- Color-coded Document Cards with Preview + Edit -->
+          <div style="display:flex;flex-direction:column;gap:8px;" x-show="fileList.length > 0">
+            <template x-for="(f, idx) in fileList" :key="f.id || idx">
+              <div class="doc-card" :class="f.docType === 'pdf' ? 'type-pdf' : f.docType === 'idcard' ? 'type-idcard' : 'type-photo'">
+                <div class="doc-card-header">
+                  <!-- Thumbnail -->
+                  <template x-if="f.previewUrl">
+                    <img :src="f.previewUrl" class="doc-thumb" alt="preview">
+                  </template>
+                  <template x-if="!f.previewUrl">
+                    <div class="doc-thumb-placeholder">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                  </template>
+
+                  <!-- Info -->
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                      <span class="doc-type-badge" :class="f.docType === 'pdf' ? 'badge-pdf' : f.docType === 'idcard' ? 'badge-idcard' : 'badge-photo'" x-text="f.docType === 'pdf' ? 'PDF' : f.docType === 'idcard' ? 'ID Card' : 'Photo'"></span>
+                      <!-- Status badge -->
+                      <span class="doc-status-badge uploading" x-show="f.status === 'uploading'">
+                        <span class="spinner-ring" style="width:9px;height:9px;border-width:1.5px;border-top-color:#2563eb;"></span>
                         <span x-text="f.progress + '%'"></span>
                       </span>
-                    </template>
-                    <!-- Done status -->
-                    <template x-if="f.status === 'done'">
-                      <span class="doc-status-badge done">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span>Ready</span>
+                      <span class="doc-status-badge done" x-show="f.status === 'done'">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Ready
                       </span>
-                    </template>
-                    <!-- Error status -->
-                    <template x-if="f.status === 'error'">
-                      <button type="button" class="doc-status-badge error" @click="retryUpload(f.id)" title="Click to retry upload">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                        <span>Retry</span>
+                      <button type="button" class="doc-status-badge error" x-show="f.status === 'error'" @click="retryUpload(f.id)">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg> Retry
                       </button>
-                    </template>
+                    </div>
+                    <div style="font-size:12px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" x-text="f.name"></div>
+                    <div style="font-size:10.5px;color:var(--text-tertiary);" x-text="`${formatBytes(f.size)} · ${f.pageCount} page(s)`"></div>
+                  </div>
 
-                    <button type="button" class="doc-remove-btn" @click="removeFile(idx)" title="Remove file">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <!-- Actions -->
+                  <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+                    <!-- Edit/Crop for photos only -->
+                    <button type="button" class="doc-edit-btn" x-show="f.docType === 'photo' && f.previewUrl" @click="openCropEditor(f.id)">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 3v18"/></svg>
+                      Crop/Edit
+                    </button>
+                    <button type="button" class="doc-remove-btn" @click="removeFile(idx)">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                   </div>
                 </div>
 
-                <!-- Per-file progress bar during upload -->
-                <div class="doc-upload-progress-wrap" x-show="f.status === 'uploading'">
+                <!-- Upload Progress Bar -->
+                <div class="doc-upload-progress-wrap" x-show="f.status === 'uploading'" style="margin:0 12px 10px;">
                   <div class="doc-upload-progress-bar" :style="'width: ' + f.progress + '%'"></div>
                 </div>
               </div>
             </template>
           </div>
         </section>
+
+        <!-- ── CROP EDITOR MODAL ── -->
+        <div class="crop-modal-backdrop" x-show="cropEditor.open" x-cloak @click.self="closeCropEditor(false)">
+          <div class="crop-modal">
+            <div class="crop-modal-header">
+              <div style="font-size:14px;font-weight:700;">Adjust &amp; Crop Photo</div>
+              <button type="button" @click="closeCropEditor(false)" style="background:none;border:none;cursor:pointer;color:var(--text-secondary);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            <!-- Image stage with crop overlay -->
+            <div class="crop-stage" id="crop-stage-wrap" x-ref="cropStage">
+              <img :src="cropEditor.imageUrl" id="crop-source-img" alt="Edit" style="display:block;"
+                   @load="onCropImageLoad()">
+              <!-- Crop rect rendered via canvas approach -->
+              <canvas id="crop-canvas" style="position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none;"></canvas>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="crop-toolbar">
+              <button type="button" class="doc-edit-btn" @click="rotateCrop(-90)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                Rotate ↺
+              </button>
+              <button type="button" class="doc-edit-btn" @click="rotateCrop(90)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                Rotate ↻
+              </button>
+              <label class="enhance-toggle">
+                <input type="checkbox" x-model="cropEditor.enhance" @change="redrawCropCanvas()">
+                ✨ Enhance
+              </label>
+              <button type="button" class="doc-edit-btn" @click="resetCropBox()">Reset</button>
+            </div>
+
+            <div style="padding:6px 14px;font-size:11px;color:var(--text-tertiary);">
+              Drag corners to crop. Enhancement boosts contrast for sharper text — safe, no quality loss.
+            </div>
+
+            <div class="crop-action-row">
+              <button type="button" class="crop-btn skip" @click="closeCropEditor(true)">Use Original</button>
+              <button type="button" class="crop-btn apply" @click="applyCropAndClose()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Apply Crop
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- STEP 2: Preferences (Appears once files are selected) -->
         <section class="block-card" x-show="fileList.length > 0">
@@ -1300,6 +1523,27 @@
         cashfreeInstance: null,
         restoredSession: false,
 
+        // ── ID Card dual-slot state ──
+        idCardPair: {
+          active: false,
+          frontFile: null, frontPreview: null, frontCropped: null,
+          backFile: null,  backPreview: null,  backCropped: null
+        },
+
+        // ── Crop Editor state ──
+        cropEditor: {
+          open: false,
+          targetId: null,   // fileList id OR 'idfront'/'idback'
+          imageUrl: null,
+          rotation: 0,
+          enhance: true,
+          box: { x: 20, y: 20, w: 200, h: 150 },
+          imgNatW: 0, imgNatH: 0,
+          canvasW: 0, canvasH: 0,
+          dragging: null,
+          _canvas: null, _ctx: null, _img: null
+        },
+
         async init() {
           try {
             const res = await fetch(`/api/shops/${this.shopSlug}/info`);
@@ -1416,6 +1660,355 @@
           return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         },
 
+        // ── PDF tile handler ──
+        async onPDFFilesSelected(e) {
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+          this.errorMessage = '';
+          for (const file of files) {
+            if (this.fileList.some(x => x.name === file.name && x.size === file.size)) {
+              this.errorMessage = `"${file.name}" already added (duplicate skipped).`; continue;
+            }
+            const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            this.fileList.push({ id, file, name: file.name, size: file.size, pageCount: 1,
+              status: 'pending', progress: 0, loadedBytes: 0, uploadedMeta: null,
+              errorMessage: '', xhr: null, docType: 'pdf', previewUrl: null });
+            setTimeout(() => this.uploadSingleFile(id), 10);
+          }
+          this.recomputeOverallProgress(); this.updatePageCounts();
+          try { e.target.value = ''; } catch (_) {}
+        },
+
+        // ── Photo tile handler (opens crop editor for each photo) ──
+        async onPhotoFilesSelected(e) {
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+          this.errorMessage = '';
+          for (const file of files) {
+            if (this.fileList.some(x => x.name === file.name && x.size === file.size)) {
+              this.errorMessage = `"${file.name}" already added (duplicate skipped).`; continue;
+            }
+            const previewUrl = URL.createObjectURL(file);
+            const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            this.fileList.push({ id, file, name: file.name, size: file.size, pageCount: 1,
+              status: 'pending', progress: 0, loadedBytes: 0, uploadedMeta: null,
+              errorMessage: '', xhr: null, docType: 'photo', previewUrl,
+              _originalFile: file });
+            // Open crop editor for first photo, then upload after crop or skip
+            this.openCropEditor(id);
+          }
+          this.recomputeOverallProgress(); this.updatePageCounts();
+          try { e.target.value = ''; } catch (_) {}
+        },
+
+        // ── ID Card dual-slot flow ──
+        startIDCardFlow() {
+          this.idCardPair = { active: true, frontFile: null, frontPreview: null, frontCropped: null,
+                              backFile: null, backPreview: null, backCropped: null };
+        },
+
+        cancelIDCardFlow() {
+          if (this.idCardPair.frontPreview) URL.revokeObjectURL(this.idCardPair.frontPreview);
+          if (this.idCardPair.backPreview) URL.revokeObjectURL(this.idCardPair.backPreview);
+          this.idCardPair = { active: false, frontFile: null, frontPreview: null, frontCropped: null,
+                              backFile: null, backPreview: null, backCropped: null };
+        },
+
+        onIDSlotSelected(e, side) {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const prevUrl = this.idCardPair[side + 'Preview'];
+          if (prevUrl) URL.revokeObjectURL(prevUrl);
+          const previewUrl = URL.createObjectURL(file);
+          this.idCardPair[side + 'File'] = file;
+          this.idCardPair[side + 'Preview'] = previewUrl;
+          this.idCardPair[side + 'Cropped'] = null;
+          try { e.target.value = ''; } catch (_) {}
+          // Auto-open crop editor for this slot
+          this.openCropEditor(side === 'front' ? 'idfront' : 'idback');
+        },
+
+        clearIDSlot(side) {
+          if (this.idCardPair[side + 'Preview']) URL.revokeObjectURL(this.idCardPair[side + 'Preview']);
+          this.idCardPair[side + 'File'] = null;
+          this.idCardPair[side + 'Preview'] = null;
+          this.idCardPair[side + 'Cropped'] = null;
+        },
+
+        async commitIDCardMerge() {
+          this.loading = true; this.loadingText = 'Combining ID Card Front & Back...';
+          try {
+            const getFinalBlob = async (side) => {
+              const cropped = this.idCardPair[side + 'Cropped'];
+              if (cropped) return cropped;
+              const file = this.idCardPair[side + 'File'];
+              return file;
+            };
+            const getImg = (blob) => new Promise((res, rej) => {
+              const img = new Image(); const url = URL.createObjectURL(blob);
+              img.onload = () => { URL.revokeObjectURL(url); res(img); };
+              img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Image load failed')); };
+              img.src = url;
+            });
+            const [blob1, blob2] = await Promise.all([getFinalBlob('front'), getFinalBlob('back')]);
+            const [img1, img2] = await Promise.all([getImg(blob1), getImg(blob2)]);
+            const canvas = document.createElement('canvas');
+            canvas.width = 1654; canvas.height = 2338;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const cardW = 1180, cardH = 740, leftX = (canvas.width - cardW) / 2;
+            ctx.drawImage(img1, leftX, 260, cardW, cardH);
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2;
+            ctx.strokeRect(leftX, 260, cardW, cardH);
+            ctx.drawImage(img2, leftX, 1240, cardW, cardH);
+            ctx.strokeRect(leftX, 1240, cardW, cardH);
+            const mergedBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.90));
+            const mergedFile = new File([mergedBlob], 'ID_Card_Front_Back.jpg', { type: 'image/jpeg' });
+            const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            const previewUrl = URL.createObjectURL(mergedBlob);
+            this.fileList.push({ id, file: mergedFile, name: mergedFile.name, size: mergedFile.size,
+              pageCount: 1, status: 'pending', progress: 0, loadedBytes: 0, uploadedMeta: null,
+              errorMessage: '', xhr: null, docType: 'idcard', previewUrl });
+            this.cancelIDCardFlow();
+            this.loading = false;
+            setTimeout(() => this.uploadSingleFile(id), 10);
+            this.recomputeOverallProgress(); this.updatePageCounts();
+          } catch (err) {
+            this.loading = false;
+            this.errorMessage = 'Merge failed: ' + (err.message || 'unknown error');
+          }
+        },
+
+        // ── Crop Editor ──
+        openCropEditor(targetId) {
+          let imageUrl = null;
+          if (targetId === 'idfront') imageUrl = this.idCardPair.frontPreview;
+          else if (targetId === 'idback') imageUrl = this.idCardPair.backPreview;
+          else { const f = this.fileList.find(x => x.id === targetId); imageUrl = f?.previewUrl; }
+          if (!imageUrl) return;
+          this.cropEditor = { ...this.cropEditor, open: true, targetId, imageUrl,
+            rotation: 0, enhance: true, dragging: null, _canvas: null, _ctx: null, _img: null };
+        },
+
+        onCropImageLoad() {
+          const img = document.getElementById('crop-source-img');
+          const wrap = document.getElementById('crop-stage-wrap');
+          const canvas = document.getElementById('crop-canvas');
+          if (!img || !canvas || !wrap) return;
+          canvas.width = wrap.offsetWidth;
+          canvas.height = wrap.offsetHeight;
+          this.cropEditor._canvas = canvas;
+          this.cropEditor._ctx = canvas.getContext('2d');
+          this.cropEditor._img = img;
+          this.cropEditor.canvasW = canvas.width;
+          this.cropEditor.canvasH = canvas.height;
+          this.cropEditor.imgNatW = img.naturalWidth;
+          this.cropEditor.imgNatH = img.naturalHeight;
+          // Default crop box = full image with 5% inset
+          const iw = img.offsetWidth, ih = img.offsetHeight;
+          const ox = (canvas.width - iw) / 2, oy = (canvas.height - ih) / 2;
+          this.cropEditor.box = { x: ox + iw * 0.03, y: oy + ih * 0.03,
+                                  w: iw * 0.94, h: ih * 0.94 };
+          this.redrawCropCanvas();
+          this.bindCropEvents(canvas);
+        },
+
+        redrawCropCanvas() {
+          const ce = this.cropEditor;
+          if (!ce._ctx || !ce._img) return;
+          const canvas = ce._canvas, ctx = ce._ctx;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const img = ce._img;
+          const iw = img.offsetWidth, ih = img.offsetHeight;
+          const ox = (canvas.width - iw) / 2, oy = (canvas.height - ih) / 2;
+          // Dim overlay
+          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          // Clear crop region (shows image through)
+          const b = ce.box;
+          ctx.clearRect(b.x, b.y, b.w, b.h);
+          // Crop border
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+          ctx.strokeRect(b.x, b.y, b.w, b.h);
+          // Corner handles
+          const hs = 10;
+          ctx.fillStyle = '#3b82f6';
+          [[b.x,b.y],[b.x+b.w,b.y],[b.x,b.y+b.h],[b.x+b.w,b.y+b.h]].forEach(([hx,hy]) => {
+            ctx.fillRect(hx - hs/2, hy - hs/2, hs, hs);
+          });
+        },
+
+        bindCropEvents(canvas) {
+          const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const src = e.touches ? e.touches[0] : e;
+            return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+          };
+          const hitHandle = (px, py) => {
+            const b = this.cropEditor.box; const tol = 16;
+            if (Math.abs(px - b.x) < tol && Math.abs(py - b.y) < tol) return 'tl';
+            if (Math.abs(px - (b.x+b.w)) < tol && Math.abs(py - b.y) < tol) return 'tr';
+            if (Math.abs(px - b.x) < tol && Math.abs(py - (b.y+b.h)) < tol) return 'bl';
+            if (Math.abs(px - (b.x+b.w)) < tol && Math.abs(py - (b.y+b.h)) < tol) return 'br';
+            if (px > b.x && px < b.x+b.w && py > b.y && py < b.y+b.h) return 'move';
+            return null;
+          };
+          const down = (e) => {
+            const { x, y } = getPos(e);
+            const h = hitHandle(x, y);
+            if (!h) return;
+            e.preventDefault();
+            const b = this.cropEditor.box;
+            this.cropEditor.dragging = { handle: h, sx: x, sy: y, bx: b.x, by: b.y, bw: b.w, bh: b.h };
+          };
+          const move = (e) => {
+            if (!this.cropEditor.dragging) return;
+            e.preventDefault();
+            const { x, y } = getPos(e);
+            const d = this.cropEditor.dragging;
+            const dx = x - d.sx, dy = y - d.sy;
+            const b = this.cropEditor.box;
+            const MIN = 30;
+            if (d.handle === 'move') {
+              b.x = Math.max(0, Math.min(d.bx + dx, this.cropEditor.canvasW - b.w));
+              b.y = Math.max(0, Math.min(d.by + dy, this.cropEditor.canvasH - b.h));
+            } else if (d.handle === 'tl') {
+              const nw = Math.max(MIN, d.bw - dx), nh = Math.max(MIN, d.bh - dy);
+              b.x = d.bx + d.bw - nw; b.y = d.by + d.bh - nh; b.w = nw; b.h = nh;
+            } else if (d.handle === 'tr') {
+              b.w = Math.max(MIN, d.bw + dx);
+              const nh = Math.max(MIN, d.bh - dy); b.y = d.by + d.bh - nh; b.h = nh;
+            } else if (d.handle === 'bl') {
+              const nw = Math.max(MIN, d.bw - dx); b.x = d.bx + d.bw - nw; b.w = nw;
+              b.h = Math.max(MIN, d.bh + dy);
+            } else if (d.handle === 'br') {
+              b.w = Math.max(MIN, d.bw + dx); b.h = Math.max(MIN, d.bh + dy);
+            }
+            this.redrawCropCanvas();
+          };
+          const up = () => { this.cropEditor.dragging = null; };
+          canvas.addEventListener('mousedown', down); canvas.addEventListener('touchstart', down, { passive: false });
+          canvas.addEventListener('mousemove', move); canvas.addEventListener('touchmove', move, { passive: false });
+          canvas.addEventListener('mouseup', up); canvas.addEventListener('touchend', up);
+        },
+
+        rotateCrop(deg) {
+          this.cropEditor.rotation = (this.cropEditor.rotation + deg + 360) % 360;
+          // Apply rotation to image in a temp canvas and update source
+          const src = document.getElementById('crop-source-img');
+          if (!src) return;
+          const c = document.createElement('canvas');
+          const rad = this.cropEditor.rotation * Math.PI / 180;
+          const iw = src.naturalWidth, ih = src.naturalHeight;
+          const abscos = Math.abs(Math.cos(rad)), abssin = Math.abs(Math.sin(rad));
+          c.width = Math.round(iw * abscos + ih * abssin);
+          c.height = Math.round(iw * abssin + ih * abscos);
+          const cx2 = c.getContext('2d');
+          cx2.translate(c.width/2, c.height/2);
+          cx2.rotate(rad);
+          cx2.drawImage(src, -iw/2, -ih/2);
+          c.toBlob(blob => {
+            if (!blob) return;
+            const newUrl = URL.createObjectURL(blob);
+            const old = this.cropEditor.imageUrl;
+            this.cropEditor.imageUrl = newUrl;
+            // Don't revoke old if it's the original preview — track separately
+          }, 'image/jpeg', 0.92);
+        },
+
+        resetCropBox() {
+          const img = document.getElementById('crop-source-img');
+          const wrap = document.getElementById('crop-stage-wrap');
+          if (!img || !wrap) return;
+          const iw = img.offsetWidth, ih = img.offsetHeight;
+          const ox = (wrap.offsetWidth - iw) / 2, oy = (wrap.offsetHeight - ih) / 2;
+          this.cropEditor.box = { x: ox + iw * 0.03, y: oy + ih * 0.03, w: iw * 0.94, h: ih * 0.94 };
+          this.redrawCropCanvas();
+        },
+
+        closeCropEditor(useOriginal) {
+          const ce = this.cropEditor;
+          if (useOriginal) {
+            // Skip crop — just upload the original
+            if (ce.targetId && ce.targetId !== 'idfront' && ce.targetId !== 'idback') {
+              const f = this.fileList.find(x => x.id === ce.targetId);
+              if (f && f.status === 'pending') setTimeout(() => this.uploadSingleFile(f.id), 10);
+            }
+          }
+          ce.open = false;
+        },
+
+        async applyCropAndClose() {
+          const ce = this.cropEditor;
+          const img = document.getElementById('crop-source-img');
+          if (!img) { this.closeCropEditor(true); return; }
+
+          const srcCanvas = document.createElement('canvas');
+          const iw = img.naturalWidth, ih = img.naturalHeight;
+          srcCanvas.width = iw; srcCanvas.height = ih;
+          const sctx = srcCanvas.getContext('2d');
+          sctx.drawImage(img, 0, 0, iw, ih);
+
+          // Map canvas-displayed crop box → natural image coordinates
+          const dispW = img.offsetWidth, dispH = img.offsetHeight;
+          const wrap = document.getElementById('crop-stage-wrap');
+          const wrapW = wrap?.offsetWidth || dispW;
+          const ox = (wrapW - dispW) / 2;
+          const oy = (wrap?.offsetHeight - dispH) / 2 || 0;
+          const scaleX = iw / dispW, scaleY = ih / dispH;
+          const b = ce.box;
+          const cx = Math.round((b.x - ox) * scaleX);
+          const cy = Math.round((b.y - oy) * scaleY);
+          const cw = Math.round(b.w * scaleX);
+          const ch = Math.round(b.h * scaleY);
+          const safeCx = Math.max(0, Math.min(cx, iw - 1));
+          const safeCy = Math.max(0, Math.min(cy, ih - 1));
+          const safeCw = Math.max(10, Math.min(cw, iw - safeCx));
+          const safeCh = Math.max(10, Math.min(ch, ih - safeCy));
+
+          const out = document.createElement('canvas');
+          out.width = safeCw; out.height = safeCh;
+          const octx = out.getContext('2d');
+          octx.drawImage(srcCanvas, safeCx, safeCy, safeCw, safeCh, 0, 0, safeCw, safeCh);
+
+          if (ce.enhance) {
+            // Safe enhancement: contrast +15%, brightness +6 — no detail loss
+            const imgData = octx.getImageData(0, 0, safeCw, safeCh);
+            const d = imgData.data;
+            for (let i = 0; i < d.length; i += 4) {
+              d[i]   = Math.min(255, Math.max(0, (d[i]   - 128) * 1.15 + 128 + 6));
+              d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * 1.15 + 128 + 6));
+              d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * 1.15 + 128 + 6));
+            }
+            octx.putImageData(imgData, 0, 0);
+          }
+
+          const croppedBlob = await new Promise(r => out.toBlob(r, 'image/jpeg', 0.92));
+
+          if (ce.targetId === 'idfront') {
+            this.idCardPair.frontCropped = croppedBlob;
+            const newUrl = URL.createObjectURL(croppedBlob);
+            if (this.idCardPair.frontPreview) URL.revokeObjectURL(this.idCardPair.frontPreview);
+            this.idCardPair.frontPreview = newUrl;
+          } else if (ce.targetId === 'idback') {
+            this.idCardPair.backCropped = croppedBlob;
+            const newUrl = URL.createObjectURL(croppedBlob);
+            if (this.idCardPair.backPreview) URL.revokeObjectURL(this.idCardPair.backPreview);
+            this.idCardPair.backPreview = newUrl;
+          } else {
+            const f = this.fileList.find(x => x.id === ce.targetId);
+            if (f) {
+              const croppedFile = new File([croppedBlob], f.name, { type: 'image/jpeg' });
+              f.file = croppedFile; f.size = croppedFile.size;
+              const newUrl = URL.createObjectURL(croppedBlob);
+              if (f.previewUrl) URL.revokeObjectURL(f.previewUrl);
+              f.previewUrl = newUrl;
+              if (f.status === 'pending') setTimeout(() => this.uploadSingleFile(f.id), 10);
+            }
+          }
+          ce.open = false;
+        },
+
         async onFilesSelected(e) {
           const files = Array.from(e.target.files || []);
           if (!files.length) return;
@@ -1432,6 +2025,10 @@
             }
 
             const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+            const previewUrl = (!isPdf && file.type.startsWith('image/')) ? URL.createObjectURL(file) : null;
+            const docType = isPdf ? 'pdf' : 'photo';
+
             this.fileList.push({
               id,
               file,
@@ -1443,7 +2040,9 @@
               loadedBytes: 0,
               uploadedMeta: null,
               errorMessage: '',
-              xhr: null
+              xhr: null,
+              docType,
+              previewUrl
             });
             // Launch background upload
             setTimeout(() => this.uploadSingleFile(id), 10);
@@ -1512,7 +2111,9 @@
                 loadedBytes: 0,
                 uploadedMeta: null,
                 errorMessage: '',
-                xhr: null
+                xhr: null,
+                docType: 'idcard',
+                previewUrl: URL.createObjectURL(mergedBlob)
               });
               this.loading = false;
               setTimeout(() => this.uploadSingleFile(id), 10);
@@ -1529,6 +2130,7 @@
           // Fallback if 1 or more than 2 files selected: add normally
           for (const file of files) {
             const id = 'doc_' + Math.random().toString(36).substring(2, 9);
+            const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
             this.fileList.push({
               id,
               file,
@@ -1540,7 +2142,9 @@
               loadedBytes: 0,
               uploadedMeta: null,
               errorMessage: '',
-              xhr: null
+              xhr: null,
+              docType: isPdf ? 'pdf' : 'photo',
+              previewUrl: (!isPdf && file.type.startsWith('image/')) ? URL.createObjectURL(file) : null
             });
             setTimeout(() => this.uploadSingleFile(id), 10);
           }
@@ -1744,8 +2348,13 @@
 
         removeFile(index) {
           const item = this.fileList[index];
-          if (item && item.xhr && item.status === 'uploading') {
-            try { item.xhr.abort(); } catch (_) {}
+          if (item) {
+            if (item.xhr && item.status === 'uploading') {
+              try { item.xhr.abort(); } catch (_) {}
+            }
+            if (item.previewUrl) {
+              try { URL.revokeObjectURL(item.previewUrl); } catch (_) {}
+            }
           }
           this.fileList.splice(index, 1);
           this.recomputeOverallProgress();
@@ -2320,7 +2929,9 @@ th{background:#f1f5f9;padding:4px 8px;text-align:left;font-size:11px;}
           this.view = 'upload';
           this.fileList.forEach(f => {
             if (f.xhr && f.status === 'uploading') try { f.xhr.abort(); } catch (_) {}
+            if (f.previewUrl) try { URL.revokeObjectURL(f.previewUrl); } catch (_) {}
           });
+          this.cancelIDCardFlow();
           this.fileList = [];
           this.totalRawPages = 1;
           this.activePrintPages = 1;

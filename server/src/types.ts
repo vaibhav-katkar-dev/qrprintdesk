@@ -90,6 +90,7 @@ export interface ShopDocument {
     defaultPagesPerSheet: 1 | 2;
     maxCopies: number;
     allowStampPaper?: boolean;
+    allowIDCardMerge?: boolean;
   };
   requireCustomerName?: boolean;
   payAtCounter?: boolean;
