@@ -53,7 +53,7 @@ export function verifyLocalToken(key: string, token: string): boolean {
 
 export async function getPresignedUploadUrl(
   key: string,
-  contentType: string,
+  contentType?: string,
   expiresInSeconds: number = 300
 ): Promise<{ url: string; key: string }> {
   if (isLocalStorage) {
@@ -63,10 +63,10 @@ export async function getPresignedUploadUrl(
     return { url, key };
   }
 
+  // Omitting strict ContentType signing allows client browsers to upload flexibly without 403 SignatureMismatch
   const command = new PutObjectCommand({
     Bucket: r2BucketName,
-    Key: key,
-    ContentType: contentType
+    Key: key
   });
 
   const url = await getSignedUrl(s3Client!, command, { expiresIn: expiresInSeconds });
