@@ -2688,11 +2688,16 @@
                   const xhr = new XMLHttpRequest();
                   const live = this.getFileItem(id);
                   let lastBytes = 0;
+                  let started = false; // first byte received?
                   let lastProgressTime = Date.now();
 
-                  // Anti-Stall Watchdog: If upload stalls for > 8s on mobile, abort and auto-retry
+                  // Anti-Stall Watchdog:
+                  // - Before first byte: allow 25s (time to establish connection + server buffer)
+                  // - After first byte: abort if no new data for 20s (true mid-transfer stall)
                   const stallTimer = setInterval(() => {
-                    if (Date.now() - lastProgressTime > 8000 && lastBytes < file.size) {
+                    const idleMs = Date.now() - lastProgressTime;
+                    const threshold = started ? 20000 : 25000;
+                    if (idleMs > threshold && lastBytes < file.size) {
                       clearInterval(stallTimer);
                       xhr.abort();
                       reject(new Error('Connection stalled on mobile network (retrying)'));
@@ -2701,6 +2706,7 @@
 
                   xhr.upload.onprogress = (e) => {
                     if (e.lengthComputable && live) {
+                      started = true;
                       live.loadedBytes = e.loaded;
                       live.progress = Math.min(99, Math.round((e.loaded / e.total) * 100));
                       this.recomputeOverallProgress();
@@ -3040,6 +3046,8 @@
 
         async waitForAllUploads() {
           return new Promise((resolve) => {
+            // Max 5 minutes wait; if any file is stuck in 'uploading' this prevents infinite hang
+            const deadline = Date.now() + 5 * 60 * 1000;
             const interval = setInterval(() => {
               const anyError = this.fileList.some(f => f.status === 'error');
               if (anyError) {
@@ -3050,6 +3058,17 @@
               if (allDone) {
                 clearInterval(interval);
                 return resolve(true);
+              }
+              if (Date.now() > deadline) {
+                clearInterval(interval);
+                // Mark any stuck uploading files as error
+                this.fileList.forEach(f => {
+                  if (f.status === 'uploading' || f.status === 'pending') {
+                    f.status = 'error';
+                    f.errorMessage = 'Upload timed out. Please retry.';
+                  }
+                });
+                return resolve(false);
               }
             }, 100);
           });

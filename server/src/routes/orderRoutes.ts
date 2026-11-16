@@ -123,6 +123,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       };
     };
   }>('/orders', async (request, reply) => {
+    try {
     const { idempotencyKey, shopSlug, customerName, customerPhone, customerNote, payAtCounter, files, printOptions } = request.body || {};
 
     if (!shopSlug || !files || !Array.isArray(files) || files.length === 0 || !printOptions) {
@@ -150,11 +151,16 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
     let totalPages = 0;
     for (const file of files) {
       if (!file.fileKey) {
-        return reply.code(400).send({ error: 'File entry missing fileKey' });
+        return reply.code(400).send({ error: 'File entry missing fileKey — one or more documents failed to upload. Please retry.' });
       }
-      const head = await headR2Object(file.fileKey);
-      if (!head.exists) {
-        return reply.code(400).send({ error: `File not found in storage: ${file.originalFilename || file.fileKey}` });
+      try {
+        const head = await headR2Object(file.fileKey);
+        if (!head.exists) {
+          return reply.code(400).send({ error: `File not found in storage: ${file.originalFilename || file.fileKey}. Please re-upload and try again.` });
+        }
+      } catch (storageErr: any) {
+        request.log.error({ err: storageErr, fileKey: file.fileKey }, 'Storage verification error');
+        return reply.code(503).send({ error: 'Storage check failed temporarily. Please try again.', retryable: true });
       }
       totalPages += Math.max(1, file.pageCount || 1);
     }
@@ -362,6 +368,10 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
     }
 
     return reply.code(201).send(clientSafeResponse);
+    } catch (err: any) {
+      request.log.error({ err }, 'Unexpected error creating order');
+      return reply.code(500).send({ error: 'Order creation failed. Please try again.', retryable: true });
+    }
   });
 
   // Verify Payment Status (Polled or called by frontend after Cashfree SDK modal completes)
