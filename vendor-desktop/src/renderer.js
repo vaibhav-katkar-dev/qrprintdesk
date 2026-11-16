@@ -908,7 +908,10 @@ window.openJobModal = async function(jobId) {
       <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div style="font-size:12px;font-weight:800;color:#166534;display:flex;align-items:center;gap:5px;">
-            <span>⚡ Counter Quick-Adjust (Fix Customer Mistake)</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Counter Quick-Adjust (Fix Customer Mistake)
+            </span>
           </div>
           <span style="font-size:11px;color:#15803d;font-weight:600;">Overrides apply instantly when you click Print</span>
         </div>
@@ -1469,14 +1472,14 @@ function updatePrinterStatusBadge(status, queueCount = 0) {
 
   // ── Dot color & text for each state ─────────────────────────────────────
   const STATE = isOffline
-    ? { dot: '#dc2626', dotPulse: true,  bg: '#fee2e2', textColor: '#b91c1c', label: '⚫ Offline',          desc: `Printer offline — ${_printQueue.length + (_isPrinting ? 1 : 0)} job(s) safely held.` }
+    ? { dot: '#dc2626', dotPulse: true,  bg: '#fee2e2', textColor: '#b91c1c', label: 'Offline',          desc: `Printer offline — ${_printQueue.length + (_isPrinting ? 1 : 0)} job(s) safely held.` }
     : isPaperOut
-    ? { dot: '#f97316', dotPulse: true,  bg: '#fff7ed', textColor: '#c2410c', label: '🟠 Paper Empty',      desc: 'Add paper to resume printing automatically.' }
+    ? { dot: '#f97316', dotPulse: true,  bg: '#fff7ed', textColor: '#c2410c', label: 'Paper Empty',      desc: 'Add paper to resume printing automatically.' }
     : isError
-    ? { dot: '#dc2626', dotPulse: true,  bg: '#fee2e2', textColor: '#b91c1c', label: '🔴 Printer Error',    desc: 'Check printer screen for details.' }
+    ? { dot: '#dc2626', dotPulse: true,  bg: '#fee2e2', textColor: '#b91c1c', label: 'Printer Error',    desc: 'Check printer screen for details.' }
     : isBusy
-    ? { dot: '#3b82f6', dotPulse: true,  bg: '#eff6ff', textColor: '#1d4ed8', label: `🔵 Printing (${queueCount} in spool)`, desc: `Spooling ${queueCount} document(s) — ${_printQueue.length} more in app queue.` }
-    : { dot: '#16a34a', dotPulse: false, bg: '#dcfce7', textColor: '#15803d', label: '🟢 Ready',             desc: 'Printer is online and ready to print.' };
+    ? { dot: '#3b82f6', dotPulse: true,  bg: '#eff6ff', textColor: '#1d4ed8', label: `Printing (${queueCount} in spool)`, desc: `Spooling ${queueCount} document(s) — ${_printQueue.length} more in app queue.` }
+    : { dot: '#16a34a', dotPulse: false, bg: '#dcfce7', textColor: '#15803d', label: 'Ready',             desc: 'Printer is online and ready to print.' };
 
   // ── Settings pill ────────────────────────────────────────────────────────
   if (settingsPill) {
@@ -1937,9 +1940,9 @@ async function loadAnalytics(period = 'today') {
     const rushBadge = document.getElementById('fin-peak-rush-badge');
     if (rushBadge) {
       if (r.busiestHour >= 0 && r.peakOrdersCount > 0) {
-        rushBadge.innerText = `🔥 Peak Rush: ${r.peakHourLabel} (${r.peakOrdersCount} orders)`;
+        rushBadge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" style="vertical-align:-1px;margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Peak Rush: ${r.peakHourLabel} (${r.peakOrdersCount} orders)`;
       } else {
-        rushBadge.innerText = '⚡ Steady Footfall';
+        rushBadge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" style="vertical-align:-1px;margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Steady Footfall';
       }
     }
 

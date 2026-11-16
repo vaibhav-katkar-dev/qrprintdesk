@@ -157,7 +157,7 @@
             <button class="period-btn" data-period="all" onclick="changePortalPeriod('all')">All Time</button>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span id="analyticsRushPill" class="rush-pill">⚡ Peak: Calculating...</span>
+            <span id="analyticsRushPill" class="rush-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Peak: Calculating...</span>
             <button onclick="loadPortalAnalytics(currentAnalyticsPeriod)" class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;">Refresh</button>
           </div>
         </div>
@@ -485,10 +485,10 @@
         // Rush Hour Highlight Pill
         const rushPill = document.getElementById('analyticsRushPill');
         if (r.busiestHour >= 0 && r.peakOrdersCount > 0) {
-          rushPill.textContent = `🔥 Peak Rush: ${r.peakHourLabel} (${r.peakOrdersCount} orders)`;
+          rushPill.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Peak Rush: ${r.peakHourLabel} (${r.peakOrdersCount} orders)`;
           rushPill.style.display = 'inline-flex';
         } else {
-          rushPill.textContent = '⚡ Normal Footfall';
+          rushPill.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Normal Footfall';
         }
 
         // Render Multi-Bar Hourly Chart
