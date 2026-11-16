@@ -915,13 +915,13 @@ window.openJobModal = async function(jobId) {
           <div style="background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid #bbf7d0;">
             <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:4px;">Color Mode</div>
             <button type="button" id="override-color-${jobId}" class="btn btn-xs ${activeColor === 'color' ? 'btn-primary' : 'btn-secondary'}" onclick="toggleJobColor('${jobId}')" style="width:100%;">
-              ${activeColor === 'color' ? '🌈 Color' : '⚫ Black & White'}
+              ${activeColor === 'color' ? 'Color' : 'Black & White'}
             </button>
           </div>
           <div style="background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid #bbf7d0;">
             <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:4px;">Stamp Paper</div>
             <button type="button" id="override-stamp-${jobId}" class="btn btn-xs ${activeStamp ? 'btn-primary' : 'btn-secondary'}" onclick="toggleJobStamp('${jobId}')" style="width:100%;">
-              ${activeStamp ? '🏛️ Stamp (3.5")' : 'Standard'}
+              ${activeStamp ? 'Stamp (3.5")' : 'Standard'}
             </button>
           </div>
         </div>
@@ -953,12 +953,15 @@ window.openJobModal = async function(jobId) {
             ? `<span style="background:#fef3c7;color:#92400e;font-weight:700;padding:1px 6px;border-radius:4px;font-size:11px;">${f.copies} copies</span>` 
             : '';
           const colorBadge = f.colorMode 
-            ? `<span style="background:${f.colorMode === 'color' ? '#dbeafe' : '#f1f5f9'};color:${f.colorMode === 'color' ? '#1e40af' : '#475569'};font-weight:700;padding:1px 6px;border-radius:4px;font-size:11px;">${f.colorMode === 'color' ? '🎨 Color' : '⚫ B&W'}</span>` 
+            ? `<span style="background:${f.colorMode === 'color' ? '#dbeafe' : '#f1f5f9'};color:${f.colorMode === 'color' ? '#1e40af' : '#475569'};font-weight:700;padding:1px 6px;border-radius:4px;font-size:11px;">${f.colorMode === 'color' ? 'Color' : 'B&W'}</span>` 
             : '';
+          const docIcon = isImg
+            ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
+            : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
           return `
           <div class="file-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#ffffff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,0.03);">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-              <div style="font-size:24px;">${isImg ? '🖼️' : '📄'}</div>
+              <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--surface-subtle);border-radius:6px;">${docIcon}</div>
               <div style="min-width:0;flex:1;">
                 <div class="file-name" style="font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(f.originalFilename)}</div>
                 <div class="file-meta" style="font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;">
@@ -1191,7 +1194,7 @@ window.toggleJobColor = function(jobId) {
   const btn = document.getElementById(`override-color-${jobId}`);
   if (btn) {
     btn.className = `btn btn-xs ${next === 'color' ? 'btn-primary' : 'btn-secondary'}`;
-    btn.innerText = next === 'color' ? '🌈 Color' : '⚫ Black & White';
+    btn.innerText = next === 'color' ? 'Color' : 'Black & White';
   }
 };
 
@@ -1203,7 +1206,7 @@ window.toggleJobStamp = function(jobId) {
   const btn = document.getElementById(`override-stamp-${jobId}`);
   if (btn) {
     btn.className = `btn btn-xs ${next ? 'btn-primary' : 'btn-secondary'}`;
-    btn.innerText = next ? '🏛️ Stamp (3.5")' : 'Standard';
+    btn.innerText = next ? 'Stamp (3.5")' : 'Standard';
   }
 };
 
