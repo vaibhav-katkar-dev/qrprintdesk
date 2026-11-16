@@ -69,12 +69,18 @@ export const uploadRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts
       return reply.code(400).send({ error: 'File size exceeds 100MB limit' });
     }
 
-    // Determine page count using pdf-lib if PDF, otherwise 1
+    // Determine page count using high-speed heuristic first (<1ms), then fallback to pdf-lib
     let pageCount = 1;
     if (mimeType.toLowerCase() === 'application/pdf' || ext === 'pdf') {
       try {
-        const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
-        pageCount = pdfDoc.getPageCount();
+        const previewStr = buffer.toString('latin1', 0, Math.min(buffer.length, 65536));
+        const countMatch = previewStr.match(/\/Type\s*\/Pages[\s\S]*?\/Count\s+(\d+)/);
+        if (countMatch && countMatch[1]) {
+          pageCount = Math.max(1, parseInt(countMatch[1], 10));
+        } else {
+          const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+          pageCount = Math.max(1, pdfDoc.getPageCount());
+        }
       } catch (err) {
         pageCount = 1;
       }
