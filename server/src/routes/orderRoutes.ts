@@ -125,7 +125,8 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
   }>('/orders', async (request, reply) => {
     try {
     const { idempotencyKey, shopSlug, customerName, customerPhone, customerNote, payAtCounter, files, printOptions } = request.body || {};
-
+    // Debug: log incoming payload shape (remove after diagnosis)
+    request.log.info({ shopSlug, fileCount: files?.length, payAtCounter, hasPrintOptions: !!printOptions }, 'POST /api/orders received');
     if (!shopSlug || !files || !Array.isArray(files) || files.length === 0 || !printOptions) {
       return reply.code(400).send({ error: 'Missing required order parameters' });
     }
@@ -165,7 +166,16 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       totalPages += Math.max(1, file.pageCount || 1);
     }
 
-    // 4. Server-side pricing calculation in paise
+    // 4. Server-side pricing calculation in paise with foolproof defaults
+    const bwRate = shop.pricing?.bwPerPagePaise ?? 200;
+    const colorRate = shop.pricing?.colorPerPagePaise ?? 1000;
+    const duplexDiscount = shop.pricing?.duplexDiscountPaise ?? 50;
+    const safePricingConfig = {
+      bwPerPagePaise: bwRate,
+      colorPerPagePaise: colorRate,
+      duplexDiscountPaise: duplexDiscount
+    };
+
     const platformFeePercent = shop.easySplit?.commissionPercent ?? 5;
     const hasPerFileOverrides = files.some(f => f.copies !== undefined || f.colorMode !== undefined);
 
@@ -175,16 +185,17 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       for (const file of files) {
         const fileColor = file.colorMode || printOptions.colorMode || 'monochrome';
         const fileCopies = file.copies || printOptions.copies || 1;
-        const baseRate = fileColor === 'color' ? shop.pricing.colorPerPagePaise : shop.pricing.bwPerPagePaise;
+        const baseRate = fileColor === 'color' ? colorRate : bwRate;
         let perPageRate = baseRate;
-        if (printOptions.duplexMode === 'duplexlong' && shop.pricing.duplexDiscountPaise > 0) {
-          perPageRate = Math.max(1, perPageRate - shop.pricing.duplexDiscountPaise);
+        if (printOptions.duplexMode === 'duplexlong' && duplexDiscount > 0) {
+          perPageRate = Math.max(1, perPageRate - duplexDiscount);
         }
         const effPages = (printOptions.pagesPerSheet === 2)
           ? Math.max(1, Math.ceil((file.pageCount || 1) / 2))
           : (file.pageCount || 1);
         grossPaise += Math.round(perPageRate * effPages * Math.max(1, fileCopies));
       }
+      grossPaise = Math.max(100, grossPaise); // Minimum ₹1.00
       const platformFeePaise = Math.round((grossPaise * platformFeePercent) / 100);
       const vendorSharePaise = grossPaise - platformFeePaise;
       pricing = {
@@ -202,9 +213,13 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
           duplexMode: printOptions.duplexMode || 'simplex',
           pagesPerSheet: printOptions.pagesPerSheet || 1
         },
-        shop.pricing,
+        safePricingConfig,
         platformFeePercent
       );
+      if (pricing.amountPaise < 100) {
+        pricing.amountPaise = 100;
+        pricing.vendorSharePaise = Math.max(0, 100 - pricing.platformFeePaise);
+      }
     }
 
     const orderId = `ord_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
@@ -334,10 +349,18 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         updatedAt: now
       });
 
-      outboxBus.emit('outbox:new');
+      try {
+        outboxBus.emit('outbox:new');
+      } catch (busErr) {
+        request.log.warn({ err: busErr }, 'outboxBus emit warning');
+      }
 
       if (wsHub) {
-        wsHub.sendJobHint(orderDoc.shopId.toString(), jobId, { payAtCounter: true });
+        try {
+          wsHub.sendJobHint(orderDoc.shopId.toString(), jobId, { payAtCounter: true });
+        } catch (wsErr) {
+          request.log.warn({ err: wsErr }, 'wsHub sendJobHint warning');
+        }
       }
     }
 
@@ -369,8 +392,9 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
 
     return reply.code(201).send(clientSafeResponse);
     } catch (err: any) {
-      request.log.error({ err }, 'Unexpected error creating order');
-      return reply.code(500).send({ error: 'Order creation failed. Please try again.', retryable: true });
+      request.log.error({ err: { message: err?.message, stack: err?.stack, name: err?.name } }, 'Unexpected error creating order');
+      const detail = err?.message || 'Order creation failed. Please try again.';
+      return reply.code(500).send({ error: detail, retryable: true });
     }
   });
 

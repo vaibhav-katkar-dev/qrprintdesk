@@ -828,6 +828,28 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
     let colorPages = 0;
     let duplexSheets = 0;
     let simplexSheets = 0;
+    let stampPaperOrders = 0;
+    let counterCashOrders = 0;
+    let counterCashPaise = 0;
+    let onlineUpiOrders = 0;
+    let onlineUpiPaise = 0;
+
+    // Customer tracking for repeat vs new customers
+    const customerMap: Record<string, number> = {};
+
+    // 24-hour distribution bucket for peak rush & time-based multi-bar charts
+    const hourlyMap: Array<{ hour: number; label: string; orders: number; pages: number; grossPaise: number }> = [];
+    for (let h = 0; h < 24; h++) {
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const displayHour = h % 12 === 0 ? 12 : h % 12;
+      hourlyMap.push({
+        hour: h,
+        label: `${displayHour} ${ampm}`,
+        orders: 0,
+        pages: 0,
+        grossPaise: 0
+      });
+    }
 
     for (const o of paidOrders) {
       const orderPages = (o.files || []).reduce((acc, f) => acc + (f.pageCount || 1), 0) * (o.printOptions?.copies || 1);
@@ -842,7 +864,65 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
       } else {
         simplexSheets += orderPages;
       }
+
+      if (o.printOptions?.stampPaperMode) {
+        stampPaperOrders++;
+      }
+
+      const grossP = o.pricing?.amountPaise || 0;
+      if (o.payAtCounter) {
+        counterCashOrders++;
+        counterCashPaise += grossP;
+      } else {
+        onlineUpiOrders++;
+        onlineUpiPaise += grossP;
+      }
+
+      // Customer identifier: phone > name > orderId
+      const custId = o.customerPhone ? o.customerPhone.trim() : (o.customerName ? o.customerName.trim().toLowerCase() : null);
+      if (custId) {
+        customerMap[custId] = (customerMap[custId] || 0) + 1;
+      }
+
+      // Hourly bucket
+      const orderDate = new Date(o.createdAt);
+      const h = orderDate.getHours();
+      if (hourlyMap[h]) {
+        hourlyMap[h].orders++;
+        hourlyMap[h].pages += orderPages;
+        hourlyMap[h].grossPaise += grossP;
+      }
     }
+
+    // Determine peak rush hour
+    let maxHour = -1;
+    let maxHourOrders = 0;
+    for (const item of hourlyMap) {
+      if (item.orders > maxHourOrders) {
+        maxHourOrders = item.orders;
+        maxHour = item.hour;
+      }
+    }
+
+    const peakHourLabel = maxHour >= 0
+      ? `${hourlyMap[maxHour].label} - ${(maxHour + 1) % 12 === 0 ? 12 : (maxHour + 1) % 12} ${(maxHour + 1) >= 12 ? 'PM' : 'AM'}`
+      : 'No peak yet';
+
+    // Customer analytics
+    const distinctCustomers = Object.keys(customerMap).length;
+    let returningCustomers = 0;
+    for (const count of Object.values(customerMap)) {
+      if (count > 1) returningCustomers++;
+    }
+    const newCustomers = distinctCustomers - returningCustomers;
+    const returningRatePercent = distinctCustomers > 0 ? Math.round((returningCustomers / distinctCustomers) * 100) : 0;
+
+    // Xerox Speed / Velocity (Throughput)
+    const activeHoursCount = hourlyMap.filter(h => h.orders > 0).length || 1;
+    const pagesPerHour = Math.round(totalPages / activeHoursCount);
+    const pagesPerMinute = (totalPages / (activeHoursCount * 60)).toFixed(2);
+    const paperSheetsUsed = simplexSheets + duplexSheets;
+    const paperSheetsSaved = Math.max(0, totalPages - paperSheetsUsed);
 
     const completedCount = orders.filter(o => o.status === 'COMPLETED').length;
     const failedCount = orders.filter(o => o.status === 'FAILED').length;
@@ -904,7 +984,42 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
         bwPages,
         colorPages,
         duplexSheets,
-        simplexSheets
+        simplexSheets,
+        paperSheetsUsed,
+        paperSheetsSaved,
+        stampPaperOrders
+      },
+      xeroxMetrics: {
+        pagesPerHour,
+        pagesPerMinute,
+        avgJobSizePages: paidOrders.length > 0 ? (totalPages / paidOrders.length).toFixed(1) : '0',
+        bwRatioPercent: totalPages > 0 ? Math.round((bwPages / totalPages) * 100) : 0,
+        colorRatioPercent: totalPages > 0 ? Math.round((colorPages / totalPages) * 100) : 0,
+        duplexSavePercent: totalPages > 0 ? Math.round((paperSheetsSaved / totalPages) * 100) : 0
+      },
+      customers: {
+        totalCustomers: distinctCustomers,
+        newCustomers,
+        returningCustomers,
+        returningRatePercent
+      },
+      payments: {
+        counterCashOrders,
+        counterCashRupees: (counterCashPaise / 100).toFixed(2),
+        onlineUpiOrders,
+        onlineUpiRupees: (onlineUpiPaise / 100).toFixed(2)
+      },
+      rushHours: {
+        peakHourLabel,
+        busiestHour: maxHour,
+        peakOrdersCount: maxHourOrders,
+        hourlyTrend: hourlyMap.map(h => ({
+          hour: h.hour,
+          label: h.label,
+          orders: h.orders,
+          pages: h.pages,
+          grossRupees: (h.grossPaise / 100).toFixed(2)
+        }))
       },
       dailyTrend
     });

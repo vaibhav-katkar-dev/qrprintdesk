@@ -3136,8 +3136,8 @@
             });
 
             if (!orderRes.ok) {
-              const errData = await orderRes.json();
-              throw new Error(errData.error || 'Failed to submit order');
+              const errData = await orderRes.json().catch(() => ({}));
+              throw new Error(errData.error || `Failed to submit order (status ${orderRes.status})`);
             }
 
             const orderData = await orderRes.json();
@@ -3230,8 +3230,8 @@
             });
 
             if (!orderRes.ok) {
-              const errData = await orderRes.json();
-              throw new Error(errData.error || 'Failed to create order');
+              const errData = await orderRes.json().catch(() => ({}));
+              throw new Error(errData.error || `Failed to create order (status ${orderRes.status})`);
             }
 
             const orderData = await orderRes.json();

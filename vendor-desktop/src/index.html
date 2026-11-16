@@ -31,6 +31,10 @@
           <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Print Jobs
         </div>
+        <div class="nav-item" data-page="analytics">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics &amp; Rush Hours
+        </div>
         <div class="nav-item" data-page="finances">
           <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Finances & Payouts
@@ -363,15 +367,15 @@
         </div>
 
         <!-- Metric Cards -->
-        <div class="fin-metric-grid">
+        <div class="fin-metric-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
           <div class="stat-card green">
             <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <div class="stat-value" id="fin-net-earnings">â‚¹0.00</div>
+            <div class="stat-value" id="fin-net-earnings">₹0.00</div>
             <div class="stat-label">Net Vendor Earnings (95%)</div>
           </div>
           <div class="stat-card blue">
             <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-            <div class="stat-value" id="fin-gross-revenue">â‚¹0.00</div>
+            <div class="stat-value" id="fin-gross-revenue">₹0.00</div>
             <div class="stat-label">Gross Revenue Collected</div>
           </div>
           <div class="stat-card purple">
@@ -381,13 +385,48 @@
           </div>
           <div class="stat-card amber">
             <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <div class="stat-value" id="fin-avg-order">â‚¹0.00</div>
+            <div class="stat-value" id="fin-avg-order">₹0.00</div>
             <div class="stat-label">Average Order Value</div>
+          </div>
+          <div class="stat-card" style="background:#ffffff;border:1px solid #e0e7ff;">
+            <div class="stat-icon-wrap" style="color:#6366f1;background:#eef2ff;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <div class="stat-value" id="fin-velocity" style="color:#4f46e5;">0.00</div>
+            <div class="stat-label">Pages / Min Throughput</div>
+          </div>
+          <div class="stat-card" style="background:#ffffff;border:1px solid #fef3c7;">
+            <div class="stat-icon-wrap" style="color:#d97706;background:#fef3c7;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="stat-value" id="fin-repeat-customers" style="color:#b45309;">0%</div>
+            <div class="stat-label">Returning Customers Rate</div>
+          </div>
+        </div>
+
+        <!-- Hourly Footfall & Most Busy Rush Hours Multi-Bar Chart -->
+        <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px;box-shadow:var(--shadow-card);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Hourly Counter Footfall &amp; Rush Hours
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">24-hour volume distribution to track peak customer rush times</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span id="fin-peak-rush-badge" style="background:#fef3c7;border:1px solid #fde68a;color:#d97706;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;">🔥 Peak Rush: Calculating...</span>
+              <div style="display:flex;gap:10px;font-size:11px;font-weight:600;">
+                <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#3b82f6;border-radius:2px;"></span> Orders</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#10b981;border-radius:2px;"></span> Pages</span>
+              </div>
+            </div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:16px 12px 6px;">
+            <div id="fin-hourly-bars" style="display:flex;align-items:flex-end;gap:5px;height:140px;overflow-x:auto;">
+              <div style="width:100%;text-align:center;color:var(--text-muted);padding:40px 0;">Loading rush hour footfall...</div>
+            </div>
           </div>
         </div>
 
         <!-- Volume & Breakdown -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:18px;margin-bottom:20px;">
           <!-- Card: Color vs B&W -->
           <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
             <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;">Print Mode Distribution</div>
@@ -402,17 +441,31 @@
             </div>
           </div>
 
-          <!-- Card: Paper & Duplex -->
+          <!-- Card: Paper & Duplex Savings -->
           <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
-            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;">Paper & Sheet Economics</div>
-            <div style="font-size:12px;color:var(--text-muted);">Paper usage and 2-sided duplex efficiency</div>
+            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;">Paper &amp; Sheet Economics</div>
+            <div style="font-size:12px;color:var(--text-muted);">Paper usage and 2-sided duplex paper savings</div>
             <div class="fin-ratio-bar">
               <div id="fin-duplex-bar" class="fin-ratio-fill" style="width:50%;background:#10b981;" title="Duplex"></div>
               <div id="fin-simplex-bar" class="fin-ratio-fill" style="width:50%;background:#f59e0b;" title="Simplex"></div>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-top:8px;">
-              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#10b981;"></span> 2-Sided (Duplex): <strong id="fin-duplex-sheets">0 sheets</strong></span>
-              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span> 1-Sided: <strong id="fin-simplex-sheets">0 sheets</strong></span>
+              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#10b981;"></span> 2-Sided: <strong id="fin-duplex-sheets">0 sheets</strong></span>
+              <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span> Saved: <strong id="fin-saved-sheets" style="color:#10b981;">0 sheets</strong></span>
+            </div>
+          </div>
+
+          <!-- Card: Payment Collection Mode -->
+          <div style="background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-card);">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;">Payment Collection Split</div>
+            <div style="font-size:12px;color:var(--text-muted);">Cash at counter vs Instant UPI payment</div>
+            <div class="fin-ratio-bar">
+              <div id="fin-cash-bar" class="fin-ratio-fill" style="width:50%;background:#f59e0b;" title="Counter Cash"></div>
+              <div id="fin-upi-bar" class="fin-ratio-fill" style="width:50%;background:#10b981;" title="Online UPI"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-top:8px;">
+              <span style="color:#b45309;">Cash: <strong id="fin-cash-text">₹0.00</strong></span>
+              <span style="color:#15803d;">Online: <strong id="fin-upi-text">₹0.00</strong></span>
             </div>
           </div>
         </div>

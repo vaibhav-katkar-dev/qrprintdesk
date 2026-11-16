@@ -194,6 +194,7 @@ function setupNavigation() {
   const titles = {
     dashboard:    { title: 'Dashboard',             sub: 'Live shop overview and incoming cloud print jobs' },
     jobs:         { title: 'Print Jobs Archive',    sub: 'Search, filter, and reprint previous customer orders' },
+    analytics:    { title: 'Xerox Analytics & Rush Hours', sub: 'Footfall patterns, peak rush hours, customer retention and paper velocity' },
     finances:     { title: 'Finances & Easy Split', sub: 'Revenue analytics, ledger transactions, and automated bank payouts' },
     qr:           { title: 'Customer QR Standee',   sub: 'Counter standee QR code and direct store link' },
     settings:     { title: 'Station Settings',      sub: 'Printer, pricing, and customer-facing print options' },
@@ -210,8 +211,15 @@ function setupNavigation() {
       pages.forEach(p => p.classList.remove('active'));
 
       item.classList.add('active');
-      const pageEl = document.getElementById(`page-${target}`);
-      if (pageEl) pageEl.classList.add('active');
+
+      if (target === 'analytics') {
+        const pageEl = document.getElementById('page-finances');
+        if (pageEl) pageEl.classList.add('active');
+        switchFinSubTab('analytics');
+      } else {
+        const pageEl = document.getElementById(`page-${target}`);
+        if (pageEl) pageEl.classList.add('active');
+      }
 
       if (titles[target]) {
         pageTitle.innerText = titles[target].title;
@@ -220,6 +228,7 @@ function setupNavigation() {
 
       if (target === 'dashboard') refreshDashboard();
       if (target === 'jobs')      loadAllJobs();
+      if (target === 'analytics') loadAnalytics(currentAnalyticsPeriod);
       if (target === 'finances')  loadFinancesPage();
       if (target === 'qr')        loadQR();
       if (target === 'settings')  loadSettingsFromServer();
@@ -1913,11 +1922,51 @@ async function loadAnalytics(period = 'today') {
     const elGross = document.getElementById('fin-gross-revenue');
     const elOrders = document.getElementById('fin-total-orders');
     const elAvg = document.getElementById('fin-avg-order');
+    const elVelocity = document.getElementById('fin-velocity');
+    const elRepeat = document.getElementById('fin-repeat-customers');
 
     if (elNet) elNet.innerText = `Rs.${s.vendorShareRupees || '0.00'}`;
     if (elGross) elGross.innerText = `Rs.${s.grossRupees || '0.00'}`;
     if (elOrders) elOrders.innerText = s.totalOrders || 0;
     if (elAvg) elAvg.innerText = `Rs.${s.avgOrderRupees || '0.00'}`;
+    if (elVelocity) elVelocity.innerText = `${data.xeroxMetrics?.pagesPerMinute || '0.00'} (${data.xeroxMetrics?.pagesPerHour || 0} pg/hr)`;
+    if (elRepeat) elRepeat.innerText = `${data.customers?.returningRatePercent || 0}% (${data.customers?.returningCustomers || 0} repeat)`;
+
+    // Hourly Rush Hours Multi-Bar Footfall
+    const r = data.rushHours || {};
+    const rushBadge = document.getElementById('fin-peak-rush-badge');
+    if (rushBadge) {
+      if (r.busiestHour >= 0 && r.peakOrdersCount > 0) {
+        rushBadge.innerText = `🔥 Peak Rush: ${r.peakHourLabel} (${r.peakOrdersCount} orders)`;
+      } else {
+        rushBadge.innerText = '⚡ Steady Footfall';
+      }
+    }
+
+    const hourlyContainer = document.getElementById('fin-hourly-bars');
+    if (hourlyContainer && r.hourlyTrend) {
+      const hData = r.hourlyTrend || [];
+      const maxO = Math.max(1, ...hData.map(h => h.orders));
+      const maxP = Math.max(1, ...hData.map(h => h.pages));
+
+      hourlyContainer.innerHTML = hData.map(h => {
+        const isPeak = h.hour === r.busiestHour && h.orders > 0;
+        const ordH = Math.max(3, Math.round((h.orders / maxO) * 90));
+        const pagH = Math.max(3, Math.round((h.pages / maxP) * 90));
+        const barColor = isPeak ? '#f59e0b' : '#3b82f6';
+        const pageColor = isPeak ? '#fbbf24' : '#10b981';
+
+        return `
+          <div style="flex:1;min-width:24px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;" title="${escHtml(h.label)}: ${h.orders} orders, ${h.pages} pages, Rs.${h.grossRupees}">
+            <div style="width:100%;display:flex;gap:2px;align-items:flex-end;justify-content:center;height:100px;">
+              <div style="width:7px;background:${barColor};height:${ordH}px;border-radius:2px 2px 0 0;"></div>
+              <div style="width:7px;background:${pageColor};height:${pagH}px;border-radius:2px 2px 0 0;"></div>
+            </div>
+            <div style="font-size:9px;color:${isPeak ? '#d97706' : '#64748b'};font-weight:${isPeak ? '700' : '500'};margin-top:4px;white-space:nowrap;">${h.label.replace(' ', '')}</div>
+          </div>
+        `;
+      }).join('');
+    }
 
     // Volume Distribution
     const totalP = v.totalPages || (v.bwPages + v.colorPages) || 1;
@@ -1934,7 +1983,7 @@ async function loadAnalytics(period = 'today') {
     if (bwTxt) bwTxt.innerText = `${v.bwPages || 0} pages (${bwPercent}%)`;
     if (colorTxt) colorTxt.innerText = `${v.colorPages || 0} pages (${colorPercent}%)`;
 
-    // Duplex vs Simplex
+    // Duplex vs Simplex & Paper Saved
     const totalSheets = (v.duplexSheets + v.simplexSheets) || 1;
     const dupPercent = Math.round(((v.duplexSheets || 0) / totalSheets) * 100);
     const simpPercent = 100 - dupPercent;
@@ -1942,12 +1991,28 @@ async function loadAnalytics(period = 'today') {
     const dupBar = document.getElementById('fin-duplex-bar');
     const simpBar = document.getElementById('fin-simplex-bar');
     const dupTxt = document.getElementById('fin-duplex-sheets');
-    const simpTxt = document.getElementById('fin-simplex-sheets');
+    const savedTxt = document.getElementById('fin-saved-sheets');
 
     if (dupBar) dupBar.style.width = `${dupPercent}%`;
     if (simpBar) simpBar.style.width = `${simpPercent}%`;
     if (dupTxt) dupTxt.innerText = `${v.duplexSheets || 0} sheets (${dupPercent}%)`;
-    if (simpTxt) simpTxt.innerText = `${v.simplexSheets || 0} sheets (${simpPercent}%)`;
+    if (savedTxt) savedTxt.innerText = `${v.paperSheetsSaved || 0} sheets (${data.xeroxMetrics?.duplexSavePercent || 0}%)`;
+
+    // Payment Collection Mode
+    const pmt = data.payments || {};
+    const totPay = (pmt.counterCashOrders + pmt.onlineUpiOrders) || 1;
+    const cashPct = Math.round((pmt.counterCashOrders / totPay) * 100);
+    const upiPct = 100 - cashPct;
+
+    const cashBar = document.getElementById('fin-cash-bar');
+    const upiBar = document.getElementById('fin-upi-bar');
+    const cashTxt = document.getElementById('fin-cash-text');
+    const upiTxt = document.getElementById('fin-upi-text');
+
+    if (cashBar) cashBar.style.width = `${cashPct}%`;
+    if (upiBar) upiBar.style.width = `${upiPct}%`;
+    if (cashTxt) cashTxt.innerText = `Rs.${pmt.counterCashRupees || '0.00'} (${pmt.counterCashOrders || 0})`;
+    if (upiTxt) upiTxt.innerText = `Rs.${pmt.onlineUpiRupees || '0.00'} (${pmt.onlineUpiOrders || 0})`;
 
     // 7-day table (now with pages column)
     const dailyTbody = document.getElementById('fin-daily-tbody');
