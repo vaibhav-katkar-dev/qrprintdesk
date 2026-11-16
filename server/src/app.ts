@@ -28,6 +28,8 @@ export interface AppInstance {
 
 export function buildApp(db: Db, mongoClient: MongoClient, startWorkers: boolean = false): AppInstance {
   const app = fastify({
+    // Allow up to 150 MB bodies so large PDFs & images pass through cleanly
+    bodyLimit: 150 * 1024 * 1024,
     logger: {
       level: process.env.LOG_LEVEL || 'error',
       serializers: {
@@ -60,11 +62,11 @@ export function buildApp(db: Db, mongoClient: MongoClient, startWorkers: boolean
     }
   });
 
-  // Register Multipart plugin for direct file uploads up to 100MB
+  // Register Multipart plugin for direct file uploads up to 150MB
   app.register(fastifyMultipart, {
     limits: {
-      fileSize: 100 * 1024 * 1024,
-      files: 5
+      fileSize: 150 * 1024 * 1024,
+      files: 10
     }
   });
 

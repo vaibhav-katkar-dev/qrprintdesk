@@ -2660,7 +2660,7 @@
           // ── Direct Cloud Upload with Anti-Stall Watchdog & Automatic Retry ──
           // Sends the file straight to Cloud Storage (Backblaze B2 / Cloudflare R2).
           // Server bandwidth consumed: 0 bytes!
-          const doPresignedUpload = async (file, maxRetries = 2) => {
+          const doPresignedUpload = async (file, maxRetries = 3) => {
             let lastErr = null;
             for (let attempt = 1; attempt <= maxRetries; attempt++) {
               try {
@@ -2725,7 +2725,7 @@
                   if (file.type) {
                     xhr.setRequestHeader('Content-Type', file.type);
                   }
-                  xhr.timeout = 40000;
+                  xhr.timeout = 180000; // 3 min — large PDFs on slow Indian mobile need time
                   xhr.send(file);
                 });
 
@@ -2770,7 +2770,7 @@
             xhr.onerror   = () => reject(new Error('Network connection failed'));
             xhr.ontimeout = () => reject(new Error('Upload timed out'));
             xhr.open('POST', `/api/uploads/direct?shopSlug=${encodeURIComponent(this.shopSlug)}`);
-            xhr.timeout = 60_000;
+            xhr.timeout = 180_000; // 3 min for large PDFs on fallback path
             xhr.send(formData);
           });
 

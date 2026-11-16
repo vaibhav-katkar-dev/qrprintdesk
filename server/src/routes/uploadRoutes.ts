@@ -21,7 +21,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ]);
 
-const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB
+const MAX_FILE_SIZE_BYTES = 150 * 1024 * 1024; // 150 MB
 
 export const uploadRoutes: FastifyPluginAsync<{ db: Db }> = async (fastify, opts) => {
   const db = opts.db;

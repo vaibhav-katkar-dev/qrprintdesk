@@ -1,16 +1,17 @@
-import { FastifyPluginAsync } from 'fastify';
+import { FastifyPluginAsync, FastifyRequest, FastifyReply, RouteShorthandOptions } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
 import { getLocalFilePath, verifyLocalToken } from '../services/r2.js';
 
 export const localStorageRoutes: FastifyPluginAsync = async (fastify) => {
   // Allow all binary content types for PUT upload endpoint
-  fastify.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) => {
+  fastify.addContentTypeParser('*', { parseAs: 'buffer', bodyLimit: 150 * 1024 * 1024 }, (req, body, done) => {
     done(null, body);
   });
 
   // Local storage PUT upload endpoint (receives raw file stream from customer browser)
-  fastify.put('/storage/upload', async (request, reply) => {
+  // bodyLimit on addContentTypeParser already covers the 150 MB limit
+  fastify.put('/storage/upload', async (request: FastifyRequest, reply: FastifyReply) => {
     const key = (request.query as any).key as string;
     const token = (request.query as any).token as string;
 
