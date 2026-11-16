@@ -2814,22 +2814,6 @@
             }
             this.recomputeOverallProgress();
           })();
-              l2.uploadedMeta = {
-                fileKey,
-                originalFilename: item.file.name,
-                fileSize: compressed.size,
-                mimeType: compressed.type || item.file.type,
-                pageCount
-              };
-              l2.pageCount = pageCount;
-              this.updatePageCounts();
-              this.persistDraftSession();
-            } catch (err) {
-              const l2 = this.getFileItem(id);
-              if (l2) { l2.status = 'error'; l2.errorMessage = err.message || 'Upload failed'; }
-            }
-            this.recomputeOverallProgress();
-          })();
         },
 
         retryUpload(id) {
