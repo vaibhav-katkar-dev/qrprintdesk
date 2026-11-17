@@ -698,8 +698,8 @@ section {
 
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   align-items: stretch;
 }
 
@@ -707,7 +707,7 @@ section {
   background: var(--bg-white);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  padding: 36px 28px;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1236,9 +1236,13 @@ footer {
 }
 
 /* Responsive */
+@media (max-width: 1080px) {
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+}
+
 @media (max-width: 992px) {
   .hero-title { font-size: 38px; }
-  .features-grid, .steps-row, .pricing-grid { grid-template-columns: 1fr; }
+  .features-grid, .steps-row { grid-template-columns: 1fr; }
   .comparison-grid, .calc-card, .footer-top { grid-template-columns: 1fr; }
   .hero-stats-row { grid-template-columns: 1fr 1fr; }
   .pricing-card.featured { transform: none; }
