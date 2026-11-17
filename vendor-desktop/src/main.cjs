@@ -104,7 +104,13 @@ function loadConfig() {
   if (fs.existsSync(configPath)) {
     try {
       const raw = fs.readFileSync(configPath, 'utf8').replace(/^\uFEFF/, '');
-      return JSON.parse(raw);
+      const cfg = JSON.parse(raw);
+      // Auto-migrate legacy root domain if it was set to qrprintdesk.in
+      if (cfg.serverUrl === 'https://qrprintdesk.in' || cfg.serverUrl === 'http://qrprintdesk.in') {
+        cfg.serverUrl = 'https://print.qrprintdesk.in';
+        saveConfig(cfg);
+      }
+      return cfg;
     } catch (e) {
       console.error('Failed to parse user config:', e);
     }
@@ -112,7 +118,7 @@ function loadConfig() {
 
   // Default fallback for new installation
   return {
-    serverUrl: 'https://qrprintdesk.in',
+    serverUrl: 'https://print.qrprintdesk.in',
     agentToken: '',
     shopSlug: '',
     shopName: '',

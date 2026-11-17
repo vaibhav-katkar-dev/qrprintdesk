@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us — QrPrintDesk</title>
+  <meta name="description" content="Contact QrPrintDesk customer support and vendor onboarding team. Operational address, email, phone helpline, and support hours.">
+  <link rel="icon" type="image/x-icon" href="assets/icon.ico">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span class="stage-badge">Support Desk</span>
+    Helpline &amp; Merchant Onboarding Assistance Available Monday–Saturday, 9:30 AM – 6:30 PM IST.
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <img src="assets/logo.png" alt="QrPrintDesk" class="brand-logo">
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features" class="nav-link">Features</a></li>
+        <li><a href="index.html#pricing" class="nav-link">Pricing</a></li>
+        <li><a href="about.html" class="nav-link">About Us</a></li>
+        <li><a href="contact.html" class="nav-link" style="color:var(--primary);font-weight:700;">Contact Us</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="https://print.qrprintdesk.in/vendor-portal.html" target="_blank" class="btn btn-secondary btn-sm">Vendor Login</a>
+        <a href="index.html" class="btn btn-primary btn-sm">Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="policy-page">
+    <div class="container">
+      <div class="policy-card">
+        <header class="policy-header">
+          <h1 class="policy-title">Contact Us</h1>
+          <div class="policy-meta">
+            <span>We are here to assist store owners, walk-in customers, and payment reconciliation inquiries.</span>
+          </div>
+        </header>
+
+        <div class="contact-grid">
+          <!-- Information Column -->
+          <div>
+            <h2 style="font-size:22px;font-weight:800;color:var(--text-primary);margin-bottom:16px;">Office &amp; Support Details</h2>
+            <p style="font-size:14.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:24px;">
+              Whether you are an Indian photocopy/print shop owner seeking pilot onboarding or a customer with a transaction question, our support team is available to assist you.
+            </p>
+
+            <div class="contact-card" style="margin-bottom:20px;">
+              <h3>Corporate &amp; Operational Address</h3>
+              <p style="font-size:14px;color:var(--text-secondary);line-height:1.5;">
+                <strong>QrPrintDesk Technologies</strong><br>
+                Office 402, Trade Link Arcade,<br>
+                LBS Marg, Ghatkopar West,<br>
+                Mumbai, Maharashtra &ndash; 400086, India
+              </p>
+            </div>
+
+            <div class="contact-card" style="margin-bottom:20px;">
+              <h3>Direct Contacts</h3>
+              <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                <strong>General Support:</strong> <a href="mailto:support@qrprintdesk.in" style="color:var(--primary);">support@qrprintdesk.in</a><br>
+                <strong>Billing &amp; Refunds:</strong> <a href="mailto:refunds@qrprintdesk.in" style="color:var(--primary);">refunds@qrprintdesk.in</a><br>
+                <strong>Merchant Onboarding:</strong> <a href="mailto:vendor@qrprintdesk.in" style="color:var(--primary);">vendor@qrprintdesk.in</a><br>
+                <strong>Phone &amp; WhatsApp:</strong> +91 99676 76767
+              </p>
+            </div>
+
+            <div class="contact-card">
+              <h3>Support Operational Hours</h3>
+              <p style="font-size:14px;color:var(--text-secondary);line-height:1.5;">
+                <strong>Monday to Saturday:</strong> 9:30 AM to 6:30 PM IST<br>
+                <strong>Sunday &amp; Gazetted Holidays:</strong> Closed (Automated ticket intake active)
+              </p>
+            </div>
+          </div>
+
+          <!-- Contact Form Column -->
+          <div>
+            <h2 style="font-size:22px;font-weight:800;color:var(--text-primary);margin-bottom:16px;">Send Us a Message</h2>
+            <form onsubmit="event.preventDefault(); document.getElementById('contact-status').style.display = 'block'; this.reset();">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" class="form-control" placeholder="Enter your full name" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input type="email" class="form-control" placeholder="name@example.com" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Mobile Number (with WhatsApp)</label>
+                <input type="tel" class="form-control" placeholder="+91 98765 43210">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Inquiry Type</label>
+                <select class="form-control">
+                  <option>Store Owner: Request Pilot Onboarding</option>
+                  <option>Customer: Transaction / Refund Query</option>
+                  <option>Payment Gateway / Partner Inquiry</option>
+                  <option>Technical / Hardware Compatibility</option>
+                  <option>General Feedback</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Message / Details *</label>
+                <textarea class="form-control" rows="4" placeholder="How can our team help you today?" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+                Submit Inquiry &rarr;
+              </button>
+
+              <div id="contact-status" style="display:none;margin-top:16px;padding:12px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;color:#065f46;font-size:13.5px;text-align:center;">
+                ✓ Thank you! Your message has been received. Our team will respond within 24 business hours.
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="QrPrintDesk" class="brand-logo">
+          <p>The modern cloud print queue and shop management platform for Indian photocopy and digital print centers.</p>
+          <div class="footer-entity-box">
+            <strong>Operated by:</strong> QrPrintDesk Technologies<br>
+            Mumbai, Maharashtra, India
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#pricing">Pricing</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal &amp; Policy</h4>
+          <ul>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="refund-policy.html">Refund &amp; Cancellation</a></li>
+            <li><a href="shipping-policy.html">Delivery &amp; Fulfillment</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="mailto:support@qrprintdesk.in">support@qrprintdesk.in</a></li>
+            <li><span>Mon–Sat: 9:30 AM – 6:30 PM IST</span></li>
+            <li><a href="contact.html">Grievance Desk</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 QrPrintDesk Technologies. All rights reserved.</div>
+        <div class="footer-bottom-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="refund-policy.html">Refund Policy</a>
+          <a href="shipping-policy.html">Fulfillment Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
