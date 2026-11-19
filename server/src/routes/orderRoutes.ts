@@ -6,6 +6,7 @@ import { headR2Object } from '../services/r2.js';
 import { calculateOrderPrice } from '../services/pricing.js';
 import { createCashfreeOrderSession, fetchCashfreeOrderStatus } from '../services/cashfree.js';
 import { createPayUCheckoutParams } from '../services/payu.js';
+import { getShopSubscription, incrementShopOrderCount } from '../services/subscription.js';
 import { fulfillPaidOrder } from '../services/paymentFulfillment.js';
 import { WebSocketHub } from '../services/wsHub.js';
 import { OrderDocument, ShopDocument, IdempotencyKeyDocument, JobDocument, OutboxDocument } from '../types.js';
@@ -147,6 +148,15 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
     const shop = await db.collection<ShopDocument>('shops').findOne({ slug: shopSlug, isActive: true });
     if (!shop) {
       return reply.code(404).send({ error: 'Shop not found' });
+    }
+
+    // Check shop subscription plan limits
+    const subInfo = await getShopSubscription(db, shop._id);
+    if (!subInfo.canPrint) {
+      return reply.code(403).send({
+        error: 'This store has reached its monthly print quota. Please notify the shopkeeper to upgrade their plan.',
+        limitReached: true
+      });
     }
 
     // 3. Verify each file in storage
@@ -328,6 +338,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
     };
 
     await db.collection<OrderDocument>('orders').insertOne(orderDoc);
+    await incrementShopOrderCount(db, shop._id);
 
     let jobId: string | undefined;
 

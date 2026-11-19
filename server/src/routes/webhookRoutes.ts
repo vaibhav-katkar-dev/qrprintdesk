@@ -4,6 +4,7 @@ import { verifyCashfreeWebhook } from '../services/cashfree.js';
 import { verifyPayUResponseHash, getPayUCredentials } from '../services/payu.js';
 import { fulfillPaidOrder } from '../services/paymentFulfillment.js';
 import { transitionJobState } from '../services/stateMachine.js';
+import { upgradeShopSubscription } from '../services/subscription.js';
 import { WebSocketHub } from '../services/wsHub.js';
 import { OrderDocument, PaymentDocument, ShopDocument, JobDocument } from '../types.js';
 
@@ -252,18 +253,37 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
       }
     }
 
-    // 2. Locate order in database
+    const eventId = String(payload.payuid || payload.mihpayid || payload.paymentId || `payu_${Date.now()}`);
+    const isRefund = status.includes('refund') || eventName.includes('refund');
+    const isSuccess = status === 'success' || status === 'successful' || eventName === 'successful';
+
+    // 2. Check if this is a Vendor Subscription Upgrade Payment
+    if (payload.udf2 === 'SUBSCRIPTION_UPGRADE' && isSuccess) {
+      const shopId = payload.udf5;
+      const planId = (payload.udf3 || 'STARTER').toUpperCase() as any;
+      const billingCycle = (payload.udf4 || 'monthly').toLowerCase() as any;
+
+      if (shopId && ObjectId.isValid(shopId)) {
+        await upgradeShopSubscription({
+          db,
+          shopId,
+          planId,
+          billingCycle,
+          paymentTxnId: eventId
+        });
+        request.log.info({ shopId, planId, billingCycle, eventId }, 'Vendor subscription upgraded via PayU webhook');
+        return reply.code(200).send({ status: 'SUBSCRIPTION_UPGRADED', shopId, planId });
+      }
+    }
+
+    // 3. Locate customer order in database
     const order = await db.collection<OrderDocument>('orders').findOne({ orderId: txnid });
     if (!order) {
       request.log.warn({ txnid }, 'PayU webhook received for unknown order — acknowledged and ignored');
       return reply.code(200).send({ status: 'IGNORED', reason: 'order_not_found' });
     }
 
-    const eventId = String(payload.payuid || payload.mihpayid || payload.paymentId || `payu_${Date.now()}`);
-    const isRefund = status.includes('refund') || eventName.includes('refund');
-    const isSuccess = status === 'success' || status === 'successful' || eventName === 'successful';
-
-    // 3. Handle REFUND Event
+    // 4. Handle REFUND Event
     if (isRefund) {
       const now = new Date();
       const refundAmountPaise = Math.round(Number(payload.amount || payload.refund_amount || 0) * 100);
@@ -401,6 +421,24 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
 
     if (isValid && status === 'success' && txnid) {
       const eventId = String(payload.payuid || payload.mihpayid || `payu_${Date.now()}`);
+
+      // Vendor Subscription Upgrade redirect
+      if (payload.udf2 === 'SUBSCRIPTION_UPGRADE') {
+        const shopId = payload.udf5;
+        const planId = (payload.udf3 || 'STARTER').toUpperCase() as any;
+        const billingCycle = (payload.udf4 || 'monthly').toLowerCase() as any;
+        if (shopId && ObjectId.isValid(shopId)) {
+          await upgradeShopSubscription({
+            db,
+            shopId,
+            planId,
+            billingCycle,
+            paymentTxnId: eventId
+          });
+        }
+        return reply.redirect(`/vendor?upgrade=success&plan=${encodeURIComponent(planId)}`);
+      }
+
       await fulfillPaidOrder({
         db,
         orderId: txnid,
@@ -413,6 +451,9 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
       });
       return reply.redirect(`/shop/${shopSlug}?order_id=${encodeURIComponent(txnid)}&payment=success`);
     } else {
+      if (payload.udf2 === 'SUBSCRIPTION_UPGRADE') {
+        return reply.redirect(`/vendor?upgrade=failed`);
+      }
       return reply.redirect(`/shop/${shopSlug}?order_id=${encodeURIComponent(txnid)}&payment=failed`);
     }
   });

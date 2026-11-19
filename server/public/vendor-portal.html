@@ -4,112 +4,184 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vendor Portal  QrPrintDesk Bank &amp; Payouts</title>
+  <title>Vendor Portal — QrPrintDesk Station, Plans &amp; Payouts</title>
+  <!-- Google Identity Services for OAuth 2.0 -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: rgba(255, 255, 255, 0.04);
-      --card-border: rgba(255, 255, 255, 0.1);
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --warning: #d97706;
+      --warning-soft: #fffbeb;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
       --radius: 12px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 60%); color: var(--text-main); min-height: 100vh; padding: 20px 16px 80px; }
-    .container { max-width: 900px; margin: 0 auto; }
+    body { background: var(--bg); color: var(--text-main); min-height: 100vh; padding: 20px 16px 80px; }
+    .container { max-width: 980px; margin: 0 auto; }
 
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); }
-    .brand { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #fff; }
-    .shop-pill { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .brand { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+    .shop-pill { background: var(--primary-soft); border: 1px solid #bfdbfe; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
 
-    .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-secondary { background: rgba(255, 255, 255, 0.05); border-color: var(--card-border); color: #fff; }
-    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn-secondary { background: var(--surface); border-color: var(--border-strong); color: var(--text-main); }
+    .btn-secondary:hover { background: var(--surface-subtle); }
     .btn-success { background: var(--success); color: #fff; }
+    .btn-outline { background: transparent; border-color: var(--border-strong); color: var(--text-muted); }
+    .btn-outline:hover { background: var(--surface-subtle); color: var(--text-main); }
 
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; backdrop-filter: blur(8px); }
-    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 22px; box-shadow: var(--shadow-sm); }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
 
-    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .stat-card { background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; }
-    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .stat-val { font-size: 24px; font-weight: 800; color: #fff; }
+    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; box-shadow: var(--shadow-sm); }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600; }
+    .stat-val { font-size: 26px; font-weight: 800; color: var(--text-main); }
 
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
-    .badge-notreg { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-active { background: var(--success-soft); color: var(--success); border: 1px solid #a7f3d0; }
+    .badge-notreg { background: var(--danger-soft); color: var(--danger); border: 1px solid #fecdd3; }
+    .badge-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid #fde68a; }
+    .badge-plan { background: var(--primary-soft); color: var(--primary); border: 1px solid #bfdbfe; font-size: 12px; }
 
-    .form-group { margin-bottom: 14px; }
-    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
-    .form-input { width: 100%; padding: 11px 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
-    .form-input:focus { border-color: var(--primary); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 11px 14px; background: #fff; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text-main); font-size: 14px; outline: none; transition: border-color 0.15s; }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-    th { padding: 10px 14px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); font-weight: 600; }
-    td { padding: 12px 14px; border-bottom: 1px solid var(--card-border); color: #e2e8f0; }
+    th { padding: 12px 14px; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 600; background: var(--surface-subtle); }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text-main); }
     tr:last-child td { border-bottom: none; }
 
     /* Login Box */
-    #loginSection { max-width: 420px; margin: 60px auto 0; }
+    #loginSection { max-width: 440px; margin: 40px auto 0; text-align: left; }
     #portalSection { display: none; }
 
     /* Portal Tabs */
-    .portal-nav { display: flex; gap: 8px; margin-bottom: 22px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; overflow-x: auto; }
-    .portal-tab-btn { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
-    .portal-tab-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-    .portal-tab-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35); }
+    .portal-nav { display: flex; gap: 8px; margin-bottom: 22px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
+    .portal-tab-btn { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text-muted); padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .portal-tab-btn:hover { background: var(--surface-subtle); color: var(--text-main); }
+    .portal-tab-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25); }
 
     /* Period Filter Pills */
-    .period-group { display: flex; gap: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 3px; border-radius: 8px; width: fit-content; }
+    .period-group { display: flex; gap: 6px; background: var(--surface-subtle); border: 1px solid var(--border); padding: 3px; border-radius: 8px; width: fit-content; }
     .period-btn { background: transparent; border: none; color: var(--text-muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
-    .period-btn:hover { color: #fff; }
-    .period-btn.active { background: var(--primary); color: #fff; }
+    .period-btn:hover { color: var(--text-main); }
+    .period-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
 
     /* Peak Rush & Stat Badges */
-    .rush-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-    .speed-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .rush-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--warning-soft); border: 1px solid #fde68a; color: var(--warning); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .speed-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--success-soft); border: 1px solid #a7f3d0; color: var(--success); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 
     /* Multi-bar Chart Styles */
-    .chart-box { background: rgba(0, 0, 0, 0.35); border: 1px solid var(--card-border); border-radius: 10px; padding: 18px 14px 10px; margin-top: 14px; }
-    .hourly-bars-track { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0 6px; border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; }
+    .chart-box { background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 10px; padding: 18px 14px 10px; margin-top: 14px; }
+    .hourly-bars-track { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0 6px; border-bottom: 1px solid var(--border-strong); overflow-x: auto; }
     .hourly-bar-col { flex: 1; min-width: 28px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
     .bar-group-flex { width: 100%; display: flex; gap: 2px; align-items: flex-end; justify-content: center; height: 100%; }
     .sub-bar { width: 10px; border-radius: 4px 4px 0 0; transition: height 0.4s ease; min-height: 2px; }
     .sub-bar-orders { background: #3b82f6; }
     .sub-bar-pages { background: #10b981; }
-    .hourly-bar-col.peak .sub-bar-orders { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .hourly-bar-col.peak .sub-bar-orders { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
     .hourly-bar-col.peak .sub-bar-pages { background: #fbbf24; }
     .bar-label { font-size: 10px; color: var(--text-muted); margin-top: 6px; text-align: center; white-space: nowrap; }
     .hourly-bar-col.peak .bar-label { color: #f59e0b; font-weight: 700; }
-    .bar-tooltip { display: none; position: absolute; bottom: 105%; background: #1e1b4b; border: 1px solid var(--primary); padding: 5px 8px; border-radius: 6px; font-size: 11px; color: #fff; white-space: nowrap; z-index: 10; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .bar-tooltip { display: none; position: absolute; bottom: 105%; background: #0f172a; border: 1px solid #334155; padding: 5px 8px; border-radius: 6px; font-size: 11px; color: #fff; white-space: nowrap; z-index: 10; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .hourly-bar-col:hover .bar-tooltip { display: block; }
 
     /* Progress & Ratio Bars */
-    .ratio-track { width: 100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; display: flex; margin: 8px 0; }
+    .ratio-track { width: 100%; height: 10px; background: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; margin: 8px 0; }
     .ratio-seg { height: 100%; transition: width 0.3s; }
+
+    /* Plan & Quota Usage Banner */
+    .plan-usage-box { background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin-bottom: 22px; }
+    .usage-track { width: 100%; height: 12px; background: #e2e8f0; border-radius: 8px; overflow: hidden; margin: 12px 0 8px; }
+    .usage-bar { height: 100%; border-radius: 8px; transition: width 0.4s ease; background: linear-gradient(90deg, #2563eb, #3b82f6); }
+    .usage-bar.warning { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .usage-bar.danger { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+    /* Pricing Plans Grid */
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 18px; }
+    .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s; position: relative; }
+    .plan-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: #93c5fd; }
+    .plan-card.current { border: 2px solid var(--primary); background: #fbfdff; }
+    .plan-card.popular { border: 2px solid #3b82f6; }
+    .plan-pop-tag { position: absolute; top: -11px; right: 20px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+    .plan-name { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+    .plan-price-num { font-size: 28px; font-weight: 800; color: var(--text-main); }
+    .plan-price-sub { font-size: 12px; color: var(--text-muted); }
+    .plan-feature-list { list-style: none; margin: 16px 0; font-size: 12.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; }
+    .plan-feature-list li { display: flex; align-items: center; gap: 6px; }
+    .plan-check { color: var(--success); font-weight: bold; }
+
+    /* Cycle Toggle */
+    .cycle-switch-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 13.5px; font-weight: 600; }
+    .cycle-pill-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .cycle-pill-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .save-tag { background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+
+    /* Google Sign In Button Box */
+    .google-btn-wrap { display: flex; justify-content: center; margin: 16px 0 18px; }
+    .divider-text { display: flex; align-items: center; text-align: center; color: var(--text-dim); font-size: 12px; margin: 18px 0; }
+    .divider-text::before, .divider-text::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+    .divider-text::before { margin-right: 10px; }
+    .divider-text::after { margin-left: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- Vendor Login -->
+    <!-- ── VENDOR LOGIN SECTION ────────────────────────────────────────────── -->
     <div id="loginSection" class="card">
-      <div class="card-title" style="display:flex;align-items:center;gap:10px;">
-        <img src="/assets/logo_dark.png" alt="QrPrintDesk" style="height:26px;width:auto;">
-        <span>Vendor Portal Login</span>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="/assets/icon.png" alt="QrPrintDesk" style="height: 48px; width: 48px; margin-bottom: 10px;">
+        <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Vendor Portal Sign In</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Manage store analytics, plans, bank payouts &amp; counter printing.</p>
       </div>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
-        Sign in with your Shop Slug and PIN to manage your bank account and track automated Easy Split settlements.
-      </p>
+
+      <!-- Google OAuth Sign In -->
+      <div style="background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center;">
+        <div style="font-size: 12.5px; font-weight: 600; color: var(--text-main); margin-bottom: 12px;">Fast 1-Click Merchant Login</div>
+        
+        <!-- Official Google GIS Button Container -->
+        <div class="google-btn-wrap">
+          <div id="g_id_onload"
+               data-client_id="demo-mode"
+               data-callback="handleGoogleCredentialResponse"
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+        </div>
+
+        <!-- 1-Click Demo / Test Sign-In fallback for testing -->
+        <button type="button" onclick="handleDemoGoogleLogin()" class="btn btn-secondary" style="width: 100%; font-size: 12.5px; justify-content: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <div class="divider-text">OR SIGN IN WITH STORE PIN</div>
+
+      <!-- Shop Slug & PIN Login -->
       <div class="form-group">
         <label class="form-label">Shop Slug</label>
         <input type="text" id="loginSlug" class="form-input" placeholder="e.g. default">
@@ -118,26 +190,40 @@
         <label class="form-label">Shop PIN</label>
         <input type="password" id="loginPin" class="form-input" placeholder="e.g. 1234">
       </div>
-      <button onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">Sign In &rarr;</button>
+      <button onclick="handleLogin()" class="btn btn-primary" style="width: 100%; justify-content: center;">Sign In with PIN &rarr;</button>
     </div>
 
-    <!-- Vendor Main Portal -->
+    <!-- ── VENDOR MAIN PORTAL ──────────────────────────────────────────────── -->
     <div id="portalSection">
       <header>
-        <div class="brand" style="display:flex;align-items:center;gap:10px;">
-          <img src="/assets/logo_dark.png" alt="QrPrintDesk" style="height:28px;width:auto;">
-          <span id="shopTitleName" style="color:#94a3b8;font-size:15px;font-weight:600;">Vendor Station</span>
+        <div class="brand">
+          <img src="/assets/icon.png" alt="QrPrintDesk" style="height: 32px; width: 32px;">
+          <div>
+            <div id="shopTitleName" style="font-size: 16px; font-weight: 700; color: var(--text-main);">Vendor Station</div>
+            <div style="font-size: 12px; color: var(--text-dim);" id="shopOwnerEmailSub">Owner</div>
+          </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="badge badge-plan" id="headerPlanBadge">Plan: FREE</span>
           <span class="shop-pill" id="shopSlugPill">shop: default</span>
-          <button onclick="handleLogout()" class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;">Logout</button>
+          <button onclick="handleLogout()" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">Logout</button>
         </div>
       </header>
 
+      <!-- Celebratory Banner on Upgrade Return -->
+      <div id="upgradeSuccessBanner" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; color: #065f46; font-size: 13.5px; font-weight: 600; align-items: center; gap: 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Congratulations! Your subscription has been upgraded successfully. Your print allowance and priority spooling are active now!</span>
+      </div>
+
       <!-- Portal Navigation Tabs -->
       <div class="portal-nav">
-        <button id="navTabAnalytics" onclick="switchPortalTab('analytics')" class="portal-tab-btn active">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <button id="navTabPlans" onclick="switchPortalTab('plans')" class="portal-tab-btn active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/></svg>
+          Plans &amp; Monthly Usage
+        </button>
+        <button id="navTabAnalytics" onclick="switchPortalTab('analytics')" class="portal-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Xerox Analytics &amp; Rush Hours
         </button>
         <button id="navTabPayouts" onclick="switchPortalTab('payouts')" class="portal-tab-btn">
@@ -146,88 +232,196 @@
         </button>
       </div>
 
-      <!-- TAB 1: XEROX DETAILED ANALYTICS & RUSH HOURS -->
-      <div id="tabViewAnalytics">
-        <!-- Filter Bar -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px;">
-          <div class="period-group">
-            <button class="period-btn active" data-period="today" onclick="changePortalPeriod('today')">Today</button>
-            <button class="period-btn" data-period="week" onclick="changePortalPeriod('week')">Last 7 Days</button>
-            <button class="period-btn" data-period="month" onclick="changePortalPeriod('month')">This Month</button>
-            <button class="period-btn" data-period="all" onclick="changePortalPeriod('all')">All Time</button>
+      <!-- ── TAB 1: PLANS & SUBSCRIPTION QUOTA (NEW!) ──────────────────────── -->
+      <div id="tabViewPlans">
+        
+        <!-- Current Plan & Usage Status Card -->
+        <div class="plan-usage-box">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Current Plan</div>
+              <h3 style="font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="currentPlanTitle">Free Starter Trial</h3>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;" id="currentPlanRenewalText">Monthly allowance resets automatically on the 1st of every month.</p>
+            </div>
+            <div style="text-align: right;">
+              <span class="badge badge-active" id="subStatusTag">Active Trial</span>
+            </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span id="analyticsRushPill" class="rush-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Peak: Calculating...</span>
-            <button onclick="loadPortalAnalytics(currentAnalyticsPeriod)" class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;">Refresh</button>
+
+          <!-- Usage Progress Bar -->
+          <div style="margin-top: 18px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
+              <span>Monthly Print Orders Used</span>
+              <span id="usageRatioText">0 / 100 orders (0%)</span>
+            </div>
+            <div class="usage-track">
+              <div id="usageProgressBar" class="usage-bar" style="width: 0%;"></div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;" id="quotaFriendlyMessage">
+              ✓ Your print queue is running at peak speed.
+            </div>
           </div>
         </div>
 
-        <!-- Xerox Key Performance Metric Grid -->
+        <!-- Billing Cycle Switch (Monthly vs Yearly) -->
+        <div class="cycle-switch-wrap">
+          <span style="color: var(--text-muted);">Billing Cycle:</span>
+          <button type="button" class="cycle-pill-btn active" id="btnCycleMonthly" onclick="setBillingCycle('monthly')">Monthly</button>
+          <button type="button" class="cycle-pill-btn" id="btnCycleYearly" onclick="setBillingCycle('yearly')">
+            Annual Billing <span class="save-tag">Save 28%</span>
+          </button>
+        </div>
+
+        <!-- 4 Plans Comparison Grid -->
+        <div class="plans-grid">
+          
+          <!-- Plan 1: Free -->
+          <div class="plan-card" id="cardPlanFree">
+            <div>
+              <div class="plan-name">Free Trial</div>
+              <div style="margin-bottom: 12px;">
+                <span class="plan-price-num">₹0</span>
+                <span class="plan-price-sub">/ month</span>
+              </div>
+              <ul class="plan-feature-list">
+                <li><span class="plan-check">✓</span> <strong>Up to 100 orders / mo</strong></li>
+                <li><span class="plan-check">✓</span> 1 Windows Print Station</li>
+                <li><span class="plan-check">✓</span> Official Counter QR Standee</li>
+                <li><span class="plan-check">✓</span> Cash &amp; UPI Counter mode</li>
+                <li><span class="plan-check">✓</span> 24-Hr auto document purge</li>
+              </ul>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center;" disabled id="btnFreeActive">Current Plan</button>
+          </div>
+
+          <!-- Plan 2: Starter -->
+          <div class="plan-card" id="cardPlanStarter">
+            <div>
+              <div class="plan-name">Starter Xerox</div>
+              <div style="margin-bottom: 12px;">
+                <span class="plan-price-num" id="priceStarterNum">₹149</span>
+                <span class="plan-price-sub" id="priceStarterSub">/ month</span>
+              </div>
+              <ul class="plan-feature-list">
+                <li><span class="plan-check">✓</span> <strong>Up to 500 orders / mo</strong></li>
+                <li><span class="plan-check">✓</span> Automated FIFO spooling</li>
+                <li><span class="plan-check">✓</span> Duplex &amp; B&amp;W controls</li>
+                <li><span class="plan-check">✓</span> Daily order &amp; page counter</li>
+                <li><span class="plan-check">✓</span> Email support assistance</li>
+              </ul>
+            </div>
+            <button onclick="upgradePlan('STARTER')" class="btn btn-primary" style="width: 100%; justify-content: center;" id="btnUpgradeStarter">
+              Upgrade to Starter &rarr;
+            </button>
+          </div>
+
+          <!-- Plan 3: Growth -->
+          <div class="plan-card popular" id="cardPlanGrowth">
+            <div class="plan-pop-tag">Most Popular</div>
+            <div>
+              <div class="plan-name">Growth Shop</div>
+              <div style="margin-bottom: 12px;">
+                <span class="plan-price-num" id="priceGrowthNum">₹349</span>
+                <span class="plan-price-sub" id="priceGrowthSub">/ month</span>
+              </div>
+              <ul class="plan-feature-list">
+                <li><span class="plan-check">✓</span> <strong>Up to 1,500 orders / mo</strong></li>
+                <li><span class="plan-check">✓</span> Real-time sales &amp; rush analytics</li>
+                <li><span class="plan-check">✓</span> Priority FIFO print queue</li>
+                <li><span class="plan-check">✓</span> Daily automated bank payouts</li>
+                <li><span class="plan-check">✓</span> Itemized settlement ledger</li>
+              </ul>
+            </div>
+            <button onclick="upgradePlan('GROWTH')" class="btn btn-primary" style="width: 100%; justify-content: center; background: #2563eb;" id="btnUpgradeGrowth">
+              Upgrade to Growth &rarr;
+            </button>
+          </div>
+
+          <!-- Plan 4: Enterprise -->
+          <div class="plan-card" id="cardPlanEnterprise">
+            <div>
+              <div class="plan-name">High-Volume Pro</div>
+              <div style="margin-bottom: 12px;">
+                <span class="plan-price-num" id="priceEnterpriseNum">₹699</span>
+                <span class="plan-price-sub" id="priceEnterpriseSub">/ month</span>
+              </div>
+              <ul class="plan-feature-list">
+                <li><span class="plan-check">✓</span> <strong>Unlimited orders / mo</strong></li>
+                <li><span class="plan-check">✓</span> Multi-printer routing support</li>
+                <li><span class="plan-check">✓</span> Full historical sales ledger</li>
+                <li><span class="plan-check">✓</span> WhatsApp document intake ready</li>
+                <li><span class="plan-check">✓</span> Priority developer support</li>
+              </ul>
+            </div>
+            <button onclick="upgradePlan('ENTERPRISE')" class="btn btn-primary" style="width: 100%; justify-content: center;" id="btnUpgradeEnterprise">
+              Upgrade to Pro &rarr;
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ── TAB 2: XEROX DETAILED ANALYTICS & RUSH HOURS ────────────────────── -->
+      <div id="tabViewAnalytics" style="display: none;">
+        
+        <!-- Period Filter Pills -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: var(--text-main);">Store Analytics &amp; Customer Trends</h2>
+          <div class="period-group">
+            <button class="period-btn active" id="btnPeriodToday" onclick="setAnalyticsPeriod('today')">Today</button>
+            <button class="period-btn" id="btnPeriod7d" onclick="setAnalyticsPeriod('7d')">Last 7 Days</button>
+            <button class="period-btn" id="btnPeriod30d" onclick="setAnalyticsPeriod('30d')">Last 30 Days</button>
+          </div>
+        </div>
+
+        <!-- 4 Top KPI Cards -->
         <div class="grid-stats">
           <div class="stat-card">
-            <div class="stat-label">Orders &amp; Volume</div>
-            <div class="stat-val" id="anTotalOrders" style="color: #60a5fa;">0</div>
-            <div class="stat-sub"><span id="anCompletedOrders">0</span> printed &bull; <span id="anAvgOrder">₹0</span> avg/job</div>
+            <div class="stat-label">Total Print Orders</div>
+            <div class="stat-val" id="anTotalOrders">0</div>
+            <div class="stat-sub">Across all counters</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Revenue &amp; Net Profit</div>
-            <div class="stat-val" id="anGrossRupees" style="color: #34d399;">₹0.00</div>
-            <div class="stat-sub">Vendor Net: <strong id="anVendorShare" style="color: #10b981;">₹0.00</strong></div>
+            <div class="stat-label">Gross Counter Revenue</div>
+            <div class="stat-val" style="color: var(--primary);" id="anGrossRev">₹0.00</div>
+            <div class="stat-sub">UPI + Cash at counter</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Pages Printed</div>
-            <div class="stat-val" id="anTotalPages" style="color: #a78bfa;">0</div>
-            <div class="stat-sub"><span id="anBwPages">0</span> B&amp;W &bull; <span id="anColorPages">0</span> Color</div>
+            <div class="stat-label">Net Shop Payout</div>
+            <div class="stat-val" style="color: var(--success);" id="anNetRev">₹0.00</div>
+            <div class="stat-sub">After aggregator fees</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Xerox Speed / Velocity</div>
-            <div class="stat-val" id="anVelocity" style="color: #38bdf8;">0.00</div>
-            <div class="stat-sub">Pages/min &bull; <span id="anPagesPerHour">0</span> pg/hr peak</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Returning Customers</div>
-            <div class="stat-val" id="anRepeatRate" style="color: #f59e0b;">0%</div>
-            <div class="stat-sub"><span id="anRepeatCount">0</span> repeat &bull; <span id="anNewCount">0</span> new</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Paper Sheets Saved</div>
-            <div class="stat-val" id="anPaperSaved" style="color: #ec4899;">0</div>
-            <div class="stat-sub">Via Duplex printing (<span id="anSavePercent">0%</span>)</div>
+            <div class="stat-label">Total Pages Spooled</div>
+            <div class="stat-val" id="anTotalPages">0</div>
+            <div class="stat-sub" id="anAvgPages">0 pages / order avg</div>
           </div>
         </div>
 
-        <!-- Multi-Bar Chart: 24-Hour Time-Based Footfall & Most Busy Rush Hours -->
+        <!-- Hourly Rush Hours Multi-bar Chart -->
         <div class="card">
           <div class="card-title">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span>Footfall &amp; Hourly Rush Times (Most Busy Hours)</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span>Hourly Customer Rush &amp; Volume</span>
+              <span class="rush-pill" id="rushHoursBadge">Peak: --</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 14px; font-size: 11px; font-weight: 600;">
-              <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 10px; height: 10px; background: #3b82f6; border-radius: 2px;"></span> Orders</span>
-              <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 2px;"></span> Pages Volume</span>
-              <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 10px; height: 10px; background: #f59e0b; border-radius: 2px;"></span> Peak Rush</span>
+            <div style="display: flex; gap: 14px; font-size: 12px; font-weight: 600;">
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #3b82f6; border-radius: 2px;"></span> Orders</span>
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #10b981; border-radius: 2px;"></span> Pages</span>
             </div>
           </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
-            Identifies peak counter rush windows throughout the day to optimize paper restocking and operator availability.
-          </p>
 
           <div class="chart-box">
-            <div class="hourly-bars-track" id="anHourlyBarsTrack">
-              <div style="width: 100%; text-align: center; color: var(--text-muted); padding: 50px 0;">Loading rush hour footfall...</div>
+            <div class="hourly-bars-track" id="hourlyBarsTrack">
+              <div style="width: 100%; text-align: center; color: var(--text-dim); line-height: 140px;">Loading rush hour trend...</div>
             </div>
           </div>
         </div>
 
-        <!-- 7-Day Revenue & Volume Multi-Bar Chart -->
+        <!-- Multi-Day Historical Table -->
         <div class="card">
-          <div class="card-title">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span>Daily Multi-Day Revenue &amp; Pages Volume</span>
-            </div>
-          </div>
+          <div class="card-title">Historical Daily Breakdown</div>
           <div style="overflow-x: auto;">
             <table>
               <thead>
@@ -236,181 +430,141 @@
                   <th>Orders</th>
                   <th>Pages Printed</th>
                   <th>Gross Sales</th>
-                  <th>Vendor Share (95%)</th>
+                  <th>Net Earnings</th>
                 </tr>
               </thead>
               <tbody id="anDailyTableBody">
-                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading 7-day historical records...</td></tr>
+                <tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 18px;">Loading orders ledger...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Xerox Specific Deep Operational Breakdown -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-          <!-- B&W vs Color Ratio -->
-          <div class="card">
-            <div class="card-title">Color vs Black &amp; White</div>
-            <div class="ratio-track">
-              <div id="ratioBarBw" class="ratio-seg" style="background: #64748b; width: 85%;"></div>
-              <div id="ratioBarColor" class="ratio-seg" style="background: #3b82f6; width: 15%;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 6px;">
-              <span style="color: #94a3b8;"><strong id="ratioBwText" style="color: #fff;">85%</strong> B&amp;W</span>
-              <span style="color: #60a5fa;"><strong id="ratioColorText" style="color: #fff;">15%</strong> Color</span>
-            </div>
-          </div>
-
-          <!-- Counter Cash vs Online Payment Split -->
-          <div class="card">
-            <div class="card-title">Payment Collection Split</div>
-            <div class="ratio-track">
-              <div id="ratioBarCash" class="ratio-seg" style="background: #f59e0b; width: 50%;"></div>
-              <div id="ratioBarUpi" class="ratio-seg" style="background: #10b981; width: 50%;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 6px;">
-              <span style="color: #fbbf24;">Counter Cash: <strong id="payCashText">₹0.00 (0)</strong></span>
-              <span style="color: #34d399;">Instant UPI: <strong id="payUpiText">₹0.00 (0)</strong></span>
-            </div>
-          </div>
-
-          <!-- Document Types & Paper Saving -->
-          <div class="card">
-            <div class="card-title">Paper &amp; Job Characteristics</div>
-            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--text-muted);">Average Job Size</span>
-                <strong id="xeroxAvgJob">0.0 pages/order</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--text-muted);">Stamp Paper Prints</span>
-                <strong id="xeroxStampCount" style="color: #f59e0b;">0 orders</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--text-muted);">Total Sheets Consumed</span>
-                <strong id="xeroxSheetsUsed">0 sheets</strong>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- TAB 2: BANK & DAILY PAYOUTS (EXISTING VIEW) -->
+      <!-- ── TAB 3: BANK & DAILY PAYOUTS ────────────────────────────────────── -->
       <div id="tabViewPayouts" style="display: none;">
-        <!-- Earnings Overview -->
+        
+        <!-- Today's Live Earnings -->
         <div class="grid-stats">
           <div class="stat-card">
-            <div class="stat-label">Today's Earnings</div>
-            <div class="stat-val" id="statToday" style="color: #60a5fa;">₹0.00</div>
+            <div class="stat-label">Today's Collections</div>
+            <div class="stat-val" style="color: var(--success);" id="statToday">₹0.00</div>
+            <div class="stat-sub">From UPI orders today</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Settled to Bank</div>
-            <div class="stat-val" id="statSettled" style="color: #34d399;">₹0.00</div>
+            <div class="stat-label">Settled To Bank</div>
+            <div class="stat-val" id="statSettled">₹0.00</div>
+            <div class="stat-sub">Successfully transferred</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Pending Payout</div>
-            <div class="stat-val" id="statPending" style="color: #fbbf24;">₹0.00</div>
+            <div class="stat-label">Pending Morning Payout</div>
+            <div class="stat-val" style="color: var(--primary);" id="statPending">₹0.00</div>
+            <div class="stat-sub">Automated T+1 Morning Cycle</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Your Share %</div>
+            <div class="stat-label">Vendor Payout Share</div>
             <div class="stat-val" id="statShare">95%</div>
+            <div class="stat-sub">Direct to bank account</div>
           </div>
         </div>
 
-        <!-- Bank & Easy Split Account -->
+        <!-- Bank Account Card -->
         <div class="card">
           <div class="card-title">
-            <span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Bank Account for Automated Payouts</span>
-            <span id="easySplitStatusBadge" class="badge badge-notreg">NOT REGISTERED</span>
+            <span>Bank Account for Auto-Payouts</span>
+            <span id="easySplitStatusBadge" class="badge badge-notreg">NOT CONNECTED</span>
           </div>
 
+          <!-- Existing Bank Details View -->
           <div id="bankDetailsView" style="display: none;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
-              <div>
-                <div class="stat-label">Bank Account</div>
-                <div style="font-weight: 700; font-size: 16px;" id="viewAccount">•••• 1234</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px;">
+              <div style="background: var(--surface-subtle); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                <div class="stat-label">Account Number</div>
+                <div style="font-weight: 700; font-size: 15px;" id="viewAccount">•••• 0000</div>
               </div>
-              <div>
+              <div style="background: var(--surface-subtle); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
                 <div class="stat-label">IFSC Code</div>
-                <div style="font-weight: 700; font-size: 16px;" id="viewIfsc">HDFC0001234</div>
+                <div style="font-weight: 700; font-size: 15px;" id="viewIfsc">XXXX0000000</div>
               </div>
-              <div>
-                <div class="stat-label">UPI ID</div>
-                <div style="font-weight: 700; font-size: 16px;" id="viewUpi">shop@upi</div>
-              </div>
-              <div>
-                <div class="stat-label">Payout Schedule</div>
-                <div style="font-weight: 700; font-size: 16px; color: #34d399;">T+1 Daily Auto-Settlement</div>
+              <div style="background: var(--surface-subtle); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                <div class="stat-label">UPI VPA</div>
+                <div style="font-weight: 700; font-size: 15px;" id="viewUpi">Not set</div>
               </div>
             </div>
-            <button onclick="toggleEditBank(true)" class="btn btn-secondary">Update Bank / UPI Details</button>
+            <button onclick="toggleEditBank(true)" class="btn btn-secondary">Edit Bank Details</button>
           </div>
 
-          <div id="bankRegisterForm">
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-              Connect your bank account or UPI ID to receive automatic daily settlements for all counter print orders.
+          <!-- Bank Registration Form -->
+          <div id="bankRegisterForm" style="display: none;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+              Enter your shop's bank account or current account details. Payouts are transferred automatically every morning on a T+1 schedule.
             </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group">
                 <label class="form-label">Account Holder Name *</label>
-                <input type="text" id="regHolder" class="form-input" placeholder="Name as per Passbook">
+                <input type="text" id="regHolder" class="form-input" placeholder="e.g. Rohit Xerox &amp; Stationery">
               </div>
               <div class="form-group">
                 <label class="form-label">Bank Account Number *</label>
                 <input type="text" id="regAccount" class="form-input" placeholder="e.g. 123456789012">
               </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group">
                 <label class="form-label">Bank IFSC Code *</label>
-                <input type="text" id="regIfsc" class="form-input" placeholder="e.g. SBIN0001234">
+                <input type="text" id="regIfsc" class="form-input" placeholder="e.g. SBIN0001234" maxlength="11">
               </div>
               <div class="form-group">
-                <label class="form-label">UPI ID (Optional)</label>
-                <input type="text" id="regUpi" class="form-input" placeholder="e.g. shopname@upi">
-              </div>
-              <div class="form-group">
-                <label class="form-label">PAN Card Number (For KYC Auto-Verification)</label>
-                <input type="text" id="regPan" class="form-input" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform: uppercase;">
+                <label class="form-label">UPI ID / VPA (Optional)</label>
+                <input type="text" id="regUpi" class="form-input" placeholder="e.g. store@upi">
               </div>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button onclick="submitBankRegistration()" class="btn btn-success">Save & Connect Bank &rarr;</button>
-              <button id="cancelEditBtn" onclick="toggleEditBank(false)" class="btn btn-secondary" style="display: none;">Cancel</button>
+            <div class="form-group">
+              <label class="form-label">Merchant PAN Number (Required for RBI Settlement KYC)</label>
+              <input type="text" id="regPan" class="form-input" placeholder="e.g. ABCDE1234F" maxlength="10">
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="submitBankRegistration()" class="btn btn-primary">Save Bank Details &rarr;</button>
+              <button onclick="toggleEditBank(false)" id="cancelEditBtn" class="btn btn-secondary" style="display: none;">Cancel</button>
             </div>
           </div>
         </div>
 
-        <!-- Settlements Ledger -->
+        <!-- Settlements History Table -->
         <div class="card">
-          <div class="card-title">
-            <span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Payout Settlements History</span>
-            <button onclick="loadSettlements()" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;">Refresh</button>
-          </div>
+          <div class="card-title">Automated Payout History</div>
           <div style="overflow-x: auto;">
             <table>
               <thead>
                 <tr>
                   <th>Settlement ID</th>
-                  <th>Amount</th>
-                  <th>Type</th>
+                  <th>Amount (₹)</th>
+                  <th>Event Type</th>
                   <th>Status</th>
-                  <th>Date</th>
+                  <th>Date &amp; Time</th>
                 </tr>
               </thead>
               <tbody id="settlementsTableBody">
-                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading settlement records...</td></tr>
+                <tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 18px;">No settlements yet. Payouts will appear here automatically.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
+
       </div>
+
     </div>
   </div>
 
   <script>
     let currentSlug = localStorage.getItem('qrprintdesk_vendor_slug') || '';
     let currentPin = localStorage.getItem('qrprintdesk_vendor_pin') || '';
-    let currentPortalTab = 'analytics';
+    let currentPortalTab = 'plans';
     let currentAnalyticsPeriod = 'today';
+    let currentBillingCycle = 'monthly';
+    let currentShopInfo = null;
+    let subscriptionData = null;
 
     function getVendorHeaders() {
       return {
@@ -422,150 +576,107 @@
 
     function switchPortalTab(tab) {
       currentPortalTab = tab;
-      const tabAnalytics = document.getElementById('tabViewAnalytics');
-      const tabPayouts = document.getElementById('tabViewPayouts');
-      const btnAnalytics = document.getElementById('navTabAnalytics');
-      const btnPayouts = document.getElementById('navTabPayouts');
+      document.getElementById('navTabPlans').classList.toggle('active', tab === 'plans');
+      document.getElementById('navTabAnalytics').classList.toggle('active', tab === 'analytics');
+      document.getElementById('navTabPayouts').classList.toggle('active', tab === 'payouts');
 
-      if (tab === 'analytics') {
-        tabAnalytics.style.display = 'block';
-        tabPayouts.style.display = 'none';
-        btnAnalytics.classList.add('active');
-        btnPayouts.classList.remove('active');
-        loadPortalAnalytics(currentAnalyticsPeriod);
+      document.getElementById('tabViewPlans').style.display = tab === 'plans' ? 'block' : 'none';
+      document.getElementById('tabViewAnalytics').style.display = tab === 'analytics' ? 'block' : 'none';
+      document.getElementById('tabViewPayouts').style.display = tab === 'payouts' ? 'block' : 'none';
+
+      if (tab === 'plans') loadSubscription();
+      else if (tab === 'analytics') loadPortalAnalytics(currentAnalyticsPeriod);
+      else if (tab === 'payouts') { loadEarnings(); loadAccount(); loadSettlements(); }
+    }
+
+    function setBillingCycle(cycle) {
+      currentBillingCycle = cycle;
+      document.getElementById('btnCycleMonthly').classList.toggle('active', cycle === 'monthly');
+      document.getElementById('btnCycleYearly').classList.toggle('active', cycle === 'yearly');
+
+      if (cycle === 'yearly') {
+        document.getElementById('priceStarterNum').textContent = '₹1,299';
+        document.getElementById('priceStarterSub').textContent = '/ year (₹108/mo)';
+        document.getElementById('priceGrowthNum').textContent = '₹2,999';
+        document.getElementById('priceGrowthSub').textContent = '/ year (₹249/mo)';
+        document.getElementById('priceEnterpriseNum').textContent = '₹5,999';
+        document.getElementById('priceEnterpriseSub').textContent = '/ year (₹499/mo)';
       } else {
-        tabAnalytics.style.display = 'none';
-        tabPayouts.style.display = 'block';
-        btnAnalytics.classList.remove('active');
-        btnPayouts.classList.add('active');
-        loadEarnings();
-        loadAccount();
-        loadSettlements();
+        document.getElementById('priceStarterNum').textContent = '₹149';
+        document.getElementById('priceStarterSub').textContent = '/ month';
+        document.getElementById('priceGrowthNum').textContent = '₹349';
+        document.getElementById('priceGrowthSub').textContent = '/ month';
+        document.getElementById('priceEnterpriseNum').textContent = '₹699';
+        document.getElementById('priceEnterpriseSub').textContent = '/ month';
       }
     }
 
-    function changePortalPeriod(period) {
-      currentAnalyticsPeriod = period;
-      document.querySelectorAll('.period-btn').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-period') === period);
-      });
-      loadPortalAnalytics(period);
-    }
-
-    async function loadPortalAnalytics(period = 'today') {
+    // ── Google OAuth Sign-in Handlers ────────────────────────────────────────
+    async function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
       try {
-        const res = await fetch(`/api/vendor/analytics?period=${period}`, { headers: getVendorHeaders() });
-        if (!res.ok) return;
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential, stationName: 'Main Counter' })
+        });
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google login failed');
 
-        const s = data.summary || {};
-        const v = data.volume || {};
-        const xm = data.xeroxMetrics || {};
-        const c = data.customers || {};
-        const p = data.payments || {};
-        const r = data.rushHours || {};
-
-        // Top Stat Cards
-        document.getElementById('anTotalOrders').textContent = s.totalOrders || 0;
-        document.getElementById('anCompletedOrders').textContent = s.completedOrders || 0;
-        document.getElementById('anAvgOrder').textContent = `₹${s.avgOrderRupees || '0.00'}`;
-        document.getElementById('anGrossRupees').textContent = `₹${s.grossRupees || '0.00'}`;
-        document.getElementById('anVendorShare').textContent = `₹${s.vendorShareRupees || '0.00'}`;
-        document.getElementById('anTotalPages').textContent = v.totalPages || 0;
-        document.getElementById('anBwPages').textContent = v.bwPages || 0;
-        document.getElementById('anColorPages').textContent = v.colorPages || 0;
-        document.getElementById('anVelocity').textContent = xm.pagesPerMinute || '0.00';
-        document.getElementById('anPagesPerHour').textContent = xm.pagesPerHour || 0;
-        document.getElementById('anRepeatRate').textContent = `${c.returningRatePercent || 0}%`;
-        document.getElementById('anRepeatCount').textContent = c.returningCustomers || 0;
-        document.getElementById('anNewCount').textContent = c.newCustomers || 0;
-        document.getElementById('anPaperSaved').textContent = v.paperSheetsSaved || 0;
-        document.getElementById('anSavePercent').textContent = `${xm.duplexSavePercent || 0}%`;
-
-        // Rush Hour Highlight Pill
-        const rushPill = document.getElementById('analyticsRushPill');
-        if (r.busiestHour >= 0 && r.peakOrdersCount > 0) {
-          rushPill.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Peak Rush: ${r.peakHourLabel} (${r.peakOrdersCount} orders)`;
-          rushPill.style.display = 'inline-flex';
-        } else {
-          rushPill.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Normal Footfall';
-        }
-
-        // Render Multi-Bar Hourly Chart
-        const hourlyTrack = document.getElementById('anHourlyBarsTrack');
-        const hourlyData = r.hourlyTrend || [];
-        if (hourlyData.length === 0) {
-          hourlyTrack.innerHTML = '<div style="width:100%;text-align:center;color:var(--text-muted);padding:40px 0;">No hourly transactions recorded yet for this period.</div>';
-        } else {
-          const maxOrders = Math.max(1, ...hourlyData.map(h => h.orders));
-          const maxPages = Math.max(1, ...hourlyData.map(h => h.pages));
-
-          hourlyTrack.innerHTML = hourlyData.map(h => {
-            const isPeak = h.hour === r.busiestHour && h.orders > 0;
-            const ordersHeight = Math.max(4, Math.round((h.orders / maxOrders) * 110));
-            const pagesHeight = Math.max(4, Math.round((h.pages / maxPages) * 110));
-            return `
-              <div class="hourly-bar-col ${isPeak ? 'peak' : ''}">
-                <div class="bar-tooltip">
-                  <strong>${h.label}</strong><br>
-                  ${h.orders} orders &bull; ${h.pages} pages<br>
-                  Sales: ₹${h.grossRupees}
-                </div>
-                <div class="bar-group-flex">
-                  <div class="sub-bar sub-bar-orders" style="height:${ordersHeight}px;"></div>
-                  <div class="sub-bar sub-bar-pages" style="height:${pagesHeight}px;"></div>
-                </div>
-                <div class="bar-label">${h.label.replace(' ', '')}</div>
-              </div>
-            `;
-          }).join('');
-        }
-
-        // Render Daily Multi-Day Breakdown Table
-        const dailyTbody = document.getElementById('anDailyTableBody');
-        const rows = data.dailyTrend || [];
-        if (rows.length === 0) {
-          dailyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px;">No historical orders yet for this timeframe.</td></tr>';
-        } else {
-          dailyTbody.innerHTML = rows.map(row => `
-            <tr>
-              <td style="font-weight:700;">${row.date}</td>
-              <td><strong style="color:#60a5fa;">${row.orders}</strong> orders</td>
-              <td><strong style="color:#a78bfa;">${row.totalPages || 0}</strong> pages</td>
-              <td>₹${row.grossRupees}</td>
-              <td style="color:#34d399;font-weight:700;">₹${row.vendorShareRupees}</td>
-            </tr>
-          `).join('');
-        }
-
-        // Xerox Deep Breakdown Cards
-        const totalP = (v.bwPages + v.colorPages) || 1;
-        const bwPct = Math.round(((v.bwPages || 0) / totalP) * 100);
-        const colorPct = 100 - bwPct;
-        document.getElementById('ratioBarBw').style.width = `${bwPct}%`;
-        document.getElementById('ratioBarColor').style.width = `${colorPct}%`;
-        document.getElementById('ratioBwText').textContent = `${bwPct}% (${v.bwPages || 0} pg)`;
-        document.getElementById('ratioColorText').textContent = `${colorPct}% (${v.colorPages || 0} pg)`;
-
-        // Payments Split
-        const totalPayPaise = (p.counterCashOrders + p.onlineUpiOrders) || 1;
-        const cashPct = Math.round((p.counterCashOrders / totalPayPaise) * 100);
-        const upiPct = 100 - cashPct;
-        document.getElementById('ratioBarCash').style.width = `${cashPct}%`;
-        document.getElementById('ratioBarUpi').style.width = `${upiPct}%`;
-        document.getElementById('payCashText').textContent = `₹${p.counterCashRupees || '0.00'} (${p.counterCashOrders || 0} orders)`;
-        document.getElementById('payUpiText').textContent = `₹${p.onlineUpiRupees || '0.00'} (${p.onlineUpiOrders || 0} orders)`;
-
-        // Paper & Job Characteristics
-        document.getElementById('xeroxAvgJob').textContent = `${xm.avgJobSizePages || '0.0'} pages/order`;
-        document.getElementById('xeroxStampCount').textContent = `${v.stampPaperOrders || 0} orders`;
-        document.getElementById('xeroxSheetsUsed').textContent = `${v.paperSheetsUsed || 0} physical sheets`;
-
+        currentSlug = data.shopSlug;
+        localStorage.setItem('qrprintdesk_vendor_slug', data.shopSlug);
+        showPortal(data);
       } catch (err) {
-        console.error('loadPortalAnalytics error:', err);
+        alert('Google Sign-In Error: ' + err.message);
       }
     }
 
+    async function handleDemoGoogleLogin() {
+      // Clean instant Google test login (allows one-click testing before setting OAuth keys)
+      const testEmail = prompt('Enter merchant email for Google sign-in demo:', 'merchant@gmail.com');
+      if (!testEmail) return;
+
+      try {
+        const res = await fetch('/api/auth/vendor/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shopName: testEmail.split('@')[0].toUpperCase() + ' Xerox',
+            ownerEmail: testEmail,
+            pin: '1234',
+            stationName: 'Counter Station 1'
+          })
+        });
+
+        const data = await res.json();
+        if (res.status === 409) {
+          // Already exists, sign in
+          const loginRes = await fetch('/api/auth/vendor/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: testEmail, pin: '1234' })
+          });
+          const loginData = await loginRes.json();
+          currentSlug = loginData.shopSlug;
+          currentPin = '1234';
+          localStorage.setItem('qrprintdesk_vendor_slug', currentSlug);
+          localStorage.setItem('qrprintdesk_vendor_pin', '1234');
+          showPortal(loginData);
+        } else if (res.ok) {
+          currentSlug = data.shopSlug;
+          currentPin = '1234';
+          localStorage.setItem('qrprintdesk_vendor_slug', currentSlug);
+          localStorage.setItem('qrprintdesk_vendor_pin', '1234');
+          showPortal(data);
+        } else {
+          throw new Error(data.error || 'Failed');
+        }
+      } catch (err) {
+        alert('Sign-In Error: ' + err.message);
+      }
+    }
+
+    // ── Regular Shop Slug & PIN Login ────────────────────────────────────────
     async function handleLogin() {
       const slug = document.getElementById('loginSlug').value.trim();
       const pin = document.getElementById('loginPin').value.trim();
@@ -605,31 +716,198 @@
     }
 
     function showPortal(shopInfo) {
+      currentShopInfo = shopInfo;
       document.getElementById('loginSection').style.display = 'none';
       document.getElementById('portalSection').style.display = 'block';
-      document.getElementById('shopTitleName').textContent = shopInfo.name || 'Vendor Station';
+      document.getElementById('shopTitleName').textContent = shopInfo.name || shopInfo.shopName || 'Vendor Station';
       document.getElementById('shopSlugPill').textContent = 'shop: ' + currentSlug;
-      loadAll();
+      if (shopInfo.ownerEmail) {
+        document.getElementById('shopOwnerEmailSub').textContent = shopInfo.ownerEmail;
+      }
+
+      // Check if URL has upgrade=success
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('upgrade') === 'success') {
+        document.getElementById('upgradeSuccessBanner').style.display = 'flex';
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      loadSubscription();
     }
 
-    async function loadAll() {
-      if (currentPortalTab === 'analytics') {
-        loadPortalAnalytics(currentAnalyticsPeriod);
-      } else {
-        loadEarnings();
-        loadAccount();
-        loadSettlements();
+    // ── Load Subscription & Order Limits ─────────────────────────────────────
+    async function loadSubscription() {
+      try {
+        const res = await fetch('/api/vendor/subscription', { headers: getVendorHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        subscriptionData = data;
+
+        const sub = data.subscription;
+        const plan = data.planConfig;
+
+        document.getElementById('headerPlanBadge').textContent = 'Plan: ' + plan.name;
+        document.getElementById('currentPlanTitle').textContent = plan.name;
+        document.getElementById('subStatusTag').textContent = sub.status === 'TRIAL' ? 'Active Free Trial' : sub.status;
+
+        const used = sub.ordersThisMonth || 0;
+        const limit = plan.monthlyOrderLimit;
+        const limitStr = limit > 900000 ? 'Unlimited' : limit;
+        const pct = data.usagePercent || 0;
+
+        document.getElementById('usageRatioText').textContent = `${used} / ${limitStr} orders (${pct}%)`;
+        
+        const bar = document.getElementById('usageProgressBar');
+        bar.style.width = Math.min(100, pct) + '%';
+        bar.className = 'usage-bar' + (pct >= 100 ? ' danger' : (pct >= 80 ? ' warning' : ''));
+
+        // Friendly message
+        const msg = document.getElementById('quotaFriendlyMessage');
+        if (data.isLimitReached) {
+          msg.innerHTML = `★ <strong>${data.graceRemaining} complimentary grace prints active</strong> so no counter customer is turned away! Upgrade below to continue uninterrupted.`;
+          msg.style.color = 'var(--danger)';
+        } else if (data.isNearLimit) {
+          msg.innerHTML = `⚡ <strong>You've used ${pct}% of your monthly allowance!</strong> Your counter is printing fast. Upgrade anytime for seamless rush hours.`;
+          msg.style.color = 'var(--warning)';
+        } else {
+          msg.textContent = `✓ Your counter is operating at peak speed. Allowance resets automatically on the 1st of every month.`;
+          msg.style.color = 'var(--success)';
+        }
+
+        // Highlight current plan card
+        ['cardPlanFree', 'cardPlanStarter', 'cardPlanGrowth', 'cardPlanEnterprise'].forEach(id => {
+          document.getElementById(id).classList.remove('current');
+        });
+
+        if (sub.plan === 'FREE') document.getElementById('cardPlanFree').classList.add('current');
+        else if (sub.plan === 'STARTER') document.getElementById('cardPlanStarter').classList.add('current');
+        else if (sub.plan === 'GROWTH') document.getElementById('cardPlanGrowth').classList.add('current');
+        else if (sub.plan === 'ENTERPRISE') document.getElementById('cardPlanEnterprise').classList.add('current');
+
+      } catch (err) {
+        console.error('loadSubscription error:', err);
       }
     }
 
+    // ── PayU 1-Click Plan Upgrade ────────────────────────────────────────────
+    async function upgradePlan(planId) {
+      if (!confirm(`Upgrade to the ${planId} plan with ${currentBillingCycle} billing?`)) return;
+
+      try {
+        const res = await fetch('/api/vendor/subscription/checkout', {
+          method: 'POST',
+          headers: getVendorHeaders(),
+          body: JSON.stringify({ planId, billingCycle: currentBillingCycle })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to initiate checkout');
+
+        if (data.payuParams) {
+          const p = data.payuParams;
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = p.action;
+          for (const [k, v] of Object.entries(p)) {
+            if (k === 'action') continue;
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = k;
+            input.value = v;
+            form.appendChild(input);
+          }
+          document.body.appendChild(form);
+          form.submit();
+        }
+      } catch (err) {
+        alert('Upgrade Checkout Error: ' + err.message);
+      }
+    }
+
+    // ── Analytics & Rush Hour Methods ────────────────────────────────────────
+    function setAnalyticsPeriod(period) {
+      currentAnalyticsPeriod = period;
+      document.getElementById('btnPeriodToday').classList.toggle('active', period === 'today');
+      document.getElementById('btnPeriod7d').classList.toggle('active', period === '7d');
+      document.getElementById('btnPeriod30d').classList.toggle('active', period === '30d');
+      loadPortalAnalytics(period);
+    }
+
+    async function loadPortalAnalytics(period) {
+      try {
+        const res = await fetch(`/api/vendor/dashboard?period=${period}`, { headers: getVendorHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const s = data.stats || {};
+        const r = data.rushHours || {};
+
+        document.getElementById('anTotalOrders').textContent = s.totalOrders || 0;
+        document.getElementById('anGrossRev').textContent = '₹' + (s.grossRevenueRupees || '0.00');
+        document.getElementById('anNetRev').textContent = '₹' + (s.netPayoutRupees || '0.00');
+        document.getElementById('anTotalPages').textContent = s.totalPages || 0;
+        document.getElementById('anAvgPages').textContent = `${data.xeroxMetrics?.avgJobSizePages || '0.0'} pages / order avg`;
+
+        document.getElementById('rushHoursBadge').textContent = `Peak Rush: ${r.busiestWindow || '--'}`;
+
+        const hourlyTrack = document.getElementById('hourlyBarsTrack');
+        const hourlyData = r.hourlyData || [];
+        if (hourlyData.length === 0) {
+          hourlyTrack.innerHTML = '<div style="width:100%;text-align:center;color:var(--text-dim);line-height:140px;">No print orders in this period.</div>';
+        } else {
+          const maxOrders = Math.max(1, ...hourlyData.map(h => h.orders));
+          const maxPages = Math.max(1, ...hourlyData.map(h => h.pages));
+
+          hourlyTrack.innerHTML = hourlyData.map(h => {
+            const isPeak = h.hour === r.busiestHour && h.orders > 0;
+            const ordersHeight = Math.max(4, Math.round((h.orders / maxOrders) * 110));
+            const pagesHeight = Math.max(4, Math.round((h.pages / maxPages) * 110));
+            return `
+              <div class="hourly-bar-col ${isPeak ? 'peak' : ''}">
+                <div class="bar-tooltip">
+                  <strong>${h.label}</strong><br>
+                  ${h.orders} orders &bull; ${h.pages} pages<br>
+                  Sales: ₹${h.grossRupees}
+                </div>
+                <div class="bar-group-flex">
+                  <div class="sub-bar sub-bar-orders" style="height:${ordersHeight}px;"></div>
+                  <div class="sub-bar sub-bar-pages" style="height:${pagesHeight}px;"></div>
+                </div>
+                <div class="bar-label">${h.label.replace(' ', '')}</div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        const dailyTbody = document.getElementById('anDailyTableBody');
+        const rows = data.dailyTrend || [];
+        if (rows.length === 0) {
+          dailyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:18px;">No historical orders yet for this timeframe.</td></tr>';
+        } else {
+          dailyTbody.innerHTML = rows.map(row => `
+            <tr>
+              <td style="font-weight:700;">${row.date}</td>
+              <td><strong style="color:var(--primary);">${row.orders}</strong> orders</td>
+              <td><strong style="color:#8b5cf6;">${row.totalPages || 0}</strong> pages</td>
+              <td>₹${row.grossRupees}</td>
+              <td style="color:var(--success);font-weight:700;">₹${row.vendorShareRupees}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('loadPortalAnalytics error:', err);
+      }
+    }
+
+    // ── Bank Details & Payout Handlers ───────────────────────────────────────
     async function loadEarnings() {
       try {
         const res = await fetch('/api/vendor/easy-split/earnings', { headers: getVendorHeaders() });
         if (!res.ok) return;
         const data = await res.json();
-        document.getElementById('statToday').textContent = '' + data.todayEarningsRupees;
-        document.getElementById('statSettled').textContent = '' + data.settledToBankRupees;
-        document.getElementById('statPending').textContent = '' + data.pendingSettlementRupees;
+        document.getElementById('statToday').textContent = '₹' + data.todayEarningsRupees;
+        document.getElementById('statSettled').textContent = '₹' + data.settledToBankRupees;
+        document.getElementById('statPending').textContent = '₹' + data.pendingSettlementRupees;
         document.getElementById('statShare').textContent = (100 - data.commissionPercent) + '%';
       } catch (err) {
         console.error(err);
@@ -647,7 +925,7 @@
           badge.textContent = 'ACTIVE [AUTO-PAYOUTS ON]';
           badge.className = 'badge badge-active';
 
-          document.getElementById('viewAccount').textContent = data.bankDetails.accountNumber ? '  ' + data.bankDetails.accountNumber.slice(-4) : 'Not Set';
+          document.getElementById('viewAccount').textContent = data.bankDetails.accountNumber ? '•••• ' + data.bankDetails.accountNumber.slice(-4) : 'Not Set';
           document.getElementById('viewIfsc').textContent = data.bankDetails.ifsc || 'Not Set';
           document.getElementById('viewUpi').textContent = data.bankDetails.upiId || 'Not Set';
 
@@ -697,7 +975,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to save bank details');
 
-        alert('Bank Account Successfully Connected with Cashfree Easy Split for Auto-Payouts!');
+        alert('Bank Account Successfully Connected for Auto-Payouts!');
         loadAccount();
       } catch (err) {
         alert('Error: ' + err.message);
@@ -712,7 +990,7 @@
         tbody.innerHTML = '';
 
         if (!data.settlements || data.settlements.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No settlements transferred yet. Future daily payouts will appear here automatically.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 18px;">No settlements transferred yet. Future daily payouts will appear here automatically.</td></tr>';
           return;
         }
 
@@ -721,7 +999,7 @@
           const badgeClass = s.status === 'SUCCESS' ? 'badge badge-active' : 'badge badge-notreg';
           tr.innerHTML = `
             <td><code>${s.settlementId}</code></td>
-            <td style="color: #34d399; font-weight: 700;">${Number(s.amountRupees || 0).toFixed(2)}</td>
+            <td style="color: var(--success); font-weight: 700;">₹${Number(s.amountRupees || 0).toFixed(2)}</td>
             <td>${s.eventType}</td>
             <td><span class="${badgeClass}">${s.status}</span></td>
             <td>${new Date(s.date).toLocaleString()}</td>

@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { authenticateAgent, authenticateShop } from '../services/auth.js';
 import { createEasySplitVendor, updateEasySplitVendor } from '../services/cashfree.js';
+import { getShopSubscription, VENDOR_PLANS } from '../services/subscription.js';
+import { createPayUCheckoutParams } from '../services/payu.js';
 import { ShopDocument, OrderDocument, JobDocument, SettlementDocument, LedgerDocument } from '../types.js';
 
 const DEFAULT_PRINT_OPTIONS = {
@@ -1149,4 +1151,69 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
       });
     }
   );
+
+  // ── GET /api/vendor/subscription ──────────────────────────────────────────
+  fastify.get('/vendor/subscription', async (request, reply) => {
+    const auth = await getAuthenticatedShop(request, reply);
+    if (!auth) return;
+
+    const subInfo = await getShopSubscription(db, auth.shopId);
+
+    return reply.send({
+      subscription: subInfo.subscription,
+      planConfig: subInfo.planConfig,
+      usagePercent: subInfo.usagePercent,
+      isNearLimit: subInfo.isNearLimit,
+      isLimitReached: subInfo.isLimitReached,
+      graceRemaining: subInfo.graceRemaining,
+      canPrint: subInfo.canPrint,
+      plans: VENDOR_PLANS
+    });
+  });
+
+  // ── POST /api/vendor/subscription/checkout (PayU Plan Upgrade) ───────────
+  fastify.post<{
+    Body: { planId: 'STARTER' | 'GROWTH' | 'ENTERPRISE'; billingCycle?: 'monthly' | 'yearly' };
+  }>('/vendor/subscription/checkout', async (request, reply) => {
+    const auth = await getAuthenticatedShop(request, reply);
+    if (!auth) return;
+
+    const { planId, billingCycle = 'monthly' } = request.body || {};
+    const targetPlan = VENDOR_PLANS[planId];
+    if (!targetPlan || planId === 'FREE') {
+      return reply.code(400).send({ error: 'Please select a valid paid upgrade plan (STARTER, GROWTH, or ENTERPRISE)' });
+    }
+
+    const priceRupees = billingCycle === 'yearly' ? targetPlan.yearlyPriceRupees : targetPlan.monthlyPriceRupees;
+    const amountPaise = priceRupees * 100;
+    const orderId = `sub_${auth.shop.slug.slice(0, 10)}_${Date.now()}`;
+
+    try {
+      const payuParams = createPayUCheckoutParams({
+        orderId,
+        amountPaise,
+        customerName: auth.shop.name,
+        customerEmail: auth.shop.ownerEmail,
+        shopSlug: auth.shop.slug,
+        udf1: auth.shop.slug,
+        udf2: 'SUBSCRIPTION_UPGRADE',
+        udf3: planId,
+        udf4: billingCycle,
+        udf5: auth.shopId.toString()
+      });
+
+      return reply.send({
+        success: true,
+        orderId,
+        planId,
+        planName: targetPlan.name,
+        billingCycle,
+        amountRupees: priceRupees,
+        payuParams
+      });
+    } catch (err: any) {
+      request.log.error({ err }, 'Failed to generate PayU subscription checkout');
+      return reply.code(500).send({ error: 'Failed to initiate plan upgrade. Please try again.' });
+    }
+  });
 };

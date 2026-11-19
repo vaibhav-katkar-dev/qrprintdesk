@@ -6,6 +6,7 @@ import { PDFDocument } from 'pdf-lib';
 import { uploadBufferToStorage, generateFileKey } from '../services/r2.js';
 import { WebSocketHub } from '../services/wsHub.js';
 import { outboxBus } from '../services/outboxWorker.js';
+import { incrementShopOrderCount } from '../services/subscription.js';
 import { OrderDocument, JobDocument, OutboxDocument, ShopDocument } from '../types.js';
 
 interface WhatsAppMediaMetadata {
@@ -333,6 +334,7 @@ export const whatsappRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }
               };
 
               await db.collection<OrderDocument>('orders').insertOne(orderDoc);
+              await incrementShopOrderCount(db, shop._id);
 
               // 7. Create Job Document in MongoDB
               const jobId = `job_${orderDoc.orderId}`;

@@ -60,12 +60,29 @@ export interface EasySplitConfig {
   updatedAt?: Date;
 }
 
+export interface VendorSubscription {
+  plan: 'FREE' | 'STARTER' | 'GROWTH' | 'ENTERPRISE';
+  billingCycle: 'monthly' | 'yearly';
+  status: 'ACTIVE' | 'EXPIRED' | 'TRIAL';
+  startDate: Date;
+  expiryDate: Date;
+  monthlyOrderLimit: number;
+  ordersThisMonth: number;
+  lastResetMonth: string; // e.g. '2026-11'
+  graceOrdersAllowed?: number;
+  lastUpgradeDate?: Date;
+  lastPaymentTxnId?: string;
+}
+
 export interface ShopDocument {
   _id: ObjectId;
   name: string;
   slug: string;
   ownerEmail: string;
   pinHash: string;
+  googleId?: string;
+  avatarUrl?: string;
+  subscription?: VendorSubscription;
   pricing: {
     bwPerPagePaise: number;
     colorPerPagePaise: number;
