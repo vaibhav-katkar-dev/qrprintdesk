@@ -154,3 +154,28 @@ export async function deleteR2Object(key: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function uploadBufferToStorage(
+  key: string,
+  buffer: Buffer,
+  contentType: string = 'application/octet-stream'
+): Promise<void> {
+  if (isLocalStorage) {
+    const filePath = getLocalFilePath(key);
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      await fs.promises.mkdir(dir, { recursive: true });
+    }
+    await fs.promises.writeFile(filePath, buffer);
+    return;
+  }
+
+  const command = new PutObjectCommand({
+    Bucket: r2BucketName,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType
+  });
+
+  await s3Client!.send(command);
+}

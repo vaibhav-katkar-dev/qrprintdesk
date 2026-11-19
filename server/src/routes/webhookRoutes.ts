@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { Db, MongoClient, ObjectId } from 'mongodb';
 import { verifyCashfreeWebhook } from '../services/cashfree.js';
+import { verifyPayUResponseHash, getPayUCredentials } from '../services/payu.js';
 import { fulfillPaidOrder } from '../services/paymentFulfillment.js';
 import { WebSocketHub } from '../services/wsHub.js';
 import { OrderDocument, PaymentDocument, ShopDocument } from '../types.js';
@@ -195,5 +196,163 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
     });
 
     return reply.code(200).send({ status: 'SUCCESS_PROCESSED', jobId: fulfillResult.jobId });
+  });
+
+  // ── PayU Webhook Endpoint ──────────────────────────────────────────────────
+  fastify.post('/webhooks/payu', async (request, reply) => {
+    const payload = (request.body as any) || {};
+    request.log.info({ txnid: payload.txnid, status: payload.status }, 'PayU webhook received');
+
+    const creds = getPayUCredentials();
+    const txnid = String(payload.txnid || '').trim();
+    const status = String(payload.status || '').toLowerCase();
+    const receivedHash = String(payload.hash || '').trim();
+
+    if (!txnid) {
+      return reply.code(400).send({ error: 'Missing txnid in PayU webhook' });
+    }
+
+    // 1. Verify PayU reverse SHA-512 hash
+    const isValid = verifyPayUResponseHash({
+      receivedHash,
+      status,
+      txnid,
+      amount: String(payload.amount || ''),
+      productinfo: String(payload.productinfo || ''),
+      firstname: String(payload.firstname || ''),
+      email: String(payload.email || ''),
+      key: String(payload.key || creds.merchantKey),
+      salt: creds.merchantSalt,
+      udf1: payload.udf1,
+      udf2: payload.udf2,
+      udf3: payload.udf3,
+      udf4: payload.udf4,
+      udf5: payload.udf5,
+      additionalCharges: payload.additionalCharges
+    });
+
+    if (!isValid) {
+      request.log.warn({ txnid, status }, 'PayU webhook hash verification failed');
+      return reply.code(400).send({ error: 'Invalid PayU hash signature' });
+    }
+
+    // 2. Locate order in database
+    const order = await db.collection<OrderDocument>('orders').findOne({ orderId: txnid });
+    if (!order) {
+      request.log.warn({ txnid }, 'PayU webhook received for unknown order — acknowledged and ignored');
+      return reply.code(200).send({ status: 'IGNORED', reason: 'order_not_found' });
+    }
+
+    // 3. Check for payment failure
+    const eventId = String(payload.payuid || payload.mihpayid || `payu_${Date.now()}`);
+    if (status !== 'success') {
+      const now = new Date();
+      await db.collection<OrderDocument>('orders').updateOne(
+        { orderId: order.orderId, status: 'PAYMENT_PENDING' },
+        {
+          $set: { status: 'FAILED', updatedAt: now },
+          $push: {
+            auditTrail: {
+              actor: 'payu',
+              from: order.status,
+              to: 'FAILED',
+              opId: eventId,
+              reason: `PayU payment status: ${status} (${payload.error_Message || payload.unmappedstatus || 'failed'})`,
+              time: now
+            }
+          }
+        }
+      );
+
+      await db.collection<PaymentDocument>('payments').insertOne({
+        _id: new ObjectId(),
+        orderId: order.orderId,
+        shopId: order.shopId,
+        provider: 'payu',
+        providerOrderId: txnid,
+        providerPaymentId: eventId,
+        providerEventId: eventId,
+        amountPaise: Math.round(Number(payload.amount || 0) * 100),
+        currency: 'INR',
+        status: 'FAILED',
+        rawPayload: payload,
+        createdAt: now
+      });
+
+      return reply.code(200).send({ status: 'FAILED_RECORDED' });
+    }
+
+    // 4. Success: Fulfill order
+    const fulfillResult = await fulfillPaidOrder({
+      db,
+      orderId: order.orderId,
+      providerPaymentId: eventId,
+      providerEventId: eventId,
+      provider: 'payu',
+      rawPayload: payload,
+      wsHub,
+      reason: 'Verified PayU webhook notification received'
+    });
+
+    request.log.info({ txnid, jobId: fulfillResult.jobId }, 'PayU order fulfilled via webhook');
+    return reply.code(200).send({ status: 'SUCCESS_PROCESSED', jobId: fulfillResult.jobId });
+  });
+
+  // ── PayU Browser SURL / FURL Return Endpoint ───────────────────────────────
+  fastify.post('/payu/response', async (request, reply) => {
+    const payload = (request.body as any) || {};
+    const query = request.query as Record<string, string | undefined>;
+    const shopSlug = (payload.udf1 || query.shop || 'default').trim();
+    const txnid = String(payload.txnid || '').trim();
+    const status = String(payload.status || '').toLowerCase();
+    const receivedHash = String(payload.hash || '').trim();
+
+    const creds = getPayUCredentials();
+    const isValid = verifyPayUResponseHash({
+      receivedHash,
+      status,
+      txnid,
+      amount: String(payload.amount || ''),
+      productinfo: String(payload.productinfo || ''),
+      firstname: String(payload.firstname || ''),
+      email: String(payload.email || ''),
+      key: String(payload.key || creds.merchantKey),
+      salt: creds.merchantSalt,
+      udf1: payload.udf1,
+      udf2: payload.udf2,
+      udf3: payload.udf3,
+      udf4: payload.udf4,
+      udf5: payload.udf5,
+      additionalCharges: payload.additionalCharges
+    });
+
+    if (isValid && status === 'success' && txnid) {
+      const eventId = String(payload.payuid || payload.mihpayid || `payu_${Date.now()}`);
+      await fulfillPaidOrder({
+        db,
+        orderId: txnid,
+        providerPaymentId: eventId,
+        providerEventId: eventId,
+        provider: 'payu',
+        rawPayload: payload,
+        wsHub,
+        reason: 'Verified PayU customer checkout redirect'
+      });
+      return reply.redirect(`/shop/${shopSlug}?order_id=${encodeURIComponent(txnid)}&payment=success`);
+    } else {
+      return reply.redirect(`/shop/${shopSlug}?order_id=${encodeURIComponent(txnid)}&payment=failed`);
+    }
+  });
+
+  // Also support GET /payu/response in case of GET redirect
+  fastify.get('/payu/response', async (request, reply) => {
+    const query = request.query as Record<string, string | undefined>;
+    const shopSlug = (query.shop || 'default').trim();
+    const orderId = query.order_id || query.txnid || '';
+    const status = (query.status || '').toLowerCase();
+    if (status === 'success' && orderId) {
+      return reply.redirect(`/shop/${shopSlug}?order_id=${encodeURIComponent(orderId)}&payment=success`);
+    }
+    return reply.redirect(`/shop/${shopSlug}?order_id=${encodeURIComponent(orderId)}&payment=failed`);
   });
 };

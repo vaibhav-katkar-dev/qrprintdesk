@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 import { headR2Object } from '../services/r2.js';
 import { calculateOrderPrice } from '../services/pricing.js';
 import { createCashfreeOrderSession, fetchCashfreeOrderStatus } from '../services/cashfree.js';
+import { createPayUCheckoutParams } from '../services/payu.js';
 import { fulfillPaidOrder } from '../services/paymentFulfillment.js';
 import { WebSocketHub } from '../services/wsHub.js';
 import { OrderDocument, ShopDocument, IdempotencyKeyDocument, JobDocument, OutboxDocument } from '../types.js';
@@ -239,26 +240,47 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
     const isPayAtCounter = (shop.payAtCounter === true) || (payAtCounter === true);
 
     // 5. Payment Session or Pay at Counter
+    const gateway = (process.env.PAYMENT_GATEWAY || 'payu').toLowerCase();
     let paymentSessionId: string | undefined;
     let providerOrderId: string | undefined;
+    let payuParams: any = undefined;
 
     if (!isPayAtCounter) {
-      try {
-        const sessionResult = await createCashfreeOrderSession({
-          orderId,
-          amountPaise: pricing.amountPaise,
-          customerName,
-          customerPhone,
-          orderSplits: orderSplitsInput.length > 0 ? orderSplitsInput : undefined
-        });
-        paymentSessionId = sessionResult.paymentSessionId;
-        providerOrderId = sessionResult.providerOrderId;
-      } catch (err: any) {
-        request.log.error({ err }, 'Failed to create Cashfree session — returning 503');
-        return reply.code(503).send({
-          error: 'Payment gateway temporarily unavailable. Please try again in a moment.',
-          retryable: true
-        });
+      if (gateway === 'payu') {
+        try {
+          payuParams = createPayUCheckoutParams({
+            orderId,
+            amountPaise: pricing.amountPaise,
+            customerName,
+            customerPhone,
+            shopSlug
+          });
+          providerOrderId = orderId;
+        } catch (err: any) {
+          request.log.error({ err }, 'Failed to create PayU checkout parameters');
+          return reply.code(503).send({
+            error: 'Payment gateway temporarily unavailable. Please try again in a moment.',
+            retryable: true
+          });
+        }
+      } else {
+        try {
+          const sessionResult = await createCashfreeOrderSession({
+            orderId,
+            amountPaise: pricing.amountPaise,
+            customerName,
+            customerPhone,
+            orderSplits: orderSplitsInput.length > 0 ? orderSplitsInput : undefined
+          });
+          paymentSessionId = sessionResult.paymentSessionId;
+          providerOrderId = sessionResult.providerOrderId;
+        } catch (err: any) {
+          request.log.error({ err }, 'Failed to create Cashfree session — returning 503');
+          return reply.code(503).send({
+            error: 'Payment gateway temporarily unavailable. Please try again in a moment.',
+            retryable: true
+          });
+        }
       }
     }
 
@@ -370,6 +392,8 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       status: orderDoc.status,
       jobId,
       payAtCounter: isPayAtCounter,
+      paymentGateway: gateway,
+      payuParams,
       paymentSessionId: orderDoc.paymentSessionId,
       amountPaise: pricing.amountPaise,
       amountRupees: (pricing.amountPaise / 100).toFixed(2),
@@ -377,6 +401,7 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       copies: orderDoc.printOptions.copies,
       pageCount: totalPages,
       cashfreeEnv: process.env.CASHFREE_ENV || 'SANDBOX',
+      payuEnv: process.env.PAYU_ENV || 'TEST',
       createdAt: orderDoc.createdAt
     };
 
@@ -418,7 +443,37 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
       });
     }
 
-    // Check with Cashfree API
+    // For PayU or non-Cashfree gateways, status transitions happen via Webhook and SURL redirect
+    const gateway = (process.env.PAYMENT_GATEWAY || 'payu').toLowerCase();
+    if (gateway !== 'cashfree') {
+      const paymentDoc = await db.collection('payments').findOne({ orderId, status: 'SUCCESS' });
+      if (paymentDoc) {
+        const fulfill = await fulfillPaidOrder({
+          db,
+          orderId: order.orderId,
+          providerPaymentId: paymentDoc.providerPaymentId,
+          providerEventId: paymentDoc.providerEventId,
+          provider: 'payu',
+          wsHub,
+          reason: 'Verified PayU payment record'
+        });
+        const job = await db.collection<JobDocument>('jobs').findOne({ orderId });
+        return reply.send({
+          orderId: order.orderId,
+          status: 'PAID',
+          jobStatus: job?.status || 'QUEUED',
+          jobId: fulfill.jobId,
+          isPaid: true
+        });
+      }
+      return reply.send({
+        orderId: order.orderId,
+        status: order.status,
+        isPaid: false
+      });
+    }
+
+    // Check with Cashfree API if Cashfree is the active gateway
     try {
       const cfStatus = await fetchCashfreeOrderStatus(order.providerOrderId || order.orderId);
       if (cfStatus.orderStatus === 'PAID') {
@@ -458,10 +513,11 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
     }
   });
 
-  // Sandbox Test Payment Simulation (Only active when CASHFREE_ENV === 'SANDBOX')
+  // Sandbox / Test Payment Simulation
   fastify.post<{ Params: { orderId: string } }>('/orders/:orderId/simulate-sandbox-payment', async (request, reply) => {
-    if (process.env.CASHFREE_ENV !== 'SANDBOX') {
-      return reply.code(403).send({ error: 'Sandbox simulation only permitted in SANDBOX mode' });
+    const isTestMode = process.env.CASHFREE_ENV === 'SANDBOX' || (process.env.PAYU_ENV || 'TEST') === 'TEST';
+    if (!isTestMode) {
+      return reply.code(403).send({ error: 'Sandbox simulation only permitted in TEST/SANDBOX mode' });
     }
 
     const { orderId } = request.params;

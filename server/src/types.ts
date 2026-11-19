@@ -16,7 +16,7 @@ export type JobState =
   | 'MANUAL_REVIEW';
 
 export interface AuditEntry {
-  actor: 'customer' | 'agent' | 'admin' | 'system' | 'cashfree';
+  actor: 'customer' | 'agent' | 'admin' | 'system' | 'cashfree' | 'payu';
   actorId?: string;
   from: JobState;
   to: JobState;
@@ -175,7 +175,7 @@ export interface PaymentDocument {
   _id: ObjectId;
   orderId: string;
   shopId: ObjectId;
-  provider: 'cashfree';
+  provider: 'cashfree' | 'payu';
   providerOrderId: string;
   providerPaymentId?: string;
   providerEventId?: string; // unique for webhooks

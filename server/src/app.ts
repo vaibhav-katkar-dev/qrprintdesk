@@ -14,6 +14,7 @@ import { webhookRoutes } from './routes/webhookRoutes.js';
 import { dashboardRoutes } from './routes/dashboardRoutes.js';
 import { localStorageRoutes } from './routes/localStorageRoutes.js';
 import { vendorRoutes } from './routes/vendorRoutes.js';
+import { whatsappRoutes } from './routes/whatsappRoutes.js';
 import { WebSocketHub } from './services/wsHub.js';
 import { OutboxWorker } from './services/outboxWorker.js';
 import { R2CleanupWorker } from './services/r2CleanupWorker.js';
@@ -56,6 +57,22 @@ export function buildApp(db: Db, mongoClient: MongoClient, startWorkers: boolean
         return done(null, {});
       }
       const parsed = JSON.parse(raw);
+      done(null, parsed);
+    } catch (err: any) {
+      done(err, undefined);
+    }
+  });
+
+  // Support application/x-www-form-urlencoded for PayU webhook and return postbacks
+  app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (req, body, done) => {
+    try {
+      const rawStr = typeof body === 'string' ? body : body.toString('utf8');
+      (req as any).rawBody = rawStr;
+      const params = new URLSearchParams(rawStr);
+      const parsed: Record<string, string> = {};
+      for (const [key, val] of params.entries()) {
+        parsed[key] = val;
+      }
       done(null, parsed);
     } catch (err: any) {
       done(err, undefined);
@@ -190,6 +207,7 @@ export function buildApp(db: Db, mongoClient: MongoClient, startWorkers: boolean
   app.register(dashboardRoutes, { db, wsHub });
   app.register(localStorageRoutes, { prefix: '/api' });
   app.register(vendorRoutes, { prefix: '/api', db, wsHub });
+  app.register(whatsappRoutes, { prefix: '/api', db, wsHub });
 
   if (startWorkers) {
     outboxWorker.start();

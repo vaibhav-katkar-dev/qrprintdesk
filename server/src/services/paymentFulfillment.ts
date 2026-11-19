@@ -8,11 +8,13 @@ export async function fulfillPaidOrder(params: {
   orderId: string;
   providerPaymentId?: string;
   providerEventId?: string;
+  provider?: 'cashfree' | 'payu';
   rawPayload?: any;
   wsHub?: WebSocketHub;
   reason?: string;
 }): Promise<{ success: boolean; jobId?: string; alreadyFulfilled?: boolean; error?: string }> {
   const { db, orderId, providerPaymentId, providerEventId, rawPayload, wsHub, reason } = params;
+  const provider = params.provider || (params.rawPayload?.payuid ? 'payu' : 'cashfree');
   const now = new Date();
 
   const order = await db.collection<OrderDocument>('orders').findOne({ orderId });
@@ -47,11 +49,11 @@ export async function fulfillPaidOrder(params: {
       $set: { status: 'PAID', updatedAt: now },
       $push: {
         auditTrail: {
-          actor: 'cashfree',
+          actor: provider,
           from: 'PAYMENT_PENDING',
           to: 'PAID',
           opId: eventId,
-          reason: reason || 'Verified payment received',
+          reason: reason || `Verified ${provider} payment received`,
           time: now
         }
       }
@@ -70,9 +72,9 @@ export async function fulfillPaidOrder(params: {
       _id: new ObjectId(),
       orderId: order.orderId,
       shopId: order.shopId,
-      provider: 'cashfree',
+      provider,
       providerOrderId: order.providerOrderId || order.orderId,
-      providerPaymentId: providerPaymentId || `cf_pay_${Date.now()}`,
+      providerPaymentId: providerPaymentId || `${provider}_pay_${Date.now()}`,
       providerEventId: eventId,
       amountPaise: order.pricing.amountPaise,
       currency: 'INR',
