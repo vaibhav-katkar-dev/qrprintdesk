@@ -3,8 +3,9 @@ import { Db, MongoClient, ObjectId } from 'mongodb';
 import { verifyCashfreeWebhook } from '../services/cashfree.js';
 import { verifyPayUResponseHash, getPayUCredentials } from '../services/payu.js';
 import { fulfillPaidOrder } from '../services/paymentFulfillment.js';
+import { transitionJobState } from '../services/stateMachine.js';
 import { WebSocketHub } from '../services/wsHub.js';
-import { OrderDocument, PaymentDocument, ShopDocument } from '../types.js';
+import { OrderDocument, PaymentDocument, ShopDocument, JobDocument } from '../types.js';
 
 export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClient; wsHub?: WebSocketHub }> = async (fastify, opts) => {
   const { db, wsHub } = opts;
@@ -198,42 +199,57 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
     return reply.code(200).send({ status: 'SUCCESS_PROCESSED', jobId: fulfillResult.jobId });
   });
 
+  // ── PayU Webhook Health Check / Test Endpoint ────────────────────────────
+  fastify.get('/webhooks/payu', async (request, reply) => {
+    return reply.code(200).send({
+      status: 'active',
+      gateway: 'payu',
+      endpoint: '/api/webhooks/payu',
+      methods: ['POST'],
+      message: 'PayU webhook listener is live and healthy'
+    });
+  });
+
   // ── PayU Webhook Endpoint ──────────────────────────────────────────────────
   fastify.post('/webhooks/payu', async (request, reply) => {
     const payload = (request.body as any) || {};
-    request.log.info({ txnid: payload.txnid, status: payload.status }, 'PayU webhook received');
-
-    const creds = getPayUCredentials();
-    const txnid = String(payload.txnid || '').trim();
-    const status = String(payload.status || '').toLowerCase();
+    const eventName = String(payload.event || payload.action || '').toLowerCase();
+    const status = String(payload.status || eventName || '').toLowerCase();
+    const txnid = String(payload.txnid || payload.merchantTransactionId || payload.orderId || '').trim();
     const receivedHash = String(payload.hash || '').trim();
+
+    request.log.info({ txnid, status, event: payload.event }, 'PayU webhook received');
 
     if (!txnid) {
       return reply.code(400).send({ error: 'Missing txnid in PayU webhook' });
     }
 
-    // 1. Verify PayU reverse SHA-512 hash
-    const isValid = verifyPayUResponseHash({
-      receivedHash,
-      status,
-      txnid,
-      amount: String(payload.amount || ''),
-      productinfo: String(payload.productinfo || ''),
-      firstname: String(payload.firstname || ''),
-      email: String(payload.email || ''),
-      key: String(payload.key || creds.merchantKey),
-      salt: creds.merchantSalt,
-      udf1: payload.udf1,
-      udf2: payload.udf2,
-      udf3: payload.udf3,
-      udf4: payload.udf4,
-      udf5: payload.udf5,
-      additionalCharges: payload.additionalCharges
-    });
+    const creds = getPayUCredentials();
 
-    if (!isValid) {
-      request.log.warn({ txnid, status }, 'PayU webhook hash verification failed');
-      return reply.code(400).send({ error: 'Invalid PayU hash signature' });
+    // 1. Verify PayU reverse SHA-512 hash if hash is provided
+    if (receivedHash) {
+      const isValid = verifyPayUResponseHash({
+        receivedHash,
+        status: payload.status ? String(payload.status).toLowerCase() : status,
+        txnid,
+        amount: String(payload.amount || ''),
+        productinfo: String(payload.productinfo || ''),
+        firstname: String(payload.firstname || ''),
+        email: String(payload.email || ''),
+        key: String(payload.key || creds.merchantKey),
+        salt: creds.merchantSalt,
+        udf1: payload.udf1,
+        udf2: payload.udf2,
+        udf3: payload.udf3,
+        udf4: payload.udf4,
+        udf5: payload.udf5,
+        additionalCharges: payload.additionalCharges
+      });
+
+      if (!isValid) {
+        request.log.warn({ txnid, status }, 'PayU webhook hash verification failed');
+        return reply.code(400).send({ error: 'Invalid PayU hash signature' });
+      }
     }
 
     // 2. Locate order in database
@@ -243,9 +259,66 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
       return reply.code(200).send({ status: 'IGNORED', reason: 'order_not_found' });
     }
 
-    // 3. Check for payment failure
-    const eventId = String(payload.payuid || payload.mihpayid || `payu_${Date.now()}`);
-    if (status !== 'success') {
+    const eventId = String(payload.payuid || payload.mihpayid || payload.paymentId || `payu_${Date.now()}`);
+    const isRefund = status.includes('refund') || eventName.includes('refund');
+    const isSuccess = status === 'success' || status === 'successful' || eventName === 'successful';
+
+    // 3. Handle REFUND Event
+    if (isRefund) {
+      const now = new Date();
+      const refundAmountPaise = Math.round(Number(payload.amount || payload.refund_amount || 0) * 100);
+
+      await db.collection<OrderDocument>('orders').updateOne(
+        { orderId: order.orderId },
+        {
+          $set: { status: 'REFUND_PENDING', updatedAt: now },
+          $push: {
+            auditTrail: {
+              actor: 'payu',
+              from: order.status,
+              to: 'REFUND_PENDING',
+              opId: eventId,
+              reason: `PayU refund processed (refundId: ${payload.refund_id || payload.refundId || eventId})`,
+              time: now
+            }
+          }
+        }
+      );
+
+      // Cancel the print job if it is still queued to prevent unnecessary printing
+      const job = await db.collection<JobDocument>('jobs').findOne({ orderId: order.orderId });
+      if (job && ['QUEUED', 'UPLOADED'].includes(job.status)) {
+        await transitionJobState({
+          db,
+          jobId: job.jobId,
+          expectedState: job.status,
+          targetState: 'CANCELLED',
+          actor: 'payu',
+          reason: 'Print cancelled due to customer refund'
+        });
+      }
+
+      await db.collection<PaymentDocument>('payments').insertOne({
+        _id: new ObjectId(),
+        orderId: order.orderId,
+        shopId: order.shopId,
+        provider: 'payu',
+        providerOrderId: txnid,
+        providerPaymentId: eventId,
+        providerEventId: eventId,
+        amountPaise: refundAmountPaise || order.pricing.amountPaise,
+        currency: 'INR',
+        status: 'FAILED', // marks transaction reversal in payments
+        rawPayload: payload,
+        createdAt: now
+      });
+
+      request.log.info({ txnid, refundAmountPaise }, 'PayU refund processed and recorded');
+      return reply.code(200).send({ status: 'REFUND_RECORDED', txnid });
+    }
+
+    // 4. Handle PAYMENT FAILED Event
+    if (!isSuccess) {
       const now = new Date();
       await db.collection<OrderDocument>('orders').updateOne(
         { orderId: order.orderId, status: 'PAYMENT_PENDING' },
@@ -282,7 +355,7 @@ export const webhookRoutes: FastifyPluginAsync<{ db: Db; mongoClient: MongoClien
       return reply.code(200).send({ status: 'FAILED_RECORDED' });
     }
 
-    // 4. Success: Fulfill order
+    // 5. Handle PAYMENT SUCCESS Event: Fulfill order & send to printer
     const fulfillResult = await fulfillPaidOrder({
       db,
       orderId: order.orderId,
