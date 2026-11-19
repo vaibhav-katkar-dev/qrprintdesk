@@ -60,6 +60,10 @@ export interface PayUCheckoutPayload {
   udf3: string;
   udf4: string;
   udf5: string;
+  // UPI-first: not in hash formula, just extra POST fields
+  enforce_paymethod: string;
+  pg: string;
+  bankcode: string;
 }
 
 /**
@@ -191,6 +195,10 @@ export function createPayUCheckoutParams(params: PayUPaymentParams): PayUCheckou
     udf2,
     udf3,
     udf4,
-    udf5
+    udf5,
+    // UPI-first: show UPI tab by default, not in hash formula
+    enforce_paymethod: 'upi',
+    pg: 'UPI',
+    bankcode: 'UPI'
   };
 }
