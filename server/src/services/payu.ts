@@ -87,16 +87,19 @@ export function generatePayURequestHash(params: {
   const udf4 = params.udf4 || '';
   const udf5 = params.udf5 || '';
 
-  const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${udf1}|${udf2}|${udf3}|${udf4}|${udf5}|||||${salt}`;
+  // PayU standard formula:
+  // sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|salt)
+  // Between udf5 and salt there are 5 fields (udf6..udf10), requiring 6 separating pipes: ||||||
+  const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${udf1}|${udf2}|${udf3}|${udf4}|${udf5}||||||${salt}`;
   return crypto.createHash('sha512').update(hashString).digest('hex').toLowerCase();
 }
 
 /**
  * Verify PayU SHA-512 Reverse Hash on Webhook or Return Response
  * Formula without additionalCharges:
- *   sha512(SALT|status|||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+ *   sha512(SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
  * Formula with additionalCharges:
- *   sha512(additionalCharges|SALT|status|||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+ *   sha512(additionalCharges|SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
  */
 export function verifyPayUResponseHash(params: {
   receivedHash: string;
@@ -122,11 +125,12 @@ export function verifyPayUResponseHash(params: {
   const udf4 = params.udf4 || '';
   const udf5 = params.udf5 || '';
 
+  // PayU response formula has 6 pipes between status and udf5 for empty udf10..udf6: ||||||
   let hashString: string;
   if (additionalCharges && additionalCharges.trim() !== '') {
-    hashString = `${additionalCharges}|${salt}|${status}|||||${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    hashString = `${additionalCharges}|${salt}|${status}||||||${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
   } else {
-    hashString = `${salt}|${status}|||||${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    hashString = `${salt}|${status}||||||${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
   }
 
   const calculatedHash = crypto.createHash('sha512').update(hashString).digest('hex').toLowerCase();

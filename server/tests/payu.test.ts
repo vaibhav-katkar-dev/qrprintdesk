@@ -21,10 +21,26 @@ describe('PayU Service', () => {
     const hash = generatePayURequestHash(params);
     expect(hash).toHaveLength(128); // 128 hex chars for SHA-512
 
-    // Manually verify expected SHA-512 calculation
-    const expectedRaw = `${key}|ord_test_123|10.00|QrPrintDesk Counter Print|Rahul|rahul@example.com|default|||||||||${salt}`;
+    // Manually verify expected SHA-512 calculation with 10 total pipes between udf1 and salt
+    const expectedRaw = `${key}|ord_test_123|10.00|QrPrintDesk Counter Print|Rahul|rahul@example.com|default||||||||||${salt}`;
     const expectedHash = crypto.createHash('sha512').update(expectedRaw).digest('hex').toLowerCase();
     expect(hash).toBe(expectedHash);
+  });
+
+  it('matches exact PayU server verified transaction hash from production error response', () => {
+    const params = {
+      key: '8BXmrR',
+      txnid: 'ord_1795067022506_e98224cc',
+      amount: '1.00',
+      productinfo: 'QrPrintDesk Counter Print',
+      firstname: 'Customer',
+      email: 'qrprintdesk@gmail.com',
+      udf1: 'vaibhav-s-shop',
+      salt: 'USFH2YmEhfmrdiWz3MHhonkwrAmr2ToJ'
+    };
+
+    const hash = generatePayURequestHash(params);
+    expect(hash).toBe('d0252cedbfb373ba3cfcea19635b70be14a241788eba02bc8956a8ec9ba10d61301055977e5b84dfdca86c69465209c2d5d56689b991f7fdac80759725b6ec27');
   });
 
   it('verifies valid reverse SHA-512 hash on PayU webhook response', () => {
@@ -36,9 +52,9 @@ describe('PayU Service', () => {
     const email = 'rahul@example.com';
     const udf1 = 'default';
 
-    // Reverse hash formula: sha512(SALT|status|||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
-    // When udf2..udf5 are empty and udf1 is 'default', there are 9 pipes between status and udf1
-    const reverseRaw = `${salt}|${status}|||||||||${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    // Reverse hash formula: sha512(SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+    // When udf2..udf5 are empty and udf1 is 'default', there are 10 pipes between status and udf1
+    const reverseRaw = `${salt}|${status}||||||||||${udf1}|${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
     const receivedHash = crypto.createHash('sha512').update(reverseRaw).digest('hex').toLowerCase();
 
     const isValid = verifyPayUResponseHash({
