@@ -37,6 +37,13 @@ async function startServer() {
 
     process.on('SIGINT', () => shutdown('SIGINT'));
     process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+    process.on('unhandledRejection', (reason, p) => {
+      app.fastify.log.error({ reason, promise: p }, 'Unhandled Rejection');
+    });
+    process.on('uncaughtException', (err) => {
+      app.fastify.log.error({ err }, 'Uncaught Exception');
+    });
   } catch (err: any) {
     console.error('Fatal startup error:', err?.message || err);
     process.exit(1);
