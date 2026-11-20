@@ -95,7 +95,8 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
         pricing: shop.pricing,
         printOptions: shop.printOptions ?? DEFAULT_PRINT_OPTIONS,
         requireCustomerName: shop.requireCustomerName ?? false,
-        payAtCounter: shop.payAtCounter ?? false,
+        payAtCounter: shop.payAtCounter ?? true,
+        enableOnlinePayment: shop.enableOnlinePayment ?? false,
         isActive: shop.isActive
       },
       stats: {
@@ -325,6 +326,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
       duplexDiscountPaise?: number;
       requireCustomerName?: boolean;
       payAtCounter?: boolean;
+      enableOnlinePayment?: boolean;
       printOptions?: {
         allowColor?: boolean;
         allowBW?: boolean;
@@ -346,7 +348,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
     if (!auth) return;
     const { shopId, shop } = auth;
 
-    const { shopName, shopSlug, bwPerPagePaise, colorPerPagePaise, duplexDiscountPaise, requireCustomerName, payAtCounter, printOptions } = request.body || {};
+    const { shopName, shopSlug, bwPerPagePaise, colorPerPagePaise, duplexDiscountPaise, requireCustomerName, payAtCounter, enableOnlinePayment, printOptions } = request.body || {};
     const update: any = { updatedAt: new Date() };
 
     if (shopName) update.name = shopName.trim().slice(0, 80);
@@ -367,6 +369,7 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
     if (typeof duplexDiscountPaise === 'number' && duplexDiscountPaise >= 0) update['pricing.duplexDiscountPaise'] = Math.round(duplexDiscountPaise);
     if (typeof requireCustomerName === 'boolean') update.requireCustomerName = requireCustomerName;
     if (typeof payAtCounter === 'boolean') update.payAtCounter = payAtCounter;
+    if (typeof enableOnlinePayment === 'boolean') update.enableOnlinePayment = enableOnlinePayment;
 
     if (printOptions && typeof printOptions === 'object') {
       const existing = shop.printOptions ?? DEFAULT_PRINT_OPTIONS;
@@ -1148,6 +1151,8 @@ export const vendorRoutes: FastifyPluginAsync<{ db: Db; wsHub?: any }> = async (
         },
         printOptions: shop.printOptions ?? DEFAULT_PRINT_OPTIONS,
         requireCustomerName: shop.requireCustomerName ?? false,
+        payAtCounter: shop.payAtCounter ?? true,
+        enableOnlinePayment: shop.enableOnlinePayment ?? false,
       });
     }
   );

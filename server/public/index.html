@@ -1367,7 +1367,7 @@
               </button>
               <label class="enhance-toggle">
                 <input type="checkbox" x-model="cropEditor.enhance" @change="redrawCropCanvas()">
-                ✨ Enhance
+                Auto-Enhance
               </label>
               <button type="button" class="doc-edit-btn" @click="resetCropBox()">Reset</button>
             </div>
@@ -1533,21 +1533,32 @@
               </div>
             </div>
 
-            <!-- Distinct Dual Action Buttons: Pay Now (Online) & Pay at Counter (Cash) -->
-            <div class="footer-actions-grid">
-              <!-- Option A: Pay at Counter (Always available or when shop enables) -->
-              <button type="button" class="counter-pay-btn" :disabled="loading || anyUploadFailed" @click="startPayAtCounter()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                <span>Pay at Counter</span>
-              </button>
-
-              <!-- Option B: Pay Online (UPI / Card / Cashfree) -->
-              <button type="button" class="primary-submit-btn" style="justify-content:center; padding: 12px 14px;" :disabled="loading || anyUploadFailed" @click="startPayAndPrint()">
+            <!-- Checkout Actions: Single Pay at Counter (Default & 100% Guaranteed) or Dual Buttons if Online Enabled -->
+            <template x-if="!shopInfo.enableOnlinePayment">
+              <button type="button" class="primary-submit-btn" style="width: 100%; justify-content: center; padding: 13px 16px; font-size: 14.5px; font-weight: 700; background: #059669; border-color: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);" :disabled="loading || anyUploadFailed" @click="startPayAtCounter()">
                 <span class="spinner-ring" x-show="loading"></span>
-                <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading...' : 'Pay Online')"></span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!loading"><polyline points="9 18 15 12 9 6"/></svg>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" x-show="!loading"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading documents...' : 'Confirm Order & Pay at Counter')"></span>
+                <span style="opacity: 0.9; margin-left: 4px;" x-show="!loading && !isUploadingFiles">(Rs.<span x-text="totalPriceRupees"></span>)</span>
               </button>
-            </div>
+            </template>
+
+            <template x-if="shopInfo.enableOnlinePayment">
+              <div class="footer-actions-grid">
+                <!-- Option A: Pay at Counter -->
+                <button type="button" class="counter-pay-btn" :disabled="loading || anyUploadFailed" @click="startPayAtCounter()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                  <span>Pay at Counter</span>
+                </button>
+
+                <!-- Option B: Pay Online (UPI / PayU) -->
+                <button type="button" class="primary-submit-btn" style="justify-content:center; padding: 12px 14px;" :disabled="loading || anyUploadFailed" @click="startPayAndPrint()">
+                  <span class="spinner-ring" x-show="loading"></span>
+                  <span x-text="loading ? loadingText : (isUploadingFiles ? 'Uploading...' : 'Pay Online')"></span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" x-show="!loading"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -1640,7 +1651,9 @@
           name: 'QrPrintDesk Station',
           pricing: { bwRate: 2, colorRate: 10, duplexDiscount: 0.5 },
           agentOnline: true,
-          sandbox: true
+          sandbox: true,
+          payAtCounter: true,
+          enableOnlinePayment: false
         },
         fileList: [],
         uploadPercent: 0,

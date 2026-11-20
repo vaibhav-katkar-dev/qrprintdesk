@@ -53,7 +53,8 @@ export const orderRoutes: FastifyPluginAsync<{ db: Db; wsHub?: WebSocketHub }> =
         maxCopies: 10
       },
       requireCustomerName: shop.requireCustomerName ?? false,
-      payAtCounter: shop.payAtCounter ?? false,
+      payAtCounter: shop.payAtCounter ?? true,
+      enableOnlinePayment: shop.enableOnlinePayment ?? false,
       agentOnline: isConnected,
       sandbox: process.env.CASHFREE_ENV === 'SANDBOX'
     });

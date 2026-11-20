@@ -51,7 +51,7 @@ async function _executePrintJob(jobId) {
   if (target && target.status && target.status.toLowerCase().includes('offline')) {
     // Printer offline → hold job in queue tail, alert shopkeeper
     logPrinterActivity(`[HOLD] Printer offline — Job #${shortId} re-queued`, 'orange');
-    showToast(`⚠️ Printer offline! Job #${shortId} held — connect printer to auto-resume.`, 'error');
+    showToast(`Printer offline: Job #${shortId} held — connect printer to auto-resume.`, 'error');
     _printQueue.unshift(jobId); // push back to front
     _isPrinting = false;
     // Retry automatically in 10 seconds
@@ -72,10 +72,10 @@ async function _executePrintJob(jobId) {
   const r = await window.electronAPI.printJob({ jobId, downloadUrls, printOptions: meta.printOptions });
 
   if (r.success) {
-    showToast(`✅ Job #${shortId} printed!`, 'success');
+    showToast(`Job #${shortId} printed successfully`, 'success');
     logPrinterActivity(`[DONE] Job #${shortId} printed successfully`, 'green');
   } else {
-    showToast(`⚠️ Print issue on #${shortId}: ${r.error || 'Check printer'}`, 'error');
+    showToast(`Print issue on #${shortId}: ${r.error || 'Check printer'}`, 'error');
     logPrinterActivity(`[FAIL] Job #${shortId}: ${r.error || 'Device busy'}`, 'red');
   }
   invalidateCache('jobs', 'dashboard');
@@ -192,14 +192,14 @@ function setupNavigation() {
   const pageSub   = document.getElementById('page-sub');
 
   const titles = {
-    dashboard:    { title: 'Dashboard',             sub: 'Live shop overview and incoming cloud print jobs' },
-    jobs:         { title: 'Print Jobs Archive',    sub: 'Search, filter, and reprint previous customer orders' },
-    analytics:    { title: 'Xerox Analytics & Rush Hours', sub: 'Footfall patterns, peak rush hours, customer retention and paper velocity' },
-    finances:     { title: 'Finances & Easy Split', sub: 'Revenue analytics, ledger transactions, and automated bank payouts' },
-    qr:           { title: 'Customer QR Standee',   sub: 'Counter standee QR code and direct store link' },
-    settings:     { title: 'Station Settings',      sub: 'Printer, pricing, and customer-facing print options' },
-    subscription: { title: 'Subscription & Tier',   sub: 'Commercial license details and station limits' },
-    support:      { title: 'Vendor Helpdesk',       sub: 'Direct support, diagnostic tools, and spooler checks' }
+    dashboard:    { title: 'Print Queue',        sub: 'Live incoming customer print requests' },
+    jobs:         { title: 'Order History',      sub: 'Search, filter, and reprint previous customer orders' },
+    analytics:    { title: 'Shop Analytics',     sub: 'Footfall patterns, peak rush hours, and page velocity' },
+    finances:     { title: 'Bank & Settlements', sub: 'Revenue analytics, ledger transactions, and automated payouts' },
+    qr:           { title: 'Counter QR Standee', sub: 'Counter standee QR code and direct store link' },
+    settings:     { title: 'Station Settings',   sub: 'Printer hardware, per-page rates, and checkout options' },
+    subscription: { title: 'Billing & Limits',   sub: 'Monthly print allowance, active tier, and plan upgrade' },
+    support:      { title: 'Station Helpdesk',   sub: 'Direct support, diagnostic tools, and spooler checks' }
   };
 
   navItems.forEach(item => {
@@ -230,8 +230,9 @@ function setupNavigation() {
       if (target === 'jobs')      loadAllJobs();
       if (target === 'analytics') loadAnalytics(currentAnalyticsPeriod);
       if (target === 'finances')  loadFinancesPage();
-      if (target === 'qr')        loadQR();
-      if (target === 'settings')  loadSettingsFromServer();
+      if (target === 'qr')           loadQR();
+      if (target === 'settings')     loadSettingsFromServer();
+      if (target === 'subscription') loadSubscriptionFromServer();
     });
   });
 }
@@ -624,7 +625,7 @@ window.runSpoolerAudit = async function() {
     const activePrinters = jobs.map(j => j.DriverName).filter(Boolean);
     const uniqueDrivers = Array.from(new Set(activePrinters)).join(', ') || config.printerName || 'Default Printer';
 
-    alert(`📊 Hardware Print Spooler Audit:\n\nActive Printer: ${uniqueDrivers}\nTotal Spooler Jobs: ${jobs.length}\nTotal Pages Spooled: ${totalQueuedPages}\nPages Completed: ${totalPrinted}\n\nTip: Match this against your daily counter log to verify 100% paper accountability.`);
+    alert(`Hardware Print Spooler Audit:\n\nActive Printer: ${uniqueDrivers}\nTotal Spooler Jobs: ${jobs.length}\nTotal Pages Spooled: ${totalQueuedPages}\nPages Completed: ${totalPrinted}\n\nTip: Match this against your daily counter log to verify 100% paper accountability.`);
     logPrinterActivity(`Hardware spooler audit run: ${jobs.length} jobs, ${totalQueuedPages} pages`, 'blue');
   } catch (err) {
     showToast(`Audit error: ${err.message}`, 'error');
@@ -681,6 +682,7 @@ async function refreshDashboard(force = false) {
     allFetchedJobs = jobsData.jobs || [];
     updatePillCounts();
     applyDashboardFilter();
+    loadSubscriptionFromServer(force);
   } catch (err) {
     console.error('Dashboard refresh failed:', err);
   }
@@ -796,9 +798,9 @@ function renderDashboardTable(jobs) {
       <td style="text-align:right;white-space:nowrap;min-width:165px;">
         <button class="btn btn-secondary btn-xs" onclick="openJobModal('${j.jobId}')">View</button>
         ${st === 'completed' 
-          ? `<button class="btn btn-success btn-xs" style="background:#16a34a;color:#ffffff;border:none;margin-left:2px;" onclick="sendWhatsAppReady('${j.jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${amt}')">📲 WhatsApp</button>` 
+          ? `<button class="btn btn-success btn-xs" style="background:#16a34a;color:#ffffff;border:none;margin-left:2px;" onclick="sendWhatsAppReady('${j.jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${amt}')">WhatsApp</button>` 
           : `<button class="btn btn-primary btn-xs" onclick="printJobRow('${j.jobId}')">Print</button>
-             <button class="btn btn-success btn-xs" style="background:#10b981;color:#ffffff;border:none;margin-left:2px;" onclick="completeJobRow('${j.jobId}')" title="Mark completed / Ready for pickup">✅ Done</button>`
+             <button class="btn btn-success btn-xs" style="background:#10b981;color:#ffffff;border:none;margin-left:2px;" onclick="completeJobRow('${j.jobId}')" title="Mark completed / Ready for pickup">Done</button>`
         }
         ${canAct ? `<button class="btn btn-danger btn-xs" onclick="openRejectModal('${j.jobId}')">Reject</button>` : ''}
       </td>
@@ -1000,20 +1002,20 @@ window.openJobModal = async function(jobId) {
         Print Now
       </button>
       <button class="btn btn-success" style="background:#10b981;color:#ffffff;border:none;" onclick="completeJobRow('${jobId}');closeJobModal();" title="Mark print completed and ready">
-        ✅ Mark Done
+        Mark Done
       </button>
       <button class="btn btn-secondary" onclick="previewJobRow('${jobId}')">
-         Preview Full Document
+        Preview Full Document
       </button>
       <button class="btn btn-success" style="background:#16a34a;color:#ffffff;border:none;" onclick="sendWhatsAppReady('${jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${o.amountRupees || '0.00'}')">
-        📲 WhatsApp Ready
+        WhatsApp Ready
       </button>
       <button class="btn btn-danger" onclick="closeJobModal();openRejectModal('${jobId}')">
-         Reject Job
+        Reject Job
       </button>
     ` : `
       <button class="btn btn-success" style="background:#16a34a;color:#ffffff;border:none;" onclick="sendWhatsAppReady('${jobId}', '${escHtml(o.customerPhone || '')}', '${escHtml(pickupCode)}', '${o.amountRupees || '0.00'}')">
-        📲 WhatsApp Ready
+        WhatsApp Ready
       </button>
       <button class="btn btn-secondary" onclick="printJobRow('${jobId}');closeJobModal();">
         Reprint
@@ -1288,7 +1290,7 @@ window.completeJobRow = async function(jobId) {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${config.agentToken}`, 'Content-Type': 'application/json' }
     }, 0);
-    showToast(`✅ Job #${jobId.substring(0, 8)} marked Completed!`, 'success');
+    showToast(`Job #${jobId.substring(0, 8)} marked Completed!`, 'success');
     logPrinterActivity(`Job #${jobId.substring(0, 8)} marked Completed`, 'green');
     invalidateCache('jobs', 'dashboard');
     refreshDashboard(true);
@@ -1532,6 +1534,12 @@ async function loadSettingsFromServer() {
       }
 
       document.getElementById('settings-require-name').checked = data.shop.requireCustomerName === true;
+      if (document.getElementById('settings-pay-counter')) {
+        document.getElementById('settings-pay-counter').checked = data.shop.payAtCounter !== false;
+      }
+      if (document.getElementById('settings-enable-online')) {
+        document.getElementById('settings-enable-online').checked = data.shop.enableOnlinePayment === true;
+      }
 
       if (data.shop.printOptions) {
         const po = data.shop.printOptions;
@@ -1625,7 +1633,8 @@ async function saveSettings() {
         colorPerPagePaise:   Math.round(colorPrice * 100),
         duplexDiscountPaise: Math.round(duplexDisc * 100),
         requireCustomerName: requireName,
-        payAtCounter:        config.payAtCounter === true,
+        payAtCounter:        document.getElementById('settings-pay-counter') ? document.getElementById('settings-pay-counter').checked : true,
+        enableOnlinePayment: document.getElementById('settings-enable-online') ? document.getElementById('settings-enable-online').checked : false,
         printOptions
       })
     });
@@ -2339,3 +2348,121 @@ window.uploadKYCDocument = async function(docType, inputEl) {
     showToast(`[ERROR] Document Upload Error: ${err.message}`, 'error');
   }
 };
+
+// ── Subscription & Billing Quota ──────────────────────────────────────────
+async function loadSubscriptionFromServer(force = false) {
+  if (!config || !config.agentToken) return;
+  try {
+    const hdr = { 'Authorization': `Bearer ${config.agentToken}` };
+    const res = await fetch(`${config.serverUrl}/api/vendor/subscription`, { headers: hdr });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !data.subscription) return;
+
+    const sub = data.subscription;
+    const planConfig = data.planConfig || {};
+    const usagePct = Math.min(100, Math.max(0, data.usagePercent || 0));
+
+    // Update Plan Name and Badge
+    const planNameEl = document.getElementById('sub-plan-name');
+    if (planNameEl) planNameEl.textContent = planConfig.name || sub.plan;
+
+    const badgeTextEl = document.getElementById('sub-plan-badge-text');
+    if (badgeTextEl) badgeTextEl.textContent = `Active Plan: ${sub.plan}`;
+
+    const statusTagEl = document.getElementById('sub-status-tag');
+    if (statusTagEl) {
+      statusTagEl.textContent = sub.status === 'TRIAL' ? 'Active Trial' : 'Active Subscription';
+      statusTagEl.style.background = sub.status === 'TRIAL' ? '#dcfce7' : '#eff6ff';
+      statusTagEl.style.color = sub.status === 'TRIAL' ? '#166534' : '#1e40af';
+      statusTagEl.style.borderColor = sub.status === 'TRIAL' ? '#bbf7d0' : '#bfdbfe';
+    }
+
+    // Progress Bar
+    const progressBar = document.getElementById('sub-progress-bar');
+    if (progressBar) {
+      progressBar.style.width = `${usagePct}%`;
+      if (usagePct >= 100) progressBar.style.background = '#dc2626';
+      else if (usagePct >= 80) progressBar.style.background = '#d97706';
+      else progressBar.style.background = '#2563eb';
+    }
+
+    const usageTextEl = document.getElementById('sub-usage-text');
+    if (usageTextEl) {
+      const limitStr = sub.monthlyOrderLimit >= 999999 ? 'Unlimited' : sub.monthlyOrderLimit;
+      usageTextEl.textContent = `${sub.ordersThisMonth || 0} / ${limitStr} orders (${usagePct}%)`;
+    }
+
+    // Stat tiles
+    const statUsed = document.getElementById('sub-stat-used');
+    if (statUsed) statUsed.textContent = `${sub.ordersThisMonth || 0} Orders`;
+
+    const statLimit = document.getElementById('sub-stat-limit');
+    if (statLimit) statLimit.textContent = sub.monthlyOrderLimit >= 999999 ? 'Unlimited' : `${sub.monthlyOrderLimit} Orders`;
+
+    const statRemaining = document.getElementById('sub-stat-remaining');
+    if (statRemaining) {
+      if (sub.monthlyOrderLimit >= 999999) {
+        statRemaining.textContent = 'Unlimited';
+      } else {
+        const remaining = Math.max(0, sub.monthlyOrderLimit - (sub.ordersThisMonth || 0));
+        statRemaining.textContent = `${remaining} Prints`;
+      }
+    }
+
+    const statGrace = document.getElementById('sub-stat-grace');
+    if (statGrace) {
+      const grace = sub.graceOrdersAllowed ?? 10;
+      statGrace.textContent = `+${grace} Prints`;
+    }
+
+    // Quota alert banner
+    const alertBanner = document.getElementById('sub-alert-banner');
+    if (alertBanner) {
+      if (data.isLimitReached) {
+        alertBanner.style.display = 'block';
+        alertBanner.style.background = '#fef2f2';
+        alertBanner.style.borderColor = '#fecaca';
+        alertBanner.style.color = '#991b1b';
+        alertBanner.textContent = `Monthly quota reached (${sub.ordersThisMonth}/${sub.monthlyOrderLimit}). Grace buffer prints are active to ensure counter never stops.`;
+      } else if (data.isNearLimit) {
+        alertBanner.style.display = 'block';
+        alertBanner.style.background = '#fffbeb';
+        alertBanner.style.borderColor = '#fef3c7';
+        alertBanner.style.color = '#92400e';
+        alertBanner.textContent = `Notice: You have used ${usagePct}% of your monthly print quota (${sub.ordersThisMonth}/${sub.monthlyOrderLimit}).`;
+      } else {
+        alertBanner.style.display = 'none';
+      }
+    }
+
+    // Sidebar quota pill
+    const sidebarQuotaText = document.getElementById('sidebar-quota-text');
+    if (sidebarQuotaText) {
+      const limitStr = sub.monthlyOrderLimit >= 999999 ? 'Unl.' : sub.monthlyOrderLimit;
+      sidebarQuotaText.textContent = `${sub.ordersThisMonth || 0} / ${limitStr}`;
+      if (usagePct >= 100) sidebarQuotaText.style.color = '#dc2626';
+      else if (usagePct >= 80) sidebarQuotaText.style.color = '#d97706';
+      else sidebarQuotaText.style.color = '#2563eb';
+    }
+
+    // Connected shop slug
+    const shopSlugEl = document.getElementById('sub-shop-slug');
+    if (shopSlugEl) shopSlugEl.textContent = config.shopSlug || 'default';
+
+  } catch (err) {
+    console.error('Failed to load subscription status:', err);
+  }
+}
+
+function openWebBillingPortal(planId) {
+  if (!config || !config.serverUrl) return;
+  const baseUrl = config.serverUrl.replace(/\/+$/, '');
+  const slug = encodeURIComponent(config.shopSlug || 'default');
+  let url = `${baseUrl}/vendor-portal.html?tab=plans&shop=${slug}`;
+  if (planId) url += `&upgrade=${encodeURIComponent(planId)}`;
+  window.electronAPI.openExternal(url);
+}
+
+window.openWebBillingPortal = openWebBillingPortal;
+window.loadSubscriptionFromServer = loadSubscriptionFromServer;

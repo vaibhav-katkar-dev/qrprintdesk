@@ -220,15 +220,19 @@
       <div class="portal-nav">
         <button id="navTabPlans" onclick="switchPortalTab('plans')" class="portal-tab-btn active">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/></svg>
-          Plans &amp; Monthly Usage
+          Billing
         </button>
         <button id="navTabAnalytics" onclick="switchPortalTab('analytics')" class="portal-tab-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Xerox Analytics &amp; Rush Hours
+          Analytics
         </button>
         <button id="navTabPayouts" onclick="switchPortalTab('payouts')" class="portal-tab-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Bank &amp; Daily Payouts
+          Payouts
+        </button>
+        <button id="navTabSettings" onclick="switchPortalTab('settings')" class="portal-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
         </button>
       </div>
 
@@ -258,7 +262,7 @@
               <div id="usageProgressBar" class="usage-bar" style="width: 0%;"></div>
             </div>
             <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;" id="quotaFriendlyMessage">
-              ✓ Your print queue is running at peak speed.
+              Your print queue is running at peak speed.
             </div>
           </div>
         </div>
@@ -554,6 +558,78 @@
 
       </div>
 
+      <!-- ── TAB 4: SETTINGS & CHECKOUT MODES ───────────────────────────────── -->
+      <div id="tabViewSettings" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          
+          <!-- Pricing Card -->
+          <div class="dash-card">
+            <h3 class="dash-card-title">Per-Page Xerox Pricing</h3>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Set customer rates for your counter station</div>
+            <div class="form-group">
+              <label class="form-label">Black & White Rate (₹ / page)</label>
+              <input type="number" step="0.25" id="settingBwRate" class="form-input" value="2.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color Rate (₹ / page)</label>
+              <input type="number" step="0.50" id="settingColorRate" class="form-input" value="10.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duplex Discount (₹ / side)</label>
+              <input type="number" step="0.25" id="settingDuplexDiscount" class="form-input" value="0.50">
+            </div>
+          </div>
+
+          <!-- Checkout & Counter Modes -->
+          <div class="dash-card">
+            <h3 class="dash-card-title">Customer Checkout Flow</h3>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Control how customers pay at your counter</div>
+            
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+              <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="settingPayAtCounter" checked style="width: 18px; height: 18px; margin-top: 2px;">
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 700; color: var(--text-main);">Pay at Counter (Cash & Desk UPI)</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Customers confirm order instantly and pay cash or scan your counter UPI standee. 100% reliable with zero gateway friction.</div>
+                </div>
+              </label>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+              <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="settingEnableOnlinePayment" style="width: 18px; height: 18px; margin-top: 2px;">
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 700; color: var(--text-main);">Online Payment (PayU Gateway)</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Requires customers to pay online before printing. Keep disabled if operating a cash counter.</div>
+                </div>
+              </label>
+            </div>
+
+            <button onclick="savePortalSettings()" class="btn btn-primary" style="width: 100%; justify-content: center;" id="btnSavePortalSettings">Save Store Settings</button>
+          </div>
+
+        </div>
+
+        <!-- Desktop Station Integration Box -->
+        <div class="dash-card" style="margin-top: 20px;">
+          <h3 class="dash-card-title">Desktop Station Integration</h3>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">Use these credentials to connect the Windows Desktop Station App to your online shop.</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label class="form-label">Shop Slug</label>
+              <input type="text" id="settingShopSlugDisplay" class="form-input" readonly style="background: #f1f5f9; font-family: monospace;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Desktop Agent Key</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="settingStationTokenDisplay" class="form-input" readonly style="background: #f1f5f9; font-family: monospace;" value="agt_verified">
+                <button onclick="copyStationToken()" class="btn btn-secondary" style="flex-shrink: 0;">Copy Key</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -579,14 +655,84 @@
       document.getElementById('navTabPlans').classList.toggle('active', tab === 'plans');
       document.getElementById('navTabAnalytics').classList.toggle('active', tab === 'analytics');
       document.getElementById('navTabPayouts').classList.toggle('active', tab === 'payouts');
+      if (document.getElementById('navTabSettings')) document.getElementById('navTabSettings').classList.toggle('active', tab === 'settings');
 
       document.getElementById('tabViewPlans').style.display = tab === 'plans' ? 'block' : 'none';
       document.getElementById('tabViewAnalytics').style.display = tab === 'analytics' ? 'block' : 'none';
       document.getElementById('tabViewPayouts').style.display = tab === 'payouts' ? 'block' : 'none';
+      if (document.getElementById('tabViewSettings')) document.getElementById('tabViewSettings').style.display = tab === 'settings' ? 'block' : 'none';
 
       if (tab === 'plans') loadSubscription();
       else if (tab === 'analytics') loadPortalAnalytics(currentAnalyticsPeriod);
       else if (tab === 'payouts') { loadEarnings(); loadAccount(); loadSettlements(); }
+      else if (tab === 'settings') loadPortalSettings();
+    }
+
+    async function loadPortalSettings() {
+      try {
+        const res = await fetch('/api/vendor/dashboard', { headers: getVendorHeaders() });
+        const data = await res.json();
+        if (data && data.shop) {
+          const s = data.shop;
+          if (s.pricing) {
+            document.getElementById('settingBwRate').value = ((s.pricing.bwPerPagePaise || 200) / 100).toFixed(2);
+            document.getElementById('settingColorRate').value = ((s.pricing.colorPerPagePaise || 1000) / 100).toFixed(2);
+            document.getElementById('settingDuplexDiscount').value = ((s.pricing.duplexDiscountPaise || 50) / 100).toFixed(2);
+          }
+          document.getElementById('settingPayAtCounter').checked = s.payAtCounter !== false;
+          document.getElementById('settingEnableOnlinePayment').checked = s.enableOnlinePayment === true;
+          document.getElementById('settingShopSlugDisplay').value = s.slug || currentSlug;
+          
+          const storedToken = localStorage.getItem('qrprintdesk_agent_token') || 'agt_verified_connected';
+          document.getElementById('settingStationTokenDisplay').value = storedToken;
+        }
+      } catch (err) {
+        console.error('Failed to load store settings:', err);
+      }
+    }
+
+    async function savePortalSettings() {
+      const btn = document.getElementById('btnSavePortalSettings');
+      btn.disabled = true;
+      btn.innerText = 'Saving...';
+      try {
+        const bwPrice = parseFloat(document.getElementById('settingBwRate').value) || 2.0;
+        const colorPrice = parseFloat(document.getElementById('settingColorRate').value) || 10.0;
+        const duplexDisc = parseFloat(document.getElementById('settingDuplexDiscount').value) || 0.5;
+        const payAtCounter = document.getElementById('settingPayAtCounter').checked;
+        const enableOnline = document.getElementById('settingEnableOnlinePayment').checked;
+
+        const res = await fetch('/api/vendor/settings', {
+          method: 'PUT',
+          headers: getVendorHeaders(),
+          body: JSON.stringify({
+            bwPerPagePaise: Math.round(bwPrice * 100),
+            colorPerPagePaise: Math.round(colorPrice * 100),
+            duplexDiscountPaise: Math.round(duplexDisc * 100),
+            payAtCounter: payAtCounter,
+            enableOnlinePayment: enableOnline
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to save settings');
+        alert('Store settings successfully updated!');
+      } catch (err) {
+        alert('Settings Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Store Settings';
+      }
+    }
+
+    function copyStationToken() {
+      const token = document.getElementById('settingStationTokenDisplay').value;
+      if (!token) return;
+      navigator.clipboard.writeText(token).then(() => {
+        alert('Desktop Station Key copied to clipboard! Paste it into the Vendor Desktop App settings.');
+      }).catch(() => {
+        prompt('Copy your Desktop Station Key:', token);
+      });
     }
 
     function setBillingCycle(cycle) {
@@ -725,14 +871,19 @@
         document.getElementById('shopOwnerEmailSub').textContent = shopInfo.ownerEmail;
       }
 
-      // Check if URL has upgrade=success
+      // Check if URL has upgrade=success or target tab
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('upgrade') === 'success') {
         document.getElementById('upgradeSuccessBanner').style.display = 'flex';
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
-      loadSubscription();
+      const targetTab = urlParams.get('tab');
+      if (targetTab && ['plans', 'analytics', 'payouts', 'settings'].includes(targetTab)) {
+        switchPortalTab(targetTab);
+      } else {
+        loadSubscription();
+      }
     }
 
     // ── Load Subscription & Order Limits ─────────────────────────────────────
@@ -764,13 +915,13 @@
         // Friendly message
         const msg = document.getElementById('quotaFriendlyMessage');
         if (data.isLimitReached) {
-          msg.innerHTML = `★ <strong>${data.graceRemaining} complimentary grace prints active</strong> so no counter customer is turned away! Upgrade below to continue uninterrupted.`;
+          msg.innerHTML = `<strong>${data.graceRemaining} complimentary grace prints active</strong> so no counter customer is turned away! Upgrade below to continue uninterrupted.`;
           msg.style.color = 'var(--danger)';
         } else if (data.isNearLimit) {
-          msg.innerHTML = `⚡ <strong>You've used ${pct}% of your monthly allowance!</strong> Your counter is printing fast. Upgrade anytime for seamless rush hours.`;
+          msg.innerHTML = `<strong>You've used ${pct}% of your monthly allowance!</strong> Your counter is printing fast. Upgrade anytime for seamless rush hours.`;
           msg.style.color = 'var(--warning)';
         } else {
-          msg.textContent = `✓ Your counter is operating at peak speed. Allowance resets automatically on the 1st of every month.`;
+          msg.textContent = `Your counter is operating at peak speed. Allowance resets automatically on the 1st of every month.`;
           msg.style.color = 'var(--success)';
         }
 
@@ -1011,7 +1162,13 @@
       }
     }
 
-    // Auto-login if credentials exist in localStorage
+    // Auto-login if credentials exist in localStorage or fill from URL
+    const initialParams = new URLSearchParams(window.location.search);
+    const shopFromUrl = initialParams.get('shop');
+    if (shopFromUrl && !currentSlug) {
+      document.getElementById('loginSlug').value = shopFromUrl;
+    }
+
     if (currentSlug && currentPin) {
       document.getElementById('loginSlug').value = currentSlug;
       document.getElementById('loginPin').value = currentPin;

@@ -111,6 +111,7 @@ export interface ShopDocument {
   };
   requireCustomerName?: boolean;
   payAtCounter?: boolean;
+  enableOnlinePayment?: boolean;
 }
 
 export interface AgentDocument {

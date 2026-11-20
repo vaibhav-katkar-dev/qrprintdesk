@@ -23,31 +23,31 @@
       <nav class="nav-menu">
         <div class="nav-item active" data-page="dashboard">
           <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Dashboard
+          Queue
         </div>
         <div class="nav-item" data-page="jobs">
           <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print Jobs
+          History
         </div>
         <div class="nav-item" data-page="analytics">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Analytics &amp; Rush Hours
+          Analytics
         </div>
         <div class="nav-item" data-page="finances">
           <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          Finances & Payouts
+          Finances
         </div>
         <div class="nav-item" data-page="qr">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Customer QR
+          Counter QR
+        </div>
+        <div class="nav-item" data-page="subscription">
+          <svg viewBox="0 0 24 24"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/></svg>
+          Billing
         </div>
         <div class="nav-item" data-page="settings">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Settings
-        </div>
-        <div class="nav-item" data-page="subscription">
-          <svg viewBox="0 0 24 24"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/></svg>
-          Subscription
         </div>
         <div class="nav-item" data-page="support">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -64,6 +64,10 @@
       <div id="sidebar-connection-pill" class="connection-pill">
         <div id="status-dot" class="status-dot online"></div>
         <span id="status-text">Connected</span>
+      </div>
+      <div id="sidebar-quota-pill" class="connection-pill" style="margin-top: 6px; font-size: 11px; font-weight: 700; color: #475569; background: #f8fafc; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+        <span>Quota</span>
+        <span id="sidebar-quota-text" style="color: #2563eb;">0 / 100</span>
       </div>
       <span class="version-text">v2.0.0</span>
     </div>
@@ -683,7 +687,7 @@
                   <div class="fin-upload-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div style="font-size:13px;font-weight:700;color:#0f172a;" id="kyc-bank-label">Click to upload Passbook or Cheque</div>
                   <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">PNG, JPG, or PDF (Max 5MB)</div>
-                  <div id="kyc-bank-status" style="margin-top:6px;font-size:12px;color:#16a34a;font-weight:700;display:none;">✓ Uploaded</div>
+                  <div id="kyc-bank-status" style="margin-top:6px;font-size:12px;color:#16a34a;font-weight:700;display:none;">Uploaded</div>
                 </div>
                 <input type="file" id="kyc-file-bank" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" onchange="uploadKYCDocument('bank_proof', this)" />
               </div>
@@ -695,7 +699,7 @@
                   <div class="fin-upload-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><line x1="15" y1="8" x2="17" y2="8"/><line x1="15" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="17" y2="16"/></svg></div>
                   <div style="font-size:13px;font-weight:700;color:#0f172a;" id="kyc-pan-label">Click to upload PAN Card</div>
                   <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">PNG, JPG, or PDF (Max 5MB)</div>
-                  <div id="kyc-pan-status" style="margin-top:6px;font-size:12px;color:#16a34a;font-weight:700;display:none;">✓ Uploaded</div>
+                  <div id="kyc-pan-status" style="margin-top:6px;font-size:12px;color:#16a34a;font-weight:700;display:none;">Uploaded</div>
                 </div>
                 <input type="file" id="kyc-file-pan" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" onchange="uploadKYCDocument('pan_card', this)" />
               </div>
@@ -879,7 +883,7 @@
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:14px;">
             <span style="font-size:12px;color:var(--text-sub,#64748b);">Platform Commission Cut: <strong id="desktop-easysplit-cut" style="color:#3b82f6;">5%</strong> (You receive <strong id="desktop-vendor-share" style="color:#10b981;">95%</strong>)</span>
-            <span style="font-size:11px;color:#10b981;font-weight:600;">✓ Automated Settlement</span>
+            <span style="font-size:11px;color:#10b981;font-weight:600;">Automated Settlement</span>
           </div>
         </div>
 
@@ -890,10 +894,30 @@
             <label class="toggle-row">
               <div>
                 <div class="toggle-label">Require Customer Name</div>
-                <div class="toggle-sub">Customer must enter their name before paying</div>
+                <div class="toggle-sub">Customer must enter their name before submitting</div>
               </div>
               <div class="toggle-switch">
                 <input id="settings-require-name" type="checkbox" />
+                <span class="toggle-track"></span>
+              </div>
+            </label>
+            <label class="toggle-row">
+              <div>
+                <div class="toggle-label">Pay at Counter (Cash / Desk UPI)</div>
+                <div class="toggle-sub">Customers pay directly at the counter (Recommended & 100% active)</div>
+              </div>
+              <div class="toggle-switch">
+                <input id="settings-pay-counter" type="checkbox" checked />
+                <span class="toggle-track"></span>
+              </div>
+            </label>
+            <label class="toggle-row">
+              <div>
+                <div class="toggle-label">Online Payment (PayU Gateway)</div>
+                <div class="toggle-sub">Require customers to pay online before printing (Keep disabled for counter-pay flow)</div>
+              </div>
+              <div class="toggle-switch">
+                <input id="settings-enable-online" type="checkbox" />
                 <span class="toggle-track"></span>
               </div>
             </label>
@@ -993,32 +1017,157 @@
 
     <!-- ------------------------------------------ -->
     <section id="page-subscription" class="page">
-      <div class="tier-card">
-        <div class="tier-badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/></svg>
-          Active Plan: Pro Vendor Station
-        </div>
-        <h2 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:6px;">Unlimited Commercial Station</h2>
-        <p style="font-size:13px;color:var(--text-muted);">
-          Your station is registered on the QrPrintDesk SaaS platform with 0% platform commission on all UPI & cash transactions.
-        </p>
+      <div style="display: flex; flex-direction: column; gap: 20px; max-width: 860px;">
 
-        <div class="feature-list">
-          <div class="feature-item"><span class="feature-check">✓</span> Unlimited Incoming Cloud Customer Orders</div>
-          <div class="feature-item"><span class="feature-check">✓</span> Automatic Windows Hardware Spooler Telemetry (WMI)</div>
-          <div class="feature-item"><span class="feature-check">✓</span> Multi-File Cart & Custom Page Range Submissions</div>
-          <div class="feature-item"><span class="feature-check">✓</span> 300 DPI AI Document Auto-Enhancer</div>
-          <div class="feature-item"><span class="feature-check">✓</span> Encrypted Zero-Knowledge File Processing</div>
-          <div class="feature-item"><span class="feature-check">✓</span> Dedicated Customer QR Desk Standee Poster</div>
-        </div>
-
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Subscription Status</div>
-            <div style="font-size:15px;font-weight:800;color:#15803d;margin-top:2px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:4px;vertical-align:middle;"></span> Lifetime Early Adopter Beta</div>
+        <!-- Active Plan & Quota Card -->
+        <div class="tier-card" style="max-width: 100%;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div class="tier-badge" id="sub-plan-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/></svg>
+                <span id="sub-plan-badge-text">Active Plan</span>
+              </div>
+              <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px;" id="sub-plan-name">Free Starter Trial</h2>
+              <p style="font-size: 13px; color: var(--text-muted);" id="sub-plan-desc">
+                Your print station is connected to the QrPrintDesk Cloud Control Plane.
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <span id="sub-status-tag" style="display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;">Active Trial</span>
+            </div>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="showToast('You are on the Lifetime Free Tier. No renewal required!', 'success')">Manage Plan</button>
+
+          <!-- Live Quota Progress Bar -->
+          <div style="margin: 20px 0 16px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+              <span>Monthly Order Allowance</span>
+              <span id="sub-usage-text">0 / 100 orders (0%)</span>
+            </div>
+            <div style="height: 10px; width: 100%; background: #f1f5f9; border-radius: 6px; overflow: hidden; border: 1px solid var(--border);">
+              <div id="sub-progress-bar" style="height: 100%; width: 0%; background: #2563eb; transition: width 0.3s, background-color 0.3s; border-radius: 6px;"></div>
+            </div>
+            <div id="sub-alert-banner" style="display: none; margin-top: 10px; padding: 10px 14px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; font-size: 12.5px; color: #92400e; font-weight: 600;">
+              Notice: You are approaching your monthly print limit. Grace buffer prints are active to ensure your counter never turns customers away.
+            </div>
+          </div>
+
+          <!-- 4 Clean Stat Tiles -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Used This Month</div>
+              <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px;" id="sub-stat-used">0 Orders</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Monthly Limit</div>
+              <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px;" id="sub-stat-limit">100 Orders</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Remaining Prints</div>
+              <div style="font-size: 18px; font-weight: 800; color: #16a34a; margin-top: 4px;" id="sub-stat-remaining">100 Prints</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Grace Buffer</div>
+              <div style="font-size: 18px; font-weight: 800; color: #0284c7; margin-top: 4px;" id="sub-stat-grace">+10 Prints</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--text-muted);">
+            <div>Monthly order counter resets automatically on the 1st of every month.</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-refresh-sub" onclick="loadSubscriptionFromServer(true)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Refresh Status
+              </button>
+              <button class="btn btn-primary btn-sm" id="btn-open-upgrade" onclick="openWebBillingPortal()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Upgrade Plan in Portal
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- Available Plans Comparison Grid -->
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Available Subscription Tiers</h3>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+            <!-- Free Plan -->
+            <div style="background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #0f172a;">Free Trial</div>
+                <div style="font-size: 20px; font-weight: 800; color: #2563eb; margin: 8px 0 4px 0;">Rs. 0</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Free Forever</div>
+                <div style="font-size: 12px; color: #334155; margin-top: 12px; line-height: 1.5;">
+                  • Up to 100 orders / mo<br>
+                  • 1 Desktop Station<br>
+                  • Counter QR standee<br>
+                  • Cash & Counter UPI
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 16px; width: 100%; justify-content: center;" disabled>Current Baseline</button>
+            </div>
+
+            <!-- Starter Plan -->
+            <div style="background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #0f172a;">Starter Xerox</div>
+                <div style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 8px 0 4px 0;">Rs. 149<span style="font-size: 11px; color: var(--text-muted); font-weight: 500;"> /mo</span></div>
+                <div style="font-size: 11px; color: var(--text-muted);">or Rs. 1,299 / yr</div>
+                <div style="font-size: 12px; color: #334155; margin-top: 12px; line-height: 1.5;">
+                  • Up to 500 orders / mo<br>
+                  • FIFO spooling priority<br>
+                  • Duplex & B/W controls<br>
+                  • Daily page counters
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 16px; width: 100%; justify-content: center;" onclick="openWebBillingPortal('STARTER')">Select Starter</button>
+            </div>
+
+            <!-- Growth Plan (Popular) -->
+            <div style="background: #fff; border: 2px solid #2563eb; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+              <span style="position: absolute; top: -10px; right: 14px; background: #2563eb; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">Most Popular</span>
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #0f172a;">Growth Shop</div>
+                <div style="font-size: 20px; font-weight: 800; color: #2563eb; margin: 8px 0 4px 0;">Rs. 349<span style="font-size: 11px; color: var(--text-muted); font-weight: 500;"> /mo</span></div>
+                <div style="font-size: 11px; color: var(--text-muted);">or Rs. 2,999 / yr</div>
+                <div style="font-size: 12px; color: #334155; margin-top: 12px; line-height: 1.5;">
+                  • Up to 1,500 orders / mo<br>
+                  • Rush hour analytics<br>
+                  • Automated bank payout<br>
+                  • Priority queue routing
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" style="margin-top: 16px; width: 100%; justify-content: center;" onclick="openWebBillingPortal('GROWTH')">Upgrade to Growth</button>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div style="background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #0f172a;">High-Volume Pro</div>
+                <div style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 8px 0 4px 0;">Rs. 699<span style="font-size: 11px; color: var(--text-muted); font-weight: 500;"> /mo</span></div>
+                <div style="font-size: 11px; color: var(--text-muted);">or Rs. 5,999 / yr</div>
+                <div style="font-size: 12px; color: #334155; margin-top: 12px; line-height: 1.5;">
+                  • Unlimited monthly orders<br>
+                  • Multi-printer routing<br>
+                  • Full historical ledger<br>
+                  • Dedicated helpline
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 16px; width: 100%; justify-content: center;" onclick="openWebBillingPortal('ENTERPRISE')">Select High-Volume</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Station Hardware & Token Info -->
+        <div style="background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a;">Registered Print Station Hardware</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+              Connected Store Slug: <code id="sub-shop-slug" style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">default</code>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="openWebBillingPortal()">Open Web Vendor Portal</button>
+        </div>
+
       </div>
     </section>
 
