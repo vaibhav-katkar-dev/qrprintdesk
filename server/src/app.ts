@@ -158,10 +158,44 @@ export function buildApp(db: Db, mongoClient: MongoClient, startWorkers: boolean
     return reply.sendFile('admin.html', resolvedPublicDir);
   });
 
-  // Self-Service Vendor Portal Route (Bank details, auto-payouts, settlements)
-  app.get('/vendor', async (req, reply) => {
+  // Self-Service Vendor Portal & Web Login Routes
+  const serveVendorPortal = async (req: any, reply: any) => {
+    reply.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    reply.header('Pragma', 'no-cache');
+    reply.header('Expires', '0');
     return reply.sendFile('vendor-portal.html', resolvedPublicDir);
-  });
+  };
+  app.get('/vendor', serveVendorPortal);
+  app.get('/vendor-portal.html', serveVendorPortal);
+  app.get('/login', serveVendorPortal);
+  app.get('/portal', serveVendorPortal);
+
+  // Marketing and legal static pages + direct setup download
+  const publicStaticFiles: Record<string, string> = {
+    '/about': 'about.html',
+    '/about.html': 'about.html',
+    '/contact': 'contact.html',
+    '/contact.html': 'contact.html',
+    '/privacy': 'privacy.html',
+    '/privacy.html': 'privacy.html',
+    '/terms': 'terms.html',
+    '/terms.html': 'terms.html',
+    '/refund-policy.html': 'refund-policy.html',
+    '/refund': 'refund-policy.html',
+    '/shipping-policy.html': 'shipping-policy.html',
+    '/shipping': 'shipping-policy.html',
+    '/style.css': 'style.css',
+    '/QrPrintDesk_Vendor_Setup.exe': 'QrPrintDesk_Vendor_Setup.exe'
+  };
+  for (const [routePath, filename] of Object.entries(publicStaticFiles)) {
+    app.get(routePath, async (req, reply) => {
+      const fullPath = path.join(resolvedPublicDir, filename);
+      if (fs.existsSync(fullPath)) {
+        return reply.sendFile(filename, resolvedPublicDir);
+      }
+      return reply.code(404).send({ error: 'File not found' });
+    });
+  }
 
   // Customer PWA Routes (HTML never cached so customers always run latest frontend code)
   app.get('/shop/:shopSlug', async (req, reply) => {
