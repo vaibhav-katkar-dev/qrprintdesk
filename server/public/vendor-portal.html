@@ -772,8 +772,26 @@
         currentSlug = data.shopSlug;
         localStorage.setItem('qrprintdesk_vendor_slug', data.shopSlug);
         showPortal(data);
+        checkDesktopLoopbackPairing(data);
       } catch (err) {
         alert('Google Sign-In Error: ' + err.message);
+      }
+    }
+
+    async function checkDesktopLoopbackPairing(authData) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const desktopPort = urlParams.get('desktop_login') || urlParams.get('desktop_port');
+      if (desktopPort && authData) {
+        try {
+          await fetch(`http://127.0.0.1:${desktopPort}/callback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(authData)
+          });
+          alert(`Print Station Connected!\n\nStore: ${authData.shopName || authData.name || 'Your Shop'}\nYou can now switch back to the Desktop App.`);
+        } catch (e) {
+          console.warn('Could not post to desktop loopback:', e);
+        }
       }
     }
 
@@ -884,6 +902,8 @@
       } else {
         loadSubscription();
       }
+
+      checkDesktopLoopbackPairing(shopInfo);
     }
 
     // ── Load Subscription & Order Limits ─────────────────────────────────────

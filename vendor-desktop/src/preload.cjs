@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   printJob: (jobData) => ipcRenderer.invoke('print-job', jobData),
   previewJob: (data) => ipcRenderer.invoke('preview-job', data),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  startGoogleAuth: (serverUrl) => ipcRenderer.invoke('start-google-auth', serverUrl),
+  cancelGoogleAuth: () => ipcRenderer.invoke('cancel-google-auth'),
   minimize: () => ipcRenderer.send('window-minimize'),
   maximize: () => ipcRenderer.send('window-maximize'),
   close: () => ipcRenderer.send('window-close'),

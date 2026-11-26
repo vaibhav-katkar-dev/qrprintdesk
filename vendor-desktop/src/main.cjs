@@ -380,6 +380,101 @@ ipcMain.handle('open-external', async (event, url) => {
   }
 });
 
+// Ephemeral OAuth loopback server for Google Desktop Authentication
+let oauthServer = null;
+
+ipcMain.handle('start-google-auth', async (event, serverBaseUrl) => {
+  return new Promise((resolve) => {
+    try {
+      if (oauthServer) {
+        try { oauthServer.close(); } catch (_) {}
+        oauthServer = null;
+      }
+
+      oauthServer = http.createServer((req, res) => {
+        // Handle CORS preflight
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+        if (req.method === 'OPTIONS') {
+          res.writeHead(204);
+          res.end();
+          return;
+        }
+
+        if (req.url.startsWith('/callback')) {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'ok', message: 'Station Connected! Return to Desktop App.' }));
+
+            let authData = null;
+            try {
+              if (body) {
+                authData = JSON.parse(body);
+              } else {
+                const u = new URL(req.url, 'http://127.0.0.1');
+                const token = u.searchParams.get('token');
+                if (token) authData = { agentToken: token };
+              }
+            } catch (err) {
+              console.error('Failed to parse OAuth callback body:', err);
+            }
+
+            if (oauthServer) {
+              try { oauthServer.close(); } catch (_) {}
+              oauthServer = null;
+            }
+
+            if (authData) {
+              resolve({ success: true, authData });
+            } else {
+              resolve({ success: false, error: 'Empty auth payload' });
+            }
+          });
+          return;
+        }
+
+        res.writeHead(404);
+        res.end('Not found');
+      });
+
+      // Listen on random free port
+      oauthServer.listen(0, '127.0.0.1', () => {
+        const port = oauthServer.address().port;
+        const targetUrl = `${(serverBaseUrl || 'https://print.qrprintdesk.in').replace(/\/+$/, '')}/vendor?desktop_login=${port}`;
+        shell.openExternal(targetUrl);
+      });
+
+      // Timeout after 120 seconds
+      setTimeout(() => {
+        if (oauthServer) {
+          try { oauthServer.close(); } catch (_) {}
+          oauthServer = null;
+          resolve({ success: false, error: 'Google sign-in timed out. Please try again.' });
+        }
+      }, 120000);
+
+    } catch (err) {
+      if (oauthServer) {
+        try { oauthServer.close(); } catch (_) {}
+        oauthServer = null;
+      }
+      resolve({ success: false, error: err.message });
+    }
+  });
+});
+
+ipcMain.handle('cancel-google-auth', async () => {
+  if (oauthServer) {
+    try { oauthServer.close(); } catch (_) {}
+    oauthServer = null;
+  }
+  return { success: true };
+});
+
 // IPC: Window controls
 ipcMain.on('window-minimize', () => { if (mainWindow) mainWindow.minimize(); });
 ipcMain.on('window-maximize', () => {

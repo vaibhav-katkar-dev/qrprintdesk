@@ -355,6 +355,13 @@ function setupEventListeners() {
   const submitTokenBtn = document.getElementById('submit-token-login-btn');
   if (submitTokenBtn) submitTokenBtn.addEventListener('click', handleTokenLogin);
 
+  const googleLoginBtn = document.getElementById('google-login-btn');
+  if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleDesktopLogin);
+  const googleRegBtn = document.getElementById('google-reg-btn');
+  if (googleRegBtn) googleRegBtn.addEventListener('click', handleGoogleDesktopLogin);
+  const googleCancelBtn = document.getElementById('google-login-cancel-btn');
+  if (googleCancelBtn) googleCancelBtn.addEventListener('click', cancelGoogleDesktopLogin);
+
   const logoutBtn = document.getElementById('nav-logout-btn');
   if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
@@ -1819,12 +1826,72 @@ async function handleEmailLogin() {
     };
     await window.electronAPI.saveConfig(config);
     showSetupModal(false); applyConfigUI(); initWebSocket(); refreshDashboard(); loadPrinters(); loadQR(); startDashboardPolling();
-    showToast(`[OK] Welcome back, ${data.shopName}!`, 'success');
+    showToast(`Welcome back, ${data.shopName}!`, 'success');
   } catch (err) {
     alert(`Connection error: ${err.message}`);
   } finally {
     btn.disabled = false; btn.innerText = 'Sign In to My Shop';
   }
+}
+
+async function handleGoogleDesktopLogin() {
+  const statusEl = document.getElementById('google-login-status');
+  const btn = document.getElementById('google-login-btn');
+  const regBtn = document.getElementById('google-reg-btn');
+  if (btn) btn.disabled = true;
+  if (regBtn) regBtn.disabled = true;
+  if (statusEl) statusEl.style.display = 'block';
+
+  try {
+    const serverUrl = config.serverUrl || 'https://print.qrprintdesk.in';
+    const res = await window.electronAPI.startGoogleAuth(serverUrl);
+    if (res && res.success && res.authData) {
+      const data = res.authData;
+      config = {
+        serverUrl,
+        agentToken: data.agentToken,
+        agentId: data.agentId,
+        shopId: data.shopId,
+        shopSlug: data.shopSlug,
+        shopName: data.shopName,
+        ownerEmail: data.ownerEmail,
+        stationName: data.stationName || 'Main Counter',
+        autoPrint: true,
+        soundAlert: true,
+        autoEnhance: true,
+        printerName: config.printerName || ''
+      };
+      await window.electronAPI.saveConfig(config);
+      showSetupModal(false);
+      applyConfigUI();
+      initWebSocket();
+      refreshDashboard();
+      loadPrinters();
+      loadQR();
+      startDashboardPolling();
+      showToast(`Connected as ${data.shopName}!`, 'success');
+    } else if (res && res.error) {
+      showToast(res.error, 'error');
+    }
+  } catch (err) {
+    showToast(`Google Sign-In error: ${err.message}`, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (regBtn) regBtn.disabled = false;
+    if (statusEl) statusEl.style.display = 'none';
+  }
+}
+
+async function cancelGoogleDesktopLogin() {
+  try {
+    await window.electronAPI.cancelGoogleAuth();
+  } catch (_) {}
+  const statusEl = document.getElementById('google-login-status');
+  const btn = document.getElementById('google-login-btn');
+  const regBtn = document.getElementById('google-reg-btn');
+  if (btn) btn.disabled = false;
+  if (regBtn) regBtn.disabled = false;
+  if (statusEl) statusEl.style.display = 'none';
 }
 
 async function handleTokenLogin() {

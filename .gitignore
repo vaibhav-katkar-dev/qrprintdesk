@@ -31,6 +31,9 @@ package-lock.json.backup
 old_files/
 windows-software/
 vendor-app/
+vendor-desktop/dist/
+vendor-desktop/installer/
+vendor-desktop/innosetup/
 INSTALL_TUNNEL_SERVICE_PERMANENT.bat
 server.zip
 build.log
